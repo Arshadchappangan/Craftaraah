@@ -15,7 +15,17 @@ const pageNotFound = async (req,res) => {
     }
 }
 
+const loadLogin = async (req,res) => {
+    try {
+        res.render('login')
+    } catch (error) {
+        console.log('Login page not found');
+        res.status(500).send('Server Error')
+    }
+}
+
 module.exports = {
     loadHome,
-    pageNotFound
+    pageNotFound,
+    loadLogin
 }
