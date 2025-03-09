@@ -1,4 +1,6 @@
-const loadHome = async (req,res) => {
+const User = require('../../models/userSchema');
+
+const loadHome = async (req, res) => {
     try {
         return res.render("home");
     } catch (error) {
@@ -7,7 +9,7 @@ const loadHome = async (req,res) => {
     }
 }
 
-const pageNotFound = async (req,res) => {
+const pageNotFound = async (req, res) => {
     try {
         res.render('page-404')
     } catch (error) {
@@ -15,7 +17,7 @@ const pageNotFound = async (req,res) => {
     }
 }
 
-const loadLogin = async (req,res) => {
+const loadLogin = async (req, res) => {
     try {
         res.render('login')
     } catch (error) {
@@ -24,8 +26,22 @@ const loadLogin = async (req,res) => {
     }
 }
 
+const signup = async (req, res) => {
+    const { name, email, phone, password } = req.body;
+    try {
+        const newUser = new User({ name,email, phone, password });
+        await newUser.save();
+        console.log(newUser)
+        res.redirect('/')
+    } catch (error) {
+        console.error('Error in saving new user : ', error);
+        res.status(500).send('Server Error')
+    }
+}
+
 module.exports = {
     loadHome,
     pageNotFound,
-    loadLogin
+    loadLogin,
+    signup
 }

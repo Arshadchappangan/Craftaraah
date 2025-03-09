@@ -20,13 +20,13 @@
 			</div>
 
 			<div class="login">
-				<form>
+				<form method="post" action="/signup">
 					<label for="chk" aria-hidden="true">Signup</label>
-                    <input type="text" name="name" placeholder="Full Name">
-					<input type="email" name="email" placeholder="Email">
-                    <input type="text" name="phone" placeholder="Phone">
-					<input type="password" name="password1" placeholder="Password">
-                    <input type="password" name="password2" placeholder="Confirm Password">
+                    <input type="text" id="name" name="name" placeholder="Full Name">
+					<input type="email" id="email" name="email" placeholder="Email">
+                    <input type="text" id="phone" name="phone" placeholder="Phone">
+					<input type="password" id="password1" name="password" placeholder="Password">
+                    <input type="password" id="password2" placeholder="Confirm Password">
 					<button>Signup</button>
                     <img class="google" src="/img/login/signup.png" alt="Google Logo">
 				</form>
