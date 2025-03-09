@@ -20,17 +20,125 @@
 			</div>
 
 			<div class="login">
-				<form method="post" action="/signup">
+				<form id="signupForm" method="post" action="/signup">
 					<label for="chk" aria-hidden="true">Signup</label>
                     <input type="text" id="name" name="name" placeholder="Full Name">
+					<div id="nameError" class="error"></div>
 					<input type="email" id="email" name="email" placeholder="Email">
+					<div id="emailError" class="error"></div>
                     <input type="text" id="phone" name="phone" placeholder="Phone">
+					<div id="phoneError" class="error"></div>
 					<input type="password" id="password1" name="password" placeholder="Password">
+					<div id="password1Error" class="error"></div>
                     <input type="password" id="password2" placeholder="Confirm Password">
+					<div id="password2Error" class="error"></div>
 					<button>Signup</button>
                     <img class="google" src="/img/login/signup.png" alt="Google Logo">
 				</form>
 			</div>
 	</div>
+
+
+	<script>
+
+		const name = document.getElementById('name');
+		const email = document.getElementById('email');
+		const phone = document.getElementById('phone');
+		const password1 = document.getElementById('password1');
+		const password2 = document.getElementById('password2');
+
+		const nameError = document.getElementById('nameError');
+		const emailError = document.getElementById('emailError');
+		const phoneError = document.getElementById('phoneError');
+		const password1Error = document.getElementById('password1Error');
+		const password2Error = document.getElementById('password2Error');
+
+		const signupForm = document.getElementById('signupForm');
+
+		const nameValidate = (event) => {
+			const nameValue = name.value;
+			const namePattern = /^[A-Za-z\s]+$/;
+
+			if(nameValue.trim() === ''){
+				nameError.style.display = 'block';
+				nameError.innerHTML = 'Please Enter a Valid Name'
+			}else if (!namePattern.test(nameValue)){
+				nameError.style.display = 'block';
+				nameError.innerHTML = 'Name can only contain alphabets and spaces'
+			}else{
+				nameError.style.display = 'none';
+				nameError.innerHTML = '';
+			}
+		}
+
+		const emailValidate = (event) => {
+			const emailValue = email.value;
+			const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+			if(!emailPattern.test(emailValue)){
+				emailError.style.display = 'block';
+				emailError.innerHTML = 'Please Enter a Valid Email'
+			}else{
+				emailError.style.display = 'none';
+				emailError.innerHTML = '';
+			}
+		}
+
+		const phoneValidate = (event) => {
+			const phoneValue = phone.value;
+			
+			if(phoneValue.trim() === ''){
+				phoneError.style.display = 'block';
+				phoneError.innerHTML = 'Enter a Valid Phone Number'
+			}else if(phoneValue.length < 10 || phoneValue.length > 10){
+				phoneError.style.display = 'block';
+				phoneError.innerHTML = 'Enter 10 digits'
+			}else{
+				phoneError.style.display = 'none';
+				phoneError.innerHTML = '';
+			}
+		}
+
+		const passwordValidate = (event) => {
+			const password1Value = password1.value;
+			const password2Value = password2.value;
+			const passwordPattern = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/
+
+			if(password1Value.length < 8){
+				password1Error.style.display = 'block';
+				password1Error.innerHTML = 'Enter Minimum 8 characters';
+			}else if(!passwordPattern.test(password1Value)){
+				password1Error.style.display = 'block';
+				password1Error.innerHTML = 'Password should contain alphabets, numbers and special characters'
+			}else{
+				password1Error.style.display = 'none';
+				password1Error.innerHTML = '';
+			}
+
+			if(password1Value !== password2Value){
+				password2Error.style.display = 'block';
+				password2Error.innerHTML = 'Passwords do not match';
+			}else{
+				password2Error.style.display = 'none';
+				password2Error.innerHTML = '';
+			}
+		}
+
+
+
+		document.addEventListener('DOMContentLoaded',() => {
+				signupForm.addEventListener('submit',(event) => {
+					nameValidate();
+					emailValidate();
+					phoneValidate();
+					passwordValidate();
+
+					if(nameError.innerHTML || emailError.innerHTML || phoneError.innerHTML || password1Error.innerHTML || password2Error.innerHTML){
+						event.preventDefault();
+					}
+				})
+		})
+
+	</script>
 </body>
 </html>
