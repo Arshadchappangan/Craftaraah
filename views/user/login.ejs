@@ -1,43 +1,57 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>Slide Navbar</title>
 	<link rel="stylesheet" type="text/css" href="/css/login.css">
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
 </head>
+
 <body>
-	<div class="main">  	
+	<div class="main">
 		<input type="checkbox" id="chk" aria-hidden="true">
 
-			<div class="signup">
-				<form>
-					<label for="chk" aria-hidden="true">Signin</label>
-					<input type="email" name="email" placeholder="Email">
-					<input type="password" name="password" placeholder="Password">
-					<button>Signin</button>
-                    <img class="google" src="/img/login/signin.png" alt="Google Logo">
-				</form>
-			</div>
+		<div class="signup">
+			<form action="/signin" method="post">
+				<label for="chk" aria-hidden="true">Signin</label>
+				<input type="email" name="email" placeholder="Email">
+				<input type="password" name="password" placeholder="Password">
 
-			<div class="login">
-				<form id="signupForm" method="post" action="/signup">
-					<label for="chk" aria-hidden="true">Signup</label>
-                    <input type="text" id="name" name="name" placeholder="Full Name">
-					<div id="nameError" class="error"></div>
-					<input type="email" id="email" name="email" placeholder="Email">
-					<div id="emailError" class="error"></div>
-                    <input type="text" id="phone" name="phone" placeholder="Phone">
-					<div id="phoneError" class="error"></div>
-					<input type="password" id="password1" name="password" placeholder="Password">
-					<div id="password1Error" class="error"></div>
-                    <input type="password" id="password2" placeholder="Confirm Password">
-					<div id="password2Error" class="error"></div>
-					<button>Signup</button>
-					<a href="/auth/google">
-						<img class="google" src="/img/login/signup.png" alt="Google Logo">
-					</a>
-				</form>
-			</div>
+				<%if (locals.message && message.length> 0){%>
+					<div class="alert">
+						<%=message%>
+					</div>
+					<%}%>
+
+						<button>Signin</button>
+						<img class="google" src="/img/login/signin.png" alt="Google Logo">
+			</form>
+				<%if (locals.messageExists && messageExists.length > 0){%>
+					<div class="alert">
+						<%=messageExists%>
+					</div>
+					<%}%>
+		</div>
+
+		<div class="login">
+			<form id="signupForm" method="post" action="/signup">
+				<label for="chk" aria-hidden="true">Signup</label>
+				<input type="text" id="name" name="name" placeholder="Full Name">
+				<div id="nameError" class="error"></div>
+				<input type="email" id="email" name="email" placeholder="Email">
+				<div id="emailError" class="error"></div>
+				<input type="text" id="phone" name="phone" placeholder="Phone">
+				<div id="phoneError" class="error"></div>
+				<input type="password" id="password1" name="password" placeholder="Password">
+				<div id="password1Error" class="error"></div>
+				<input type="password" id="password2" placeholder="Confirm Password">
+				<div id="password2Error" class="error"></div>
+				<button>Signup</button>
+				<a href="/auth/google">
+					<img class="google" src="/img/login/signup.png" alt="Google Logo">
+				</a>
+			</form>
+		</div>
 	</div>
 
 
@@ -61,13 +75,13 @@
 			const nameValue = name.value;
 			const namePattern = /^[A-Za-z\s]+$/;
 
-			if(nameValue.trim() === ''){
+			if (nameValue.trim() === '') {
 				nameError.style.display = 'block';
 				nameError.innerHTML = 'Please Enter a Valid Name'
-			}else if (!namePattern.test(nameValue)){
+			} else if (!namePattern.test(nameValue)) {
 				nameError.style.display = 'block';
 				nameError.innerHTML = 'Name can only contain alphabets and spaces'
-			}else{
+			} else {
 				nameError.style.display = 'none';
 				nameError.innerHTML = '';
 			}
@@ -77,10 +91,10 @@
 			const emailValue = email.value;
 			const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-			if(!emailPattern.test(emailValue)){
+			if (!emailPattern.test(emailValue)) {
 				emailError.style.display = 'block';
 				emailError.innerHTML = 'Please Enter a Valid Email'
-			}else{
+			} else {
 				emailError.style.display = 'none';
 				emailError.innerHTML = '';
 			}
@@ -88,14 +102,14 @@
 
 		const phoneValidate = (event) => {
 			const phoneValue = phone.value;
-			
-			if(phoneValue.trim() === ''){
+
+			if (phoneValue.trim() === '') {
 				phoneError.style.display = 'block';
 				phoneError.innerHTML = 'Enter a Valid Phone Number'
-			}else if(phoneValue.length < 10 || phoneValue.length > 10){
+			} else if (phoneValue.length < 10 || phoneValue.length > 10) {
 				phoneError.style.display = 'block';
 				phoneError.innerHTML = 'Enter 10 digits'
-			}else{
+			} else {
 				phoneError.style.display = 'none';
 				phoneError.innerHTML = '';
 			}
@@ -106,21 +120,21 @@
 			const password2Value = password2.value;
 			const passwordPattern = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/
 
-			if(password1Value.length < 8){
+			if (password1Value.length < 8) {
 				password1Error.style.display = 'block';
 				password1Error.innerHTML = 'Enter Minimum 8 characters';
-			}else if(!passwordPattern.test(password1Value)){
+			} else if (!passwordPattern.test(password1Value)) {
 				password1Error.style.display = 'block';
 				password1Error.innerHTML = 'Password should contain alphabets, numbers and special characters'
-			}else{
+			} else {
 				password1Error.style.display = 'none';
 				password1Error.innerHTML = '';
 			}
 
-			if(password1Value !== password2Value){
+			if (password1Value !== password2Value) {
 				password2Error.style.display = 'block';
 				password2Error.innerHTML = 'Passwords do not match';
-			}else{
+			} else {
 				password2Error.style.display = 'none';
 				password2Error.innerHTML = '';
 			}
@@ -128,19 +142,20 @@
 
 
 
-		document.addEventListener('DOMContentLoaded',() => {
-				signupForm.addEventListener('submit',(event) => {
-					nameValidate();
-					emailValidate();
-					phoneValidate();
-					passwordValidate();
+		document.addEventListener('DOMContentLoaded', () => {
+			signupForm.addEventListener('submit', (event) => {
+				nameValidate();
+				emailValidate();
+				phoneValidate();
+				passwordValidate();
 
-					if(nameError.innerHTML || emailError.innerHTML || phoneError.innerHTML || password1Error.innerHTML || password2Error.innerHTML){
-						event.preventDefault();
-					}
-				})
+				if (nameError.innerHTML || emailError.innerHTML || phoneError.innerHTML || password1Error.innerHTML || password2Error.innerHTML) {
+					event.preventDefault();
+				}
+			})
 		})
 
 	</script>
 </body>
+
 </html>

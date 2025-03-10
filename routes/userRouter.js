@@ -3,10 +3,13 @@ const router = express.Router();
 const userController = require('../controllers/user/userController');
 const passport = require('passport');
 
+router.get('/pageNotFound',userController.pageNotFound)
+
 router.get('/',userController.loadHome);
 router.get('/pageNotFound',userController.pageNotFound);
 router.get('/login',userController.loadLogin)
 router.post('/signup',userController.signup)
+router.post('/signin',userController.signin)
 router.post('/verifyOtp',userController.verifyOtp)
 router.post('/resendOtp',userController.resendOtp)
 

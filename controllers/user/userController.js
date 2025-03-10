@@ -22,10 +22,13 @@ const pageNotFound = async (req, res) => {
 
 const loadLogin = async (req, res) => {
     try {
-        res.render('login')
+        if(!req.session.user){
+            res.render('login')
+        }else{
+            res.redirect('/')
+        }
     } catch (error) {
-        console.log('Login page not found');
-        res.status(500).send('Server Error')
+        res.redirect('/pageNotFound')
     }
 }
 
@@ -67,7 +70,7 @@ const signup = async (req, res) => {
         const { name,email,phone,password } = req.body;
         const existingUser = await User.findOne({ email })
         if (existingUser) {
-            return res.render('login', { message: "User already exists" })
+            return res.render('login', { messageExists: "User already exists... Please Signin..." })
         }
 
         const otp = generateOtp();
@@ -154,6 +157,30 @@ const resendOtp = async(req,res) => {
     }
 }
 
+const signin = async(req,res) => {
+    try {
+        const {email,password} = req.body;
+        const findUser = await User.findOne({email:email});
+        if(!findUser){
+            return res.render('login',{message:"User Not Found"})
+        }
+        if(findUser.isBlocked){
+            return res.render('login',{message:"User is blocked by Admin"})
+        }
+        
+        const passwordMatch = await bcrypt.compare(password,findUser.password);
+        if(!passwordMatch){
+            return res.render('login',{message:"Incorrect Password"})
+        }
+
+        req.session.user = findUser._id;
+        res.redirect('/')
+    } catch (error) {
+        console.error("Login Error : ",error);
+        res.render('login',{message:"login failed, please try again"})
+    }
+}
+
 module.exports = {
     loadHome,
     pageNotFound,
@@ -161,5 +188,6 @@ module.exports = {
     signup,
     securePassword,
     verifyOtp,
-    resendOtp
+    resendOtp,
+    signin
 }
