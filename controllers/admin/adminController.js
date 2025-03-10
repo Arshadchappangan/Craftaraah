@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 
 const loadLogin = (req,res) => {
     if(req.session.admin){
-        return res.redirect('/admin/dashboard')
+        return res.redirect('/admin')
     }
     res.render('adminLogin',{message:null})
 }
@@ -13,13 +13,12 @@ const loadLogin = (req,res) => {
 const login = async (req,res) => {
     try {
         const {email,password} = req.body;
-        const admin = User.findOne({email,isAdmin:true});
+        const admin = await User.findOne({email});
         if(admin){
-            console.log(admin)
             const passwordMatch = bcrypt.compare(password,admin.password);
             if(passwordMatch){
                 req.session.admin = true;
-                return res.redirect('/admin/dashboard')
+                return res.redirect('/admin')
             }else{
                 return res.render('adminLogin',{message:"Invalid password"})
             }
@@ -27,16 +26,17 @@ const login = async (req,res) => {
             return res.render('adminLogin',{message:"Admin not found"})
         }
     } catch (error) {
-        console.error("Admin login error");
+        console.error("Admin login error : ",error);
         return res.redirect('/pageError')
     }
 }
 
 const loadDashboard = async (req,res) => {
     try {
-        if(req.session.admin){
-            res.render('dashboard')
+        if(!req.session.admin){
+            return res.redirect('/admin/login')
         }
+        res.render('dashboard')
     } catch (error) {
         res.redirect('/pageError')
     }
