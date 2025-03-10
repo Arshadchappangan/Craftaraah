@@ -2,10 +2,18 @@ const User = require('../../models/userSchema')
 const nodeMailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
+const { name } = require('ejs');
 
 const loadHome = async (req, res) => {
     try {
-        return res.render("home");
+        const user = req.session.user;
+        if(user){
+            const userData = await User.findOne({_id:user})
+            res.render("home",{user:userData});
+        }else{
+            return res.render('home');
+        }
+        
     } catch (error) {
         console.log("Home page not found");
         res.status(500).send("Server Error")
@@ -173,11 +181,31 @@ const signin = async(req,res) => {
             return res.render('login',{message:"Incorrect Password"})
         }
 
-        req.session.user = findUser._id;
+        req.session.user = {
+            _id:findUser._id,
+            name : findUser.name,
+            email : findUser.email
+        };
+
         res.redirect('/')
     } catch (error) {
         console.error("Login Error : ",error);
         res.render('login',{message:"login failed, please try again"})
+    }
+}
+
+const logout = async (req,res) => {
+    try {
+        req.session.destroy((err) => {
+            if(err){
+                console.log("Session destroy error : ",err);
+                return res.redirect('/pageNotFound')
+            }
+            return res.redirect('/login')
+        })
+    } catch (error) {
+        console.error("Logout error : ",error);
+        res.redirect('/pageNotFound');
     }
 }
 
@@ -189,5 +217,6 @@ module.exports = {
     securePassword,
     verifyOtp,
     resendOtp,
-    signin
+    signin,
+    logout
 }

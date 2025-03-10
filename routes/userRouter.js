@@ -12,6 +12,7 @@ router.post('/signup',userController.signup)
 router.post('/signin',userController.signin)
 router.post('/verifyOtp',userController.verifyOtp)
 router.post('/resendOtp',userController.resendOtp)
+router.get('/logout',userController.logout)
 
 
 

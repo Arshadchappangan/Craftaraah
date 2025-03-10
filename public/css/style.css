@@ -2900,6 +2900,42 @@ ol {
 	letter-spacing: 2px;
 }
 
+.header__top__right__auth .dropdown{
+	position: relative;
+	display: inline-block;	
+}
+
+.header__top__right__auth .dropdown-content{
+	display: none;
+	position: absolute;
+	background-color: white;
+	min-width: 160px;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 500;
+	right: 5px;
+}
+
+.header__top__right__auth .dropdown-content a{
+	color: black;
+	padding: 12px 16px;
+	text-decoration: none;
+	display: block;
+	width: 100%;
+}
+
+.header__top__right__auth .dropdown-content a:hover{
+	background-color: rgb(224, 216, 216);
+}
+
+.header__top__right__auth .dropdown:hover .dropdown-content{
+	display: block;
+}
+
+.header {
+	position: relative;
+	z-index: 250;
+}
+
 /*--------------------------------- Responsive Media Quaries -----------------------------*/
 
 @media only screen and (min-width: 1200px) {
