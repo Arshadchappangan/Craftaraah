@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="/css/adminLogin.css">
+
+
+<div class="wrapper">
+  <div class="container">
+    <div class="col-left">
+      <div class="login-text">
+        <h2>Welcome Back</h2>
+        <p>Login to your account<br>to access the system.</p>
+      </div>
+    </div>
+    <div class="col-right">
+      <div class="login-form">
+        <h2>Admin Login</h2>
+        <form action="/admin/login" method="post">
+          <p>
+            <input type="text" placeholder="Username" required>
+          </p>
+          <p>
+
+            <input type="password" placeholder="Password" required>
+          </p>
+          <%if(locals.message && locals.message.length> 0){%>
+            <p style="text-align: center; color: red;">
+              <%=message%>
+            </p>
+            <%}%>
+              <p>
+                <input type="submit" value="Sing In" />
+              </p>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

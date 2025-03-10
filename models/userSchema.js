@@ -28,11 +28,11 @@ const userSchema = new Schema({
     },
     isBlocked : {
         type : Boolean,
-        // default : false
+        default : false
     },
-    idAdmin : {
+    isAdmin : {
         type : Boolean,
-        // default : false
+        default : false
     },
     cart : [{
         type : Schema.Types.ObjectId,
@@ -52,7 +52,7 @@ const userSchema = new Schema({
     }],
     createdAt : {
         type : Date,
-        // default : Date.now
+        default : Date.now
     },
     searchHistory : [{
         category : {
@@ -65,7 +65,7 @@ const userSchema = new Schema({
         },
         searchOn : {
             type : Date,
-            // default : Date.now
+            default : Date.now
         }
     }]
 })
