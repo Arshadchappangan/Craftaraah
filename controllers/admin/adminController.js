@@ -42,8 +42,13 @@ const loadDashboard = async (req,res) => {
     }
 }
 
+const pageError = async (req,res) => {
+    res.render("adminError")
+}
+
 module.exports = {
     loadLogin,
     login,
-    loadDashboard
+    loadDashboard,
+    pageError
 }
