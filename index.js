@@ -5,6 +5,7 @@ const env = require('dotenv').config();
 const db = require('./config/db');
 const userRouter = require('./routes/userRouter');
 const session = require('express-session');
+const passport = require('./config/passport')
 
 
 app.use(express.json());
@@ -26,6 +27,9 @@ app.set('views',[path.join(__dirname,'views/user'),path.join(__dirname,'views/ad
 app.use(express.static(path.join(__dirname,'public')));
 
 app.use('/',userRouter)
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.listen(process.env.PORT,() => {
     console.log("Server Running on the PORT : ",process.env.PORT)
