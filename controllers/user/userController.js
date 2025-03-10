@@ -1,6 +1,7 @@
 const User = require('../../models/userSchema')
 const nodeMailer = require('nodemailer');
 const env = require('dotenv').config();
+const bcrypt = require('bcrypt');
 
 const loadHome = async (req, res) => {
     try {
@@ -63,10 +64,10 @@ const verificationMail = async (email,otp) => {
 
 const signup = async (req, res) => {
     try {
-        const { email,password } = req.body;
-        const existingUser = await User.find({ email })
+        const { name,email,phone,password } = req.body;
+        const existingUser = await User.findOne({ email })
         if (existingUser) {
-            res.render('login', { message: "User already exists" })
+            return res.render('login', { message: "User already exists" })
         }
 
         const otp = generateOtp();
@@ -78,14 +79,77 @@ const signup = async (req, res) => {
         }
 
         req.session.userOTP = otp;
-        req.session.userData = {email,password}
+        req.session.userData = {name,email,phone,password}
 
-        // res.render('otp');
+
         console.log("OTP sent" , otp)
+        res.render('otp')
+        
 
     } catch (error) {
         console.error("Signup error",error);
-        // res.redirect('/pageNotFound')
+        res.redirect('/pageNotFound')
+        
+    }
+}
+
+const securePassword = async(password) => {
+    try {
+        const passwordHashed = await bcrypt.hash(password,10);
+        return passwordHashed;
+    } catch (error) {
+        
+    }
+}
+
+
+const verifyOtp = async (req,res) => {
+    try {
+        const {otp} = req.body
+
+        if (otp === req.session.userOTP){
+            const user = req.session.userData;
+            const passwordHashed = await securePassword(user.password);
+
+            const saveUserData = new User({
+                name : user.name,
+                email : user.email,
+                phone : user.phone,
+                password : passwordHashed
+            })
+            await saveUserData.save();
+            req.session.user = saveUserData._id;
+            res.json({success:true,redirectUrl:"/"})
+        }else{
+            res.status(400).json({success:false,message:"Invalid OTP, Please try again"})
+        }
+        
+    } catch (error) {
+        console.error("Error in verifying OTP : ",error);
+        res.status(500).json({success:false, message:"an error occured"})
+        
+    }
+}
+
+const resendOtp = async(req,res) => {
+    try {
+        const {email} = req.session.userData;
+        if(!email){
+            return res.status(400).json({success:false,message:"Email not found in session"})
+        }
+
+        const otp = generateOtp();
+        req.session.userOTP = otp;
+        const emailSent = await verificationMail(email,otp);
+        if(emailSent){
+            console.log("Resend OTP : ",otp);
+            res.status(200).json({success:true,message:"OTP Resent successfully"})
+        }else{
+            res.status(500).json({success:false,message:"Failed to resend OTP, Please try again"})
+        }
+    } catch (error) {
+        console.error("Error resending OTP : ",error);
+        res.status(500).json({success:false,message:"Internal Server Error, Please try again"})
         
     }
 }
@@ -94,5 +158,8 @@ module.exports = {
     loadHome,
     pageNotFound,
     loadLogin,
-    signup
+    signup,
+    securePassword,
+    verifyOtp,
+    resendOtp
 }
