@@ -4,6 +4,7 @@ const path = require('path');
 const env = require('dotenv').config();
 const db = require('./config/db');
 const userRouter = require('./routes/userRouter');
+const adminRouter = require('./routes/adminRouter');
 const session = require('express-session');
 const passport = require('./config/passport')
 
@@ -20,13 +21,14 @@ app.use(session({
         httpOnly : true,
         maxAge : 24*60*60*1000
     }
-}))
+}));
 
 app.set('view engine','ejs');
 app.set('views',[path.join(__dirname,'views/user'),path.join(__dirname,'views/admin')]);
 app.use(express.static(path.join(__dirname,'public')));
 
 app.use('/',userRouter)
+app.use('/admin',adminRouter)
 
 app.use(passport.initialize());
 app.use(passport.session());
