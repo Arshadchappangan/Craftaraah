@@ -11,9 +11,12 @@ router.get('/pageError',adminController.pageError)
 router.get('/login',adminController.loadLogin);
 router.post('/login',adminController.login);
 router.get('/',adminAuth,adminController.loadDashboard);
-router.get('/logout',adminController.logout)
+router.get('/logout',adminController.logout);
 
 //user management
-router.get('/users',adminAuth,customerController.customerInfo)
+router.get('/users',adminAuth,customerController.customerInfo);
+router.get('/blockCustomer',adminAuth,customerController.blockCustomer);
+router.get('/unblockCustomer',adminAuth,customerController.unblockCustomer);
+
 
 module.exports = router
