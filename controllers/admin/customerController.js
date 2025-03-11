@@ -10,17 +10,18 @@ const customerInfo = async(req,res) => {
 
         let page = 1;
         if(req.query.page){             //check any pagination triggers
-            page = req.query.page;
+            page = Number(req.query.page);
         }
         
-        const limit = 3;
+        const limit = 5;
         const userData = await User.find({              //searching suitable data for search from User collection
             isAdmin : false,
             $or:[
-                {name:{$regex:'.*'+search+'.*'}},
-                {email:{$regex:'.*'+search+'.*'}}
+                {name:{$regex:'.*'+search+'.*',$options:'i'}},
+                {email:{$regex:'.*'+search+'.*',$options:'i'}}
             ]
         })
+        .sort({createdAt:-1})
         .limit(limit)
         .skip((page-1)*limit)                           // to apply pagination
         .exec();
