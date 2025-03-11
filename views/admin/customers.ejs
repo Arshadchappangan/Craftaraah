@@ -85,12 +85,12 @@
                             <td class="text-end"><%=data[i].phone%></td>
                             <td class="text-end">
                                 <%if(data[i].isBlocked === false){%>
-                              <button class="badge badge-danger">
-                                <a style="color: white;" href="/admin/blockCustomer?id=<%=data[i]._id%>">Block</a>
+                              <button class="badge badge-danger" onclick="confirmBlock('<%= data[i]._id %>')">
+                                Block
                             </button>
                               <%}else{%>
-                              <button class="badge badge-success">
-                                <a style="color: black;" href="/admin/unblockCustomer?id=<%=data[i]._id%>">Unblock</a>
+                              <button class="badge badge-success" onclick="confirmUnblock('<%= data[i]._id %>')">
+                                Unblock
                                 </button>
                               <%}%>
                             </td>
@@ -379,7 +379,44 @@
     <!-- Kaiadmin DEMO methods, don't include it in your project! -->
     <script src="assets/js/setting-demo.js"></script>
     <script src="assets/js/demo.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+
+    function confirmBlock(userId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This user will be blocked!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Block"
+        }).then((result) => {
+            if (result) {
+                window.location.href = `/admin/blockCustomer?id=${userId}`;
+            }
+        });
+    }
+
+    function confirmUnblock(userId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This user will be unblocked!",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Unblock"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/unblockCustomer?id=${userId}`;
+            }
+        });
+    }
+
+
+
       $("#lineChart").sparkline([102, 109, 120, 99, 110, 105, 115], {
         type: "line",
         height: "70",
