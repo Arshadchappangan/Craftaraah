@@ -1,0 +1,50 @@
+const User = require('../../models/userSchema');
+
+
+const customerInfo = async(req,res) => {
+    try {
+        let search = '';
+        if (req.query.search){          //check any search keywords
+            search = req.query.search;
+        }
+
+        let page = 1;
+        if(req.query.page){             //check any pagination triggers
+            page = req.query.page;
+        }
+        
+        const limit = 3;
+        const userData = await User.find({              //searching suitable data for search from User collection
+            isAdmin : false,
+            $or:[
+                {name:{$regex:'.*'+search+'.*'}},
+                {email:{$regex:'.*'+search+'.*'}}
+            ]
+        })
+        .limit(limit)
+        .skip((page-1)*limit)                           // to apply pagination
+        .exec();
+
+        const count = await User.find({
+            isAdmin : false,
+            $or:[
+                {name:{$regex:'.*'+search+'.*'}},
+                {email:{$regex:'.*'+search+'.*'}}
+            ]
+        })
+        .countDocuments();                              // get count of documents
+
+        res.render('customers', { 
+            data: userData,  // Fix: Passing the users array
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            searchQuery: search
+        });
+    } catch (error) {
+        
+    }
+}
+
+module.exports = {
+    customerInfo
+}
