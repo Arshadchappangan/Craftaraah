@@ -58,6 +58,7 @@
                                         <tr>
                                             <th scope="col" class="text-start">Name</th>
                                             <th scope="col" class="text-start">Description</th>
+                                            <th scope="col" class="text-start">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -66,6 +67,15 @@
                                         <tr>
                                             <td class="text-start"><%=cat.name%></td>
                                             <td class="text-start"><%=cat.description%></td>
+                                            <td class="text-start">
+                                              <%if(cat.isListed){%>
+                                                <button class="badge badge-success">Listed</button>
+                                                <i class="fas fa-sync ms-2 text-dark" onclick="confirmUnlist('<%=cat._id%>')"></i>
+                                                <%}else{%>
+                                                  <button class="badge badge-danger">Unlisted</button>
+                                                    <i class="fas fa-sync ms-2 text-dark" onclick="confirmList('<%=cat._id%>')"></i>
+                                                  <%}%>
+                                            </td>
                                         </tr>
 
                                         <%})%>
@@ -120,34 +130,6 @@
                 </nav>
 
 
-        <footer class="footer">
-          <div class="container-fluid d-flex justify-content-between">
-            <nav class="pull-left">
-              <ul class="nav">
-                <li class="nav-item">
-                  <a class="nav-link" href="http://www.themekita.com">
-                    ThemeKita
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#"> Help </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#"> Licenses </a>
-                </li>
-              </ul>
-            </nav>
-            <div class="copyright">
-              2024, made with <i class="fa fa-heart heart text-danger"></i> by
-              <a href="http://www.themekita.com">ThemeKita</a>
-            </div>
-            <div>
-              Distributed by
-              <a target="_blank" href="https://themewagon.com/">ThemeWagon</a>.
-            </div>
-          </div>
-        </footer>
-      </div>
 
     <!--   Core JS Files   -->
     <script src="assets/js/core/jquery-3.7.1.min.js"></script>
@@ -216,17 +198,11 @@
                 location.reload();
             })
             .catch(error => {
-                // if(error.message === "Category already exists"){
                     Swal.fire({
                         icon : "error",
                         title : "Oops",
                         text : error.message
                     })
-                // }else{
-                    // Swal.fire({
-                        // icon : "error",
-                    // })
-                // }
             })
 
         }
@@ -267,7 +243,38 @@
                 elem.style.display = 'none'
             })
         }
+        
+        function confirmUnlist(userId){
+          Swal.fire({
+            title: "Are you sure?",
+            text: "This user will be unlisted!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Unlist"
+        }).then((result) => {
+            if (result) {
+                window.location.href = `/admin/unlistCategory?id=${userId}`;
+            }
+        });
+        }
 
+        function confirmList(userId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This user will be Listed!",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "List"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/listCategory?id=${userId}`;
+            }
+        });
+    }
     
       $("#lineChart").sparkline([102, 109, 120, 99, 110, 105, 115], {
         type: "line",
