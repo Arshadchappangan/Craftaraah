@@ -81,8 +81,8 @@
                                               <a href="/admin/editCategory?id=<%=cat._id%>">
                                                 <i class="fas fa-pencil-alt mx-2 text-dark"></i>
                                               </a>
+                                                <i class="fas fa-trash-alt mx-2" onclick="confirmDelete('<%=cat._id%>')"></i>
                                               
-                                              <i class="fas fa-trash-alt mx-2"></i>
                                             </td>
                                         </tr>
 
@@ -283,6 +283,22 @@
             }
         });
     }
+
+    function confirmDelete(userId){
+          Swal.fire({
+            title: "Are you sure?",
+            text: "This user will be deleted!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Delete"
+        }).then((result) => {
+            if (result) {
+                window.location.href = `/admin/deleteCategory?id=${userId}`;
+            }
+        });
+        }
     
       $("#lineChart").sparkline([102, 109, 120, 99, 110, 105, 115], {
         type: "line",
