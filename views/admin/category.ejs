@@ -58,7 +58,8 @@
                                         <tr>
                                             <th scope="col" class="text-start">Name</th>
                                             <th scope="col" class="text-start">Description</th>
-                                            <th scope="col" class="text-start">Status</th>
+                                            <th scope="col" class="text-end">Status</th>
+                                            <th scope="col" class="text-end">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -67,7 +68,7 @@
                                         <tr>
                                             <td class="text-start"><%=cat.name%></td>
                                             <td class="text-start"><%=cat.description%></td>
-                                            <td class="text-start">
+                                            <td class="text-end">
                                               <%if(cat.isListed){%>
                                                 <button class="badge badge-success">Listed</button>
                                                 <i class="fas fa-sync ms-2 text-dark" onclick="confirmUnlist('<%=cat._id%>')"></i>
@@ -75,6 +76,13 @@
                                                   <button class="badge badge-danger">Unlisted</button>
                                                     <i class="fas fa-sync ms-2 text-dark" onclick="confirmList('<%=cat._id%>')"></i>
                                                   <%}%>
+                                            </td>
+                                            <td class="text-end">
+                                              <a href="/admin/editCategory?id=<%=cat._id%>">
+                                                <i class="fas fa-pencil-alt mx-2 text-dark"></i>
+                                              </a>
+                                              
+                                              <i class="fas fa-trash-alt mx-2"></i>
                                             </td>
                                         </tr>
 
