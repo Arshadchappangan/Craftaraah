@@ -1,7 +1,8 @@
 <%- include("../../views/partials/admin/header") %>
 
     <head>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+        <!-- Cropper.js CSS -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     </head>
 
     <style>
@@ -146,16 +147,19 @@
 
     <div id="overlay"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+
+
+    <!-- Cropper.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
 
     <script>
         let cropper;
-        let currentFile;
-        let croppedImages = [];
+        let currentImageElement;
 
         function previewImages(event) {
             const previewContainer = document.getElementById('previewContainer');
-            previewContainer.innerHTML = ""; // Clear previous images
+            previewContainer.innerHTML = "";
 
             const files = event.target.files;
 
@@ -167,10 +171,10 @@
                     imgElement.classList.add("img-thumbnail");
                     imgElement.style.height = "auto";
                     imgElement.style.width = "120px";
-                    imgElement.style.maxHeight = "100px"
-                    imgElement.style.objectFit = "contain"
+                    imgElement.style.maxHeight = "100px";
+                    imgElement.style.objectFit = "contain";
                     imgElement.style.margin = "5px";
-                    imgElement.onclick = () => openCropper(e.target.result, file);
+                    imgElement.onclick = () => openCropper(imgElement, e.target.result);
 
                     previewContainer.appendChild(imgElement);
                 };
@@ -178,51 +182,74 @@
             });
         }
 
-        function openCropper(imageSrc, file) {
-            currentFile = file;
-            document.getElementById('cropImage').src = imageSrc;
+
+        function openCropper(imgElement, imageSrc) {
+            currentImageElement = imgElement;
+            const cropImage = document.getElementById('cropImage');
+
+            // Remove any previous event listener
+            cropImage.onload = null;
+
+            // Wait until image loads before initializing Cropper
+            cropImage.onload = function () {
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+
+                cropper = new Cropper(cropImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    guides: true,
+                    background: false,
+                    autoCropArea: 1,
+                    zoomable: true,
+                    movable: true,
+                    rotatable: true,
+                    scalable: true,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                });
+
+                console.log("✅ Cropper initialized successfully.");
+            };
+
+            cropImage.src = imageSrc; // Set the image source
             document.getElementById('cropModal').style.display = "block";
             document.getElementById('overlay').style.display = "block";
-
-            if (cropper) {
-                cropper.destroy();
-            }
-
-            const cropImage = document.getElementById('cropImage');
-            cropper = new Cropper(cropImage, {
-                aspectRatio: 1,
-                viewMode: 1,
-                guides: true,
-                background: false,
-                autoCropArea: 1,
-                zoomable: true,
-                movable: true,
-                rotatable: true,
-                scalable: true
-            });
         }
+
+
+
 
         function saveCroppedImage() {
+            if (!cropper) {
+                console.error("Cropper is not initialized!");
+                return;
+            }
+
             cropper.getCroppedCanvas().toBlob((blob) => {
+                if (!blob) {
+                    console.error("Failed to create cropped image blob.");
+                    return;
+                }
+
                 const croppedImageURL = URL.createObjectURL(blob);
 
-                const imgElement = document.createElement("img");
-                imgElement.src = croppedImageURL;
-                imgElement.classList.add("img-thumbnail");
-                imgElement.style.height = "auto";
-                imgElement.style.width = "120px";
-                imgElement.style.maxHeight = "100px"
-                imgElement.style.objectFit = "contain"
-                imgElement.style.margin = "5px";
+                // Replace the original preview image with the cropped image
+                currentImageElement.src = croppedImageURL;
 
-                document.getElementById('previewContainer').appendChild(imgElement);
-
-                croppedImages.push(blob);
-
+                // Hide the crop modal
                 document.getElementById('cropModal').style.display = "none";
                 document.getElementById('overlay').style.display = "none";
+
+                // Destroy Cropper instance after cropping
+                cropper.destroy();
+                cropper = null;
             });
         }
+
+
 
         function closeCropModal() {
             document.getElementById('cropModal').style.display = "none";
@@ -230,8 +257,11 @@
 
             if (cropper) {
                 cropper.destroy();
+                cropper = null;
             }
         }
+
+
 
         function validateForm() {
             clearErrorMessages();
