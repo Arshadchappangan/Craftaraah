@@ -6,8 +6,41 @@ const path = require('path');
 const sharp = require('sharp');
  
 
-const productInfo = (req,res) => {
-    res.render('products')
+const productInfo = async(req,res) => {
+    try {
+        const search = req.query.search || "";
+        const page = req.query.page || 1;
+        const limit = 5;
+
+        const productData = await Product.find({
+            $or:[
+                {productName:{$regex:new RegExp('.*'+search+'.*','i')}}
+            ]
+        }).limit(limit*1).skip((page-1)*limit).populate('category').exec();
+
+        const count = await Product.find({
+            $or:[
+                {productName:{$regex:new RegExp('.*'+search+'.*','i')}}
+            ]
+        }).countDocuments();
+
+        const category = await Category.find({isListed:true});
+
+        if(category){
+            res.render('products',{
+                data : productData,
+                currentPage : page,
+                totalPages : Math.ceil(count/limit),
+                category : category
+            })
+        }else {
+            res.redirect('/pageError')
+        }
+        
+    } catch (error) {
+        res.redirect('/pageError')
+    }
+    
 }
 
 const loadAddProducts = async (req,res) => {
@@ -28,12 +61,17 @@ const addProducts = async (req,res) => {
 
         if(!productExists){
             const images = []
+            if (!req.files || req.files.length === 0) {
+                return res.status(400).json({ error: "No image uploaded!" });
+            }
+            
             if(req.files && req.files.length > 0){
                 for (let file of req.files){
                     const originalImagePath = file.path;
-                    const resizedImagePath = path.join('public','uploads','product-images',`resized-${file.filename}`);
+                    const extension = path.extname(file.filename)
+                    const resizedImagePath = path.join('public','uploads','product-images',`resized-${Date.now()}${extension}`);
                     await sharp(originalImagePath).resize({width:440,height:440}).toFile(resizedImagePath);
-                    images.push(`/uploads/product-images/resized-${file.filename}`);
+                    images.push(`/uploads/product-images/resized-${Date.now()}${extension}`);
                 }
             }
 
@@ -46,7 +84,7 @@ const addProducts = async (req,res) => {
                 regularPrice : products.regularPrice,
                 salePrice : products.salePrice,
                 createdAt : new Date(),
-                quantiry : products.quantity,
+                quantity : products.quantity,
                 productImage : images,
                 status : 'Available'
             })

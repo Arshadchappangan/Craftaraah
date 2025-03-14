@@ -32,7 +32,7 @@ const productSchema = new Schema({
         type : Number,
         default : 0
     },
-    quantiry : {
+    quantity : {
         type : Number,
         required : true
     },

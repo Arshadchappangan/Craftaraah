@@ -52,7 +52,7 @@
                     <div class="card card-round">
                         <div class="card-header">
                             <div class="card-head-row card-tools-still-right">
-                                <div class="card-title">Category Details</div>
+                                <div class="card-title">Product Details</div>
                             </div>
                         </div>
                         <div class="card-body p-0">
@@ -61,24 +61,30 @@
                                     <thead class="thead-light">
                                         <tr>
                                             <th scope="col" class="text-start">Name</th>
-                                            <th scope="col" class="text-start">Description</th>
-                                            <th scope="col" class="text-end">Status</th>
+                                            <th scope="col" class="text-start">Category</th>
+                                            <th scope="col" class="text-end">Regular Price</th>
+                                            <th scope="col" class="text-end">Sale Price</th>
+                                            <th scope="col" class="text-end">Quantity</th>
                                             <th scope="col" class="text-end">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        <%for(let i=data.length-1;i>=0;i--){%>
                                         <tr>
-                                            <td class="text-start"></td>
-                                            <td class="text-start"></td>
+                                            <td class="text-start"><%=data[i].productName%></td>
+                                            <td class="text-start"><%=data[i].category.name%></td>
+                                            <td class="text-end"><%=data[i].regularPrice%></td>
+                                            <td class="text-end"><%=data[i].salePrice%></td>
+                                            <td class="text-end"><%=data[i].quantity%></td>
                                             <td class="text-end">
                                                 <button class="badge badge-success">Listed</button>
 
-                                                  <button class="badge badge-danger">Unlisted</button>
+                                                <button class="badge badge-danger">Unlisted</button>
                                             </td>
                             
                                         </tr>
 
-
+                                        <%}%>
                                     </tbody>
                                 </table>
                             </div>
@@ -95,7 +101,21 @@
                 </div>
             </div>
         
-   
+            <div class="container mt-3">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+             
+             
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%=(i === currentPage) ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                        <% } %>
+             
+             
+                    </ul>
+                </nav>
+             </div>
 
 
 
@@ -139,153 +159,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
 
-        function handleFormSubmission(event){
-            event.preventDefault();
-            if(!validateForm()){
-                return
-            }
-            const name = document.getElementById("product_name").value.trim();
-            const description = document.getElementById("descriptionId").value.trim();
-
-            fetch('/admin/addCategory',{
-                method : "POST",
-                headers : {
-                    "content-type" : "application/json"
-                },
-                body : JSON.stringify({name,description})
-            })
-            .then(response => {
-                if(!response.ok){
-                    return response.json().then(err => {
-                        throw new Error(err.error);
-                    })
-                }
-                return response.json();
-            })
-            .then(data => {
-                location.reload();
-            })
-            .catch(error => {
-                    Swal.fire({
-                        icon : "error",
-                        title : "Oops",
-                        text : error.message
-                    })
-            })
-
-        }
-
-        function validateForm(){
-            clearErrorMessages();
-            const name = document.getElementById("product_name").value.trim();
-            const description = document.getElementById("descriptionId").value.trim();
-            isValid = true;
-            
-            if(name === ""){
-                displayErrorMessage("name-error","Please enter a name")
-                isValid = false;
-            }else if(!/^[A-Za-z\s]+$/.test(name)){
-                displayErrorMessage("name-error","Categoty name should contain only alphabets");
-                isValid = false
-            }
-
-            if(description === ''){
-                displayErrorMessage("description-error","Please enter a description");
-                isValid = false
-            }
-
-            return isValid;
-        }
-
-        function displayErrorMessage(elementId,message){
-            let errorElement = document.getElementById(elementId);
-            errorElement.innerText = message;
-            errorElement.style.display = 'block';
-        }
-
-
-        function clearErrorMessages(){
-            const errorElements = document.getElementsByClassName("error-message");
-            Array.from(errorElements).forEach((elem) => {
-                elem.innerHTML = '';
-                elem.style.display = 'none'
-            })
-        }
         
-        function confirmUnlist(userId){
-          Swal.fire({
-            title: "Are you sure?",
-            text: "This user will be unlisted!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Unlist"
-        }).then((result) => {
-            if (result) {
-                window.location.href = `/admin/unlistCategory?id=${userId}`;
-            }
-        });
-        }
-
-        function confirmList(userId) {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "This user will be Listed!",
-            icon: "info",
-            showCancelButton: true,
-            confirmButtonColor: "#28a745",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "List"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = `/admin/listCategory?id=${userId}`;
-            }
-        });
-    }
-
-    function confirmDelete(userId){
-          Swal.fire({
-            title: "Are you sure?",
-            text: "This user will be deleted!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Delete"
-        }).then((result) => {
-            if (result) {
-                window.location.href = `/admin/deleteCategory?id=${userId}`;
-            }
-        });
-        }
-    
-      $("#lineChart").sparkline([102, 109, 120, 99, 110, 105, 115], {
-        type: "line",
-        height: "70",
-        width: "100%",
-        lineWidth: "2",
-        lineColor: "#177dff",
-        fillColor: "rgba(23, 125, 255, 0.14)",
-      });
-
-      $("#lineChart2").sparkline([99, 125, 122, 105, 110, 124, 115], {
-        type: "line",
-        height: "70",
-        width: "100%",
-        lineWidth: "2",
-        lineColor: "#f3545d",
-        fillColor: "rgba(243, 84, 93, .14)",
-      });
-
-      $("#lineChart3").sparkline([105, 103, 123, 100, 95, 105, 115], {
-        type: "line",
-        height: "70",
-        width: "100%",
-        lineWidth: "2",
-        lineColor: "#ffa534",
-        fillColor: "rgba(255, 165, 52, .14)",
-      });
     </script>
   </body>
 </html>

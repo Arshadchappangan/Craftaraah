@@ -59,7 +59,7 @@
             <div class="col-lg-6">
                 <div class="card mb-4">
                     <div class="card-body">
-                    
+
                         <form method="post" action="/admin/addProducts" enctype="multipart/form-data"
                             onsubmit="return validateForm()">
                             <div class="row">
@@ -127,7 +127,8 @@
                                     <h4>Crop image</h4>
                                     <img id="cropImage">
                                     <br><br>
-                                    <button class="btn btn-outline-primary" onclick="saveCroppedImage()">Crop &
+                                    <button type="button" class="btn btn-outline-primary"
+                                        onclick="saveCroppedImage()">Crop &
                                         Save</button>
                                     <button class="btn btn-outline-secondary" onclick="closeCropModal()">Cancel</button>
                                 </div>
@@ -138,7 +139,7 @@
                             </div>
 
                     </div>
-                    
+
                     </form>
                 </div>
             </div>
@@ -155,12 +156,12 @@
 
 
     <script>
-        function validateAndSubmit(event){
-            event.preventDefault();
-            if(validateForm()){
-                document.forms[0].submit();
+        function validateAndSubmit(event) {
+            if (!validateForm()) {
+                event.preventDefault();
             }
         }
+
 
         let cropper;
         let currentImageElement;
@@ -299,16 +300,16 @@
                 isValid = false;
             }
 
-            if(quantity === ""){
+            if (quantity === "") {
                 displayErrorMessage('quantity-error', 'Please enter quantity.');
                 isValid = false;
-            }else if (parseInt(quantity) < 0) {
+            } else if (parseInt(quantity) < 0) {
                 displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
                 isValid = false;
             }
 
-            if(!category){
-                displayErrorMessage('category-error','Please choose one category')
+            if (!category) {
+                displayErrorMessage('category-error', 'Please choose one category')
                 isValid = false;
             }
 
