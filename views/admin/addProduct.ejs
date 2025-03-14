@@ -59,6 +59,7 @@
             <div class="col-lg-6">
                 <div class="card mb-4">
                     <div class="card-body">
+                    
                         <form method="post" action="/admin/addProducts" enctype="multipart/form-data"
                             onsubmit="return validateForm()">
                             <div class="row">
@@ -80,7 +81,7 @@
                             <div class="row">
                                 <div class="col-lg-6 mb-4">
                                     <label for="product_name" class="form-label">Regular Price</label>
-                                    <input type="text" placeholder="₹" name="regulaPrice" class="form-control border"
+                                    <input type="text" placeholder="₹" name="regularPrice" class="form-control border"
                                         id="regular-price">
                                     <div id="regularPrice-error" class="error-message"></div>
                                 </div>
@@ -100,7 +101,7 @@
                                 </div>
                                 <div class="col-lg-6 mb-4">
                                     <label for="product_name" class="form-label">Category</label>
-                                    <select class="form-select border" name="category">
+                                    <select class="form-select border" name="category" id="category">
                                         <option value="" disabled selected>Choose one</option>
                                         <%for(let i=0;i<category.length;i++){%>
                                             <option value="<%=category[i].name%>">
@@ -114,19 +115,16 @@
                             </div>
 
 
-
-
-
                             <div class="card mb-2">
                                 <div class="card-header">
                                     <h4>Choose images</h4>
                                 </div>
 
                                 <input type="file" id="imageInput" multiple accept="image/png, image/jpeg, image/jpg"
-                                    onchange="previewImages(event)">
+                                    onchange="previewImages(event)" name="images">
                                 <div id="previewContainer" class="d-flex flex-wrap mt-2"></div>
                                 <div id="cropModal">
-                                    <h4>Preview & Crop</h4>
+                                    <h4>Crop image</h4>
                                     <img id="cropImage">
                                     <br><br>
                                     <button class="btn btn-outline-primary" onclick="saveCroppedImage()">Crop &
@@ -134,10 +132,13 @@
                                     <button class="btn btn-outline-secondary" onclick="closeCropModal()">Cancel</button>
                                 </div>
                             </div>
+                            <div>
+                                <input class="btn btn-outline-primary rounded font-sm hover-up my-4" type="submit"
+                                    value="Add product" onclick="validateAndSubmit(event)">
+                            </div>
+
                     </div>
-                    <div>
-                        <input class="btn btn-md rounded font-sm hover-up" type="submit" value="Publish">
-                    </div>
+                    
                     </form>
                 </div>
             </div>
@@ -154,6 +155,13 @@
 
 
     <script>
+        function validateAndSubmit(event){
+            event.preventDefault();
+            if(validateForm()){
+                document.forms[0].submit();
+            }
+        }
+
         let cropper;
         let currentImageElement;
 
@@ -187,14 +195,10 @@
             currentImageElement = imgElement;
             const cropImage = document.getElementById('cropImage');
 
-            // Remove any previous event listener
-            cropImage.onload = null;
 
-            // Wait until image loads before initializing Cropper
             cropImage.onload = function () {
                 if (cropper) {
                     cropper.destroy();
-                    cropper = null;
                 }
 
                 cropper = new Cropper(cropImage, {
@@ -211,10 +215,9 @@
                     cropBoxResizable: true,
                 });
 
-                console.log("✅ Cropper initialized successfully.");
             };
 
-            cropImage.src = imageSrc; // Set the image source
+            cropImage.src = imageSrc;
             document.getElementById('cropModal').style.display = "block";
             document.getElementById('overlay').style.display = "block";
         }
@@ -236,16 +239,12 @@
 
                 const croppedImageURL = URL.createObjectURL(blob);
 
-                // Replace the original preview image with the cropped image
                 currentImageElement.src = croppedImageURL;
 
-                // Hide the crop modal
                 document.getElementById('cropModal').style.display = "none";
                 document.getElementById('overlay').style.display = "none";
 
-                // Destroy Cropper instance after cropping
                 cropper.destroy();
-                cropper = null;
             });
         }
 
@@ -257,7 +256,6 @@
 
             if (cropper) {
                 cropper.destroy();
-                cropper = null;
             }
         }
 
@@ -270,6 +268,7 @@
             const regularPrice = document.getElementById('regular-price').value;
             const salePrice = document.getElementById('sale-price').value;
             const quantity = document.getElementById('quantity').value;
+            const category = document.getElementById('category').value;
             let isValid = true;
 
             if (name === "") {
@@ -282,9 +281,6 @@
 
             if (description === "") {
                 displayErrorMessage('description-error', 'Please enter the description for product.');
-                isValid = false;
-            } else if (!/^[a-zA-Z\s]+$/.test(description)) {
-                displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
                 isValid = false;
             }
 
@@ -303,8 +299,16 @@
                 isValid = false;
             }
 
-            if (parseInt(quantity) < 0) {
+            if(quantity === ""){
+                displayErrorMessage('quantity-error', 'Please enter quantity.');
+                isValid = false;
+            }else if (parseInt(quantity) < 0) {
                 displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
+                isValid = false;
+            }
+
+            if(!category){
+                displayErrorMessage('category-error','Please choose one category')
                 isValid = false;
             }
 

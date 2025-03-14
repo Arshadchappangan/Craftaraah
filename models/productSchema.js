@@ -37,12 +37,13 @@ const productSchema = new Schema({
         required : true
     },
     productImage : {
-        type : [String],
+        type : [{type : String}],
         required : true
     },
     isBlocked : {
         type : Boolean,
         required : true,
+        default : false
     },
     status : {
         type : String,
