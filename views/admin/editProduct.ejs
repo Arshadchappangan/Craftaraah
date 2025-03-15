@@ -127,9 +127,13 @@
                                         <% product.productImage.forEach((image)=> { %>
                                             <img src="<%= image %>" class="img-thumbnail preview-img"
                                                 style="height:auto; width:120px; max-height:100px; object-fit:contain; margin:5px;">
+                                            <i onclick="deleteImage('<%=image%>','<%=product._id%>')"
+                                                class="fas fa-times" style=""></i>
                                             <% }) %>
                                                 <% } %>
+
                                 </div>
+                                <div id="image-error" class="error-message"></div>
 
                                 <div id="cropModal">
                                     <h4>Crop image</h4>
@@ -161,6 +165,8 @@
 
     <!-- Cropper.js JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 
     <script>
@@ -339,4 +345,30 @@
                 element.innerText = '';
             });
         }
+
+
+        function deleteImage(imageName, productId) {
+            fetch('/admin/deleteImage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    imageNameToServer: imageName,
+                    productIdToServer: productId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status) {
+                        location.reload();
+                    } else {
+                        displayErrorMessage('image-error','Image deletion failed')
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+
+
     </script>

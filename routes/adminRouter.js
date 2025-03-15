@@ -38,6 +38,7 @@ router.get('/products',adminAuth,productController.productInfo);
 router.get('/addProducts',adminAuth,productController.loadAddProducts);
 router.post('/addProducts',adminAuth,multer.array('images',4),productController.addProducts);
 router.get('/editProduct',adminAuth,productController.loadEditProduct)
-router.post('/editProduct',adminAuth,multer.array('images',4),productController.editProduct);
+router.post('/editProduct/:id',adminAuth,multer.array('images',4),productController.editProduct);
+router.post('/deleteImage',adminAuth,productController.deleteImage)
 
 module.exports = router

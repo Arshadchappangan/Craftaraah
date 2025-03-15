@@ -4,6 +4,8 @@ const User = require('../../models/userSchema')
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
+const category = require('../../models/categorySchema');
+
 
 
 const productInfo = async (req, res) => {
@@ -105,7 +107,6 @@ const loadEditProduct = async (req, res) => {
         const id = req.query.id;
         const product = await Product.findOne({ _id: id });
         const category = await Category.find({});
-        console.log(product)
         res.render('editProduct', {
             product: product,
             category: category
@@ -118,17 +119,27 @@ const loadEditProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
     try {
-        const productId = req.body.id;
+        const productId = req.params.id;
         const updatedData = req.body;
 
         let product = await Product.findById(productId);
+        let category = await Category.findOne({name:updatedData.category})
+
         if (!product) {
             return res.status(404).json({ error: "Product not found!" });
         }
 
-        let images = product.productImage; 
+        const productExists = await Product.findOne({
+            productName: product.productName,
+            _id: { $ne: productId }
+        })
+
+        if (productExists) {
+            return res.status(400).json({ error: "Product with this name already exists, please try another name" })
+        }
+
+        let images = []
         if (req.files && req.files.length > 0) {
-            images = []; 
             for (let file of req.files) {
                 const originalImagePath = file.path;
                 const extension = path.extname(file.filename);
@@ -144,12 +155,11 @@ const editProduct = async (req, res) => {
         await Product.findByIdAndUpdate(productId, {
             productName: updatedData.productName,
             description: updatedData.description,
-            category: updatedData.category,
+            category: category._id,
             regularPrice: updatedData.regularPrice,
             salePrice: updatedData.salePrice,
             quantity: updatedData.quantity,
             productImage: images,
-            status: updatedData.status,
             updatedAt: new Date(),
         });
 
@@ -161,10 +171,46 @@ const editProduct = async (req, res) => {
 };
 
 
+const deleteImage = async (req, res) => {
+
+    try {
+        const { imageNameToServer, productIdToServer } = req.body;
+
+        const imageFilename = path.basename(imageNameToServer);
+        const imagePath = path.join('public', 'uploads', 'product-images', imageFilename);
+
+
+        const product = await Product.findByIdAndUpdate(
+            productIdToServer,
+            { $pull: { productImage: imageNameToServer } },
+            { new: true }
+        );
+
+        if (!product) {
+            return res.status(404).json({ error: "Product not found!" });
+        }
+
+        if (fs.existsSync(imagePath)) {
+            await fs.promises.unlink(imagePath);
+            console.log(`Image deleted: ${imageFilename}`);
+        } else {
+            console.log("Image file not found on the server.");
+        }
+
+        res.json({ status: true, message: "Image deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting image:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+
+
 module.exports = {
     productInfo,
     loadAddProducts,
     addProducts,
     loadEditProduct,
-    editProduct
+    editProduct,
+    deleteImage
 }
