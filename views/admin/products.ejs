@@ -77,10 +77,12 @@
                                             <td class="text-end"><%=data[i].salePrice%></td>
                                             <td class="text-end"><%=data[i].quantity%></td>
                                             <td class="text-end">
-                                                <button class="badge badge-success">Listed</button>
-
-                                                <button class="badge badge-danger">Unlisted</button>
-                                            </td>
+                                                <a href="/admin/editProduct?id=<%=data[i]._id%>">
+                                                  <i class="fas fa-pencil-alt mx-2 text-dark"></i>
+                                                </a>
+                                                  <i class="fas fa-trash-alt mx-2"></i>
+                                                
+                                              </td>
                             
                                         </tr>
 

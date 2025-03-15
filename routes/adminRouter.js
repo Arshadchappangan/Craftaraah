@@ -37,5 +37,7 @@ router.get('/deleteCategory',adminAuth,categoryController.deleteCategory)
 router.get('/products',adminAuth,productController.productInfo);
 router.get('/addProducts',adminAuth,productController.loadAddProducts);
 router.post('/addProducts',adminAuth,multer.array('images',4),productController.addProducts);
+router.get('/editProduct',adminAuth,productController.loadEditProduct)
+router.post('/editProduct',adminAuth,multer.array('images',4),productController.editProduct);
 
 module.exports = router
