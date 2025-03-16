@@ -1,9 +1,12 @@
 const User = require('../../models/userSchema')
+const Category = require('../../models/categorySchema')
+const Product = require('../../models/productSchema')
 const nodeMailer = require('nodemailer');
 const env = require('dotenv').config();
 const session = require('express-session')
 const bcrypt = require('bcrypt');
 const { name } = require('ejs');
+const category = require('../../models/categorySchema');
 
 const loadHome = async (req, res) => {
     try {
@@ -304,6 +307,46 @@ const resetPassword = async (req,res) => {
     }
 }
 
+const loadShopPage = async (req,res) => {
+    try {
+        const user = req.session.user;
+        const userData = await User.findOne({_id:user})
+        const categories = await Category.find({isListed:true});
+        const categoryIds = categories.map(category => category._id.toString())
+        const page = parseInt(req.query.page) || 1;
+        const limit = 9;
+        const skip = (page-1) * limit;
+        const products = await Product.find({
+            isBlocked:false,
+            category:{$in:categoryIds},
+            quantity:{$gt:0}
+        }).sort({createdAt:-1}).skip(skip).limit(limit);
+
+        const countProducts = await Product.countDocuments({
+            isBlocked:false,
+            category:{$in:categoryIds},
+            quantity:{$gt:0}
+        })
+
+        const totalPages = Math.ceil(countProducts/limit);
+
+        const categoryWithIds = categories.map(category => ({_id:category.id,name:category.name})); 
+
+        res.render('shop-grid',{
+            user:userData,
+            products : products,
+            category : categoryWithIds,
+            totalProducts : countProducts,
+            currentPage : page,
+            totalPages : totalPages
+        })
+    } catch (error) {
+        res.redirect('pageNotFound')
+    }
+}
+
+
+
 
 module.exports = {
     loadHome,
@@ -320,5 +363,6 @@ module.exports = {
     verifyForgotOtp,
     loadResetPassword,
     resendForgotOtp,
-    resetPassword
+    resetPassword,
+    loadShopPage
 }
