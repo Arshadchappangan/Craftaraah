@@ -318,14 +318,12 @@ const loadShopPage = async (req,res) => {
         const skip = (page-1) * limit;
         const products = await Product.find({
             isBlocked:false,
-            category:{$in:categoryIds},
-            quantity:{$gt:0}
+            category:{$in:categoryIds}
         }).sort({createdAt:-1}).skip(skip).limit(limit);
 
         const countProducts = await Product.countDocuments({
             isBlocked:false,
-            category:{$in:categoryIds},
-            quantity:{$gt:0}
+            category:{$in:categoryIds}
         })
 
         const totalPages = Math.ceil(countProducts/limit);
@@ -352,7 +350,6 @@ const filterProducts = async (req,res) => {
         const findCategory = category ? await Category.findOne({_id:category}) : null; 
         let findProducts = await Product.find({
             isBlocked : false,
-            quantity : {$gt:0},
             category : findCategory._id
         }).lean();
 
@@ -406,8 +403,7 @@ const filterPrice = async (req,res) => {
         const {gt,lt} = req.query
         let findProducts = await Product.find({
             salePrice: {$gt:gt,$lt:lt},
-            isBlocked:false,
-            quantity:{$gt:0}
+            isBlocked:false
         }).lean()
 
         findProducts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -448,13 +444,12 @@ const searchProducts = async (req,res) => {
 
         if(req.session.filteredProducts && req.session.filteredProducts.length > 0){
             searchResult = req.session.filteredProducts.filter(product => {
-                product.productName.toLowerCase().includes(search.toLowerCase())
+               return product.productName.toLowerCase().includes(search.toLowerCase())
             })
         }else{
             searchResult = await Product.find({
                 productName : {$regex:'.*'+search+'.*',$options:"i"},
                 isBlocked : false,
-                quantity : {$gt:0},
                 category : {$in:categoryIds}
             })
         }
@@ -482,6 +477,51 @@ const searchProducts = async (req,res) => {
     }
 }
 
+const sortProducts = async (req,res) => {
+    try {
+        const user = req.session.user;
+        const sortBy = req.query.by || 'createdAt';
+        const type = parseInt(req.query.type) || -1;
+        const userData = await User.findOne({_id:user});
+        const categories = await Category.find({isListed:true});
+        const categoryIds = categories.map(category => category._id.toString())
+        const page = parseInt(req.query.page) || 1;
+        const limit = 9;
+        const skip = (page-1) * limit;
+        let products;
+        let sortedProducts = req.session.filteredProducts ? [...req.session.filteredProducts] : [];
+        
+        if(req.session.filteredProducts && req.session.filteredProducts.length > 0){
+            type===1 ? sortedProducts.sort((a,b) => a[sortBy] - b[sortBy]) : sortedProducts.sort((a,b) => b[sortBy] - a[sortBy])
+        }else{
+            products = await Product.find({
+                isBlocked : false,
+                category:{$in:categoryIds}
+            }).sort({[sortBy]:type}).lean()
+        }
+
+        sortedProducts = sortedProducts.length > 0 ? sortedProducts : products;
+        
+
+        let itemsPerPage = 9
+        let currentPage = parseInt(req.query.page) || 1;
+        let totalPages = Math.ceil(sortedProducts.length/itemsPerPage);
+
+        sortedProducts = sortedProducts.slice(skip, skip + limit);
+
+        res.render('shop-grid',{
+            user : userData,
+            products : sortedProducts,
+            category : categories,
+            totalPages,
+            currentPage,
+        })
+    } catch (error) {
+        console.log(error)
+        res.redirect('pageNotFound')
+    }
+}
+
 
 
 
@@ -504,5 +544,6 @@ module.exports = {
     loadShopPage,
     filterProducts,
     filterPrice,
-    searchProducts
+    searchProducts,
+    sortProducts
 }

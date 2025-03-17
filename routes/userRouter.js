@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user/userController');
+const productController = require('../controllers/user/productController');
 const passport = require('passport');
 const {userAuth,adminAuth} = require('../middlewares/auth')
 
@@ -34,7 +35,11 @@ router.get('/shop',userAuth,userController.loadShopPage)
 router.get('/filter',userAuth,userController.filterProducts)
 router.get('/filterPrice',userAuth,userController.filterPrice)
 router.post('/search',userAuth,userController.searchProducts)
+router.get('/sort',userAuth,userController.sortProducts)
 
+//product details
+
+router.get('/productDetails',userAuth,productController.loadProductDetails)
 
 
 
