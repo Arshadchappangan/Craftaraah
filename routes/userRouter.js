@@ -28,9 +28,12 @@ router.get('/resetPassword',userController.loadResetPassword)
 router.post('/resendForgotOtp',userController.resendForgotOtp)
 router.post('/resetPassword',userController.resetPassword)
 
-// product management
+// Shopping page
 
 router.get('/shop',userAuth,userController.loadShopPage)
+router.get('/filter',userAuth,userController.filterProducts)
+router.get('/filterPrice',userAuth,userController.filterPrice)
+router.post('/search',userAuth,userController.searchProducts)
 
 
 

@@ -1229,7 +1229,6 @@ ol {
 }
 
 .sidebar__item__size {
-	display: inline-block;
 	margin-right: 16px;
 	margin-bottom: 10px;
 }
@@ -1528,6 +1527,7 @@ ol {
 
 .product__item {
 	margin-bottom: 50px;
+	
 }
 
 .product__item:hover .product__item__pic .product__item__pic__hover {
@@ -1603,7 +1603,8 @@ ol {
 
 .product__item__text {
 	text-align: center;
-	padding-top: 15px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	padding: 10px;
 }
 
 .product__item__text h6 {
@@ -1645,6 +1646,12 @@ ol {
 
 .product__pagination a:hover,
 .blog__pagination a:hover {
+	background: #7fad39;
+	border-color: #7fad39;
+	color: #ffffff;
+}
+
+.product__pagination .active{
 	background: #7fad39;
 	border-color: #7fad39;
 	color: #ffffff;
