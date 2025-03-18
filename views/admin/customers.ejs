@@ -224,7 +224,12 @@
 
     function searchSubmit(event) {
         event.preventDefault();  
-        localStorage.setItem("showClearBtnCustomers", "true"); 
+        let searchValue = document.getElementById('searchInput').value.trim();
+        if (searchValue !== "") {
+            localStorage.setItem("showClearBtnCustomers", "true");
+        } else {
+            localStorage.removeItem("showClearBtnCustomers");
+        }
         document.getElementById('searchForm').submit(); 
     }
 

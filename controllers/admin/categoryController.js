@@ -7,26 +7,27 @@ const categoryInfo = async (req,res) => {
         const limit = 5;
         const skip = (page-1)*limit;
 
-        const searchQuery = req.query.search || "";
+        const search = req.query.search || "";
 
-        let filter = {};
-        if (searchQuery) {
-            filter.name = { $regex: searchQuery, $options: "i" }; // Case-insensitive search
-        }
 
-        const categoryData = await Category.find(filter)
+        const categoryData = await Category.find({
+            name:{$regex:'.*'+search+'.*',$options:'i'}
+        })
         .sort({createdAt:-1})
         .skip(skip)
         .limit(limit)
 
-        const totalCategories = await Category.countDocuments(filter)
+        const totalCategories = await Category.countDocuments({
+            name:{$regex:'.*'+search+'.*',$options:'i'}
+        })
+
         const totalPages = Math.ceil(totalCategories/limit);
         res.render('category',{
             category : categoryData,
             currentPage : page,
             totalPages : totalPages,
             totalCategories : totalCategories,
-            searchQuery : searchQuery
+            searchQuery : search
         })
     } catch (error) {
         console.error(error);

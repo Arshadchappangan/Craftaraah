@@ -16,13 +16,13 @@ const productInfo = async (req, res) => {
 
         const productData = await Product.find({
             $or: [
-                { productName: { $regex: new RegExp('.*' + search + '.*', 'i') } }
+                {productName:{$regex:'.*'+search+'.*',$options:'i'}}
             ]
         }).limit(limit * 1).skip((page - 1) * limit).populate('category').exec();
 
         const count = await Product.find({
             $or: [
-                { productName: { $regex: new RegExp('.*' + search + '.*', 'i') } }
+                {productName:{$regex:'.*'+search+'.*',$options:'i'}}
             ]
         }).countDocuments();
 

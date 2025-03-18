@@ -15,45 +15,50 @@
           <div class="page-inner">
 
             <div
-              class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
+              class="d-flex justify-content-center"
             >
               <div>
                 <h3 class="fw-bold mb-3">Products</h3>
               </div>
-              <div class="ms-md-auto py-2 py-md-0">
-                <a href="#" class="btn btn-label-info btn-round me-2">Manage</a>
-                <a href="/admin/addProducts" class="btn btn-primary btn-round">Add Product</a>
-              </div>
 
-            </div>
-
-            <div style="width: 500px; margin-bottom: 30px;">
+              <div style="width: 500px; margin-bottom: 30px; margin-left: 800px;">
                 <nav
                 class="nav-search p-0 d-none d-lg-flex"
               >
-                <div class="input-group">
+                <form class="input-group" id="searchForm" action="/admin/products" method="get" onsubmit="searchSubmit(event)">
                   <div class="input-group-prepend">
                     <button type="submit" class="btn btn-search pe-1">
                       <i class="fa fa-search search-icon"></i>
                     </button>
                   </div>
                   <input
+                    id="searchInput"
+                    name="search"
                     type="text"
                     placeholder="Search ..."
                     class="form-control"
                   />
-                </div>
+                </form>
               </nav>
             </div>
+
+              <div class="ms-md-auto py-2 py-md-0">
+                <a href="/admin/addProducts" class="btn btn-primary btn-round">Add Product</a>
+              </div>
+
+            </div>
+
+            
 
             <div class="row">
                 <!-- Left Side: Table (9 columns) -->
                 <div class="col-md-9">
                     <div class="card card-round">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between">
                             <div class="card-head-row card-tools-still-right">
                                 <div class="card-title">Product Details</div>
                             </div>
+                            <button class="btn btn-primary" id="clear-btn">Clear search</button>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -161,6 +166,31 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
 
+function searchSubmit(event) {
+        event.preventDefault();  
+        let searchValue = document.getElementById('searchInput').value.trim();
+        if (searchValue !== "") {
+            localStorage.setItem("showClearBtnProducts", "true");
+        } else {
+            localStorage.removeItem("showClearBtnProducts");
+        }
+        document.getElementById('searchForm').submit(); 
+    }
+
+    document.getElementById('clear-btn').addEventListener('click', function() {
+        document.getElementById('searchInput').value = '';
+        localStorage.removeItem("showClearBtnProducts");
+        document.getElementById('searchForm').submit();
+    });
+
+    document.addEventListener('DOMContentLoaded',() => {
+        if (localStorage.getItem("showClearBtnProducts") === "true") {
+            document.getElementById('clear-btn').style.display = 'block';
+        } else {
+            document.getElementById('clear-btn').style.display = 'none';
+        }
+    }
+  )
         
     </script>
   </body>
