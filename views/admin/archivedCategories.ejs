@@ -18,13 +18,13 @@
               class="d-flex justify-content-between align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
             >
               <div>
-                <h3 class="fw-bold mb-3">Categories</h3>
+                <h3 class="fw-bold mb-3">Archived Categories</h3>
               </div>
               <div style="width: 500px; margin-bottom: 30px;">
                 <nav
                 class="nav-search p-0 d-none d-lg-flex"
               >
-                <form class="input-group" action="/admin/category" method="get" id="searchForm" onsubmit="searchSubmit(event)">
+                <form class="input-group" action="/admin/archivedCategories" method="get" id="searchForm" onsubmit="searchSubmit(event)">
                   <div class="input-group-prepend">
                     <button type="submit" class="btn btn-search pe-1">
                       <i class="fa fa-search search-icon"></i>
@@ -81,10 +81,9 @@
                                                   <%}%>
                                             </td>
                                             <td class="text-end">
-                                              <a href="/admin/editCategory?id=<%=cat._id%>">
-                                                <i class="fas fa-pencil-alt mx-2 text-dark"></i>
-                                              </a>
-                                                <i class="fas fa-archive mx-2" onclick="confirmArchive('<%=cat._id%>')"></i>
+                                                <i class="fas fa-undo mx-2 text-dark" onclick="confirmRestore('<%=cat._id%>')"></i>
+                                                <i class="fas fa-trash-alt mx-2" onclick="confirmDelete('<%=cat._id%>')"></i>
+                                              
                                             </td>
                                         </tr>
 
@@ -95,30 +94,7 @@
                         </div>
                     </div>
                 </div>
-    
-                <!-- Right Side: Form (3 columns) -->
-                <div class="col-md-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Create Category</h5>
-                            <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmission(event)">
-                                <div class="mb-4">
-                                    <label for="product_name" class="form-label"> Name</label>
-                                    <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name" />
-                                    <div id="name-error" class="error-message"></div>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="form-label">Description</label>
-                                    <textarea placeholder="Type here" name="description" class="form-control" id="descriptionId"></textarea>
-                                    <div id="description-error" class="error-message"></div>
-                                </div>
-                                <div class="d-grid">
-                                    <button class="btn btn-primary" type="submit">Create Category</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+
     
             </div> <!-- End Row -->
             
@@ -180,79 +156,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-
-        function handleFormSubmission(event){
-            event.preventDefault();
-            if(!validateForm()){
-                return
-            }
-            const name = document.getElementById("product_name").value.trim();
-            const description = document.getElementById("descriptionId").value.trim();
-
-            fetch('/admin/addCategory',{
-                method : "POST",
-                headers : {
-                    "content-type" : "application/json"
-                },
-                body : JSON.stringify({name,description})
-            })
-            .then(response => {
-                if(!response.ok){
-                    return response.json().then(err => {
-                        throw new Error(err.error);
-                    })
-                }
-                return response.json();
-            })
-            .then(data => {
-                location.reload();
-            })
-            .catch(error => {
-                    Swal.fire({
-                        icon : "error",
-                        title : "Oops",
-                        text : error.message
-                    })
-            })
-
-        }
-
-        function validateForm(){
-            clearErrorMessages();
-            const name = document.getElementById("product_name").value.trim();
-            const description = document.getElementById("descriptionId").value.trim();
-            isValid = true;
-            
-            if(name === ""){
-                displayErrorMessage("name-error","Please enter a name")
-                isValid = false;
-            }else if(!/^[A-Za-z\s]+$/.test(name)){
-                displayErrorMessage("name-error","Categoty name should contain only alphabets");
-                isValid = false
-            }
-
-            if(description === ''){
-                displayErrorMessage("description-error","Please enter a description");
-                isValid = false
-            }
-
-            return isValid;
-        }
-
-        function displayErrorMessage(elementId,message){
-            let errorElement = document.getElementById(elementId);
-            errorElement.innerText = message;
-            errorElement.style.display = 'block';
-        }
-
-
-        function clearErrorMessages(){
-            const errorElements = document.getElementsByClassName("error-message");
-            Array.from(errorElements).forEach((elem) => {
-                elem.innerHTML = '';
-                elem.style.display = 'none'
-            })
-        }
         
         function confirmUnlist(userId){
           Swal.fire({
@@ -286,7 +189,7 @@
         });
     }
 
-    function confirmArchive(userId){
+    function confirmDelete(userId){
           Swal.fire({
             title: "Are you sure?",
             text: "This user will be deleted!",
@@ -297,7 +200,23 @@
             confirmButtonText: "Delete"
         }).then((result) => {
             if (result) {
-                window.location.href = `/admin/archiveCategory?id=${userId}`;
+                window.location.href = `/admin/deleteCategory?id=${userId}`;
+            }
+        });
+        }
+
+    function confirmRestore(userId){
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This category will be restored!",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Restore"
+        }).then((result) => {
+            if (result) {
+                window.location.href = `/admin/restoreCategory?id=${userId}`;
             }
         });
         }

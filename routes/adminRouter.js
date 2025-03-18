@@ -30,7 +30,11 @@ router.get('/unlistCategory',adminAuth,categoryController.unlistCategory);
 router.get('/listCategory',adminAuth,categoryController.listCategory);
 router.get('/editCategory',adminAuth,categoryController.loadEditCategory);
 router.post('/editCategory/:id',adminAuth,categoryController.editCategory);
-router.get('/deleteCategory',adminAuth,categoryController.deleteCategory)
+router.get('/archiveCategory',adminAuth,categoryController.archiveCategory);
+router.get('/archivedCategories',adminAuth,categoryController.archivedCategoryInfo);
+router.get('/deleteCategory',adminAuth,categoryController.deleteCategory);
+router.get('/restoreCategory',adminAuth,categoryController.restoreCategory)
+
 
 // product management
 
@@ -40,5 +44,6 @@ router.post('/addProducts',adminAuth,multer.array('images',4),productController.
 router.get('/editProduct',adminAuth,productController.loadEditProduct)
 router.post('/editProduct/:id',adminAuth,multer.array('images',4),productController.editProduct);
 router.post('/deleteImage',adminAuth,productController.deleteImage)
+router.get('/archivedProducts',adminAuth,productController.archivedProductInfo)
 
 module.exports = router

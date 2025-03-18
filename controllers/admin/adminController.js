@@ -37,7 +37,7 @@ const loadDashboard = async (req, res) => {
     try {
         const users = await User.find({});
         const products = await Product.find({});
-        const categories = await Category.find({})
+        const categories = await Category.find({isDeleted:false})
 
 
         if (!req.session.admin) {

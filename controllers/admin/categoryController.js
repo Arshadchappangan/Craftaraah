@@ -11,6 +11,7 @@ const categoryInfo = async (req,res) => {
 
 
         const categoryData = await Category.find({
+            isDeleted : false,
             name:{$regex:'.*'+search+'.*',$options:'i'}
         })
         .sort({createdAt:-1})
@@ -18,6 +19,7 @@ const categoryInfo = async (req,res) => {
         .limit(limit)
 
         const totalCategories = await Category.countDocuments({
+            isDeleted : false,
             name:{$regex:'.*'+search+'.*',$options:'i'}
         })
 
@@ -108,10 +110,79 @@ const editCategory = async (req,res) => {
 }
 
 
-const deleteCategory = async (req,res) =>{
-    const id = req.query.id;
-    const deleteCategory = await Category.findOneAndDelete({_id:id})
-    res.redirect('/admin/category')
+const archiveCategory = async (req,res) =>{
+    try {
+        const id = req.query.id;
+        const deleteCategory = await Category.findOneAndUpdate({_id:id},{$set:{isDeleted:true}})
+        if(deleteCategory){
+            res.redirect('/admin/category')
+        }else{
+            res.status(404).json({error:"Category not found"})
+        }
+    } catch (error) {
+        console.error("Error in deleting category : ",error)
+    }
+}
+
+const archivedCategoryInfo = async(req,res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page-1)*limit;
+
+        const search = req.query.search || "";
+
+
+        const categoryData = await Category.find({
+            isDeleted : true,
+            name:{$regex:'.*'+search+'.*',$options:'i'}
+        })
+        .sort({createdAt:-1})
+        .skip(skip)
+        .limit(limit)
+
+        const totalCategories = await Category.countDocuments({
+            isDeleted : true,
+            name:{$regex:'.*'+search+'.*',$options:'i'}
+        })
+
+        const totalPages = Math.ceil(totalCategories/limit);
+        res.render('archivedCategories',{
+            category : categoryData,
+            currentPage : page,
+            totalPages : totalPages,
+            totalCategories : totalCategories,
+            searchQuery : search
+        })
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageError')
+    }
+}
+
+const deleteCategory = async(req,res) => {
+    try {
+        const id = req.query.id;
+        const deleteCategory = await Category.findByIdAndDelete(id)
+        if(deleteCategory){
+            res.redirect('/admin/archivedCategories')
+        }else{
+            res.status(404).json({error:"Category not found"})
+        }
+    } catch (error) {
+        console.error("Error in deleting category : ",error)
+    }
+}
+
+const restoreCategory = async(req,res) => {
+    try {
+        const id = req.query.id;
+        console.log("id : ",id)
+        await Category.findOneAndUpdate({_id:id},{$set:{isDeleted:false}})
+        res.redirect('/admin/archivedCategories')
+    } catch (error) {
+        console.error("Error in deleting category : ",error)
+    }
 }
 
 module.exports = {
@@ -121,5 +192,8 @@ module.exports = {
     unlistCategory,
     loadEditCategory,
     editCategory,
-    deleteCategory
+    archiveCategory,
+    archivedCategoryInfo,
+    deleteCategory,
+    restoreCategory
 }

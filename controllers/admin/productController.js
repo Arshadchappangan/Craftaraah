@@ -26,7 +26,7 @@ const productInfo = async (req, res) => {
             ]
         }).countDocuments();
 
-        const category = await Category.find({ isListed: true });
+        const category = await Category.find({ isListed: true,isDeleted:false });
 
         if (category) {
             res.render('products', {
@@ -47,7 +47,7 @@ const productInfo = async (req, res) => {
 
 const loadAddProducts = async (req, res) => {
     try {
-        const category = await Category.find({ isListed: true });
+        const category = await Category.find({ isListed: true,isDeleted:false});
         res.render("addProduct", { category: category });
     } catch (error) {
         res.redirect('/admin/pageError')
@@ -106,7 +106,7 @@ const loadEditProduct = async (req, res) => {
     try {
         const id = req.query.id;
         const product = await Product.findOne({ _id: id });
-        const category = await Category.find({});
+        const category = await Category.find({isDeleted:false,isListed:true});
         res.render('editProduct', {
             product: product,
             category: category
@@ -204,6 +204,44 @@ const deleteImage = async (req, res) => {
     }
 };
 
+const archivedProductInfo = async(req,res) => {
+    try {
+        const search = req.query.search || "";
+        const page = req.query.page || 1;
+        const limit = 5;
+
+        const productData = await Product.find({
+            isDeleted : true,
+            $or: [
+                {productName:{$regex:'.*'+search+'.*',$options:'i'}}
+            ]
+        }).limit(limit * 1).skip((page - 1) * limit).populate('category').exec();
+
+        const count = await Product.find({
+            isDeleted : true,
+            $or: [
+                {productName:{$regex:'.*'+search+'.*',$options:'i'}}
+            ]
+        }).countDocuments();
+
+        const category = await Category.find({ isListed: true });
+
+        if (category) {
+            res.render('archivedProducts', {
+                data: productData,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                category: category
+            })
+        } else {
+            res.redirect('/pageError')
+        }
+
+    } catch (error) {
+        res.redirect('/pageError')
+    }
+}
+
 
 
 module.exports = {
@@ -212,5 +250,6 @@ module.exports = {
     addProducts,
     loadEditProduct,
     editProduct,
-    deleteImage
+    deleteImage,
+    archivedProductInfo
 }
