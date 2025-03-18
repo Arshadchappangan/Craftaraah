@@ -10,12 +10,12 @@
                 <div class="col-lg-9">
                     <div class="hero__search">
                         <div class="hero__search__form">
-                            <form action="/search" method="post">
+                            <form action="/search" method="post" id="searchForm" onsubmit="searchSubmit(event)">
                                 <div class="hero__search__categories">
                                     All Categories
                                     <span class="arrow_carrot-down"></span>
                                 </div>
-                                <input type="text" placeholder="What do yo u need?" name="query">
+                                <input type="text" placeholder="What do yo u need?" name="query" id="searchInput">
                                 <button type="submit" class="site-btn">SEARCH</button>
                             </form>
                         </div>
@@ -136,10 +136,9 @@
                                     <h6><span><%=products.length%></span> Products found</h6>
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-md-3">
+                            <div class="col-lg-4 col-md-3 d-flex justify-content-end">
                                 <div class="filter__option">
-                                    <span class="icon_grid-2x2"></span>
-                                    <span class="icon_ul"></span>
+                                    <button class="site-btn" id="clear-btn">CLEAR</button>
                                 </div>
                             </div>
                         </div>
@@ -302,6 +301,27 @@
         container.innerHTML = "";
         products.forEach(product => container.appendChild(product));
     }
+
+    function searchSubmit(event) {
+        event.preventDefault();  
+        localStorage.setItem("showClearBtn", "true"); 
+        document.getElementById('searchForm').submit(); 
+    }
+
+    document.getElementById('clear-btn').addEventListener('click', function() {
+        document.getElementById('searchInput').value = '';
+        localStorage.removeItem("showClearBtn");
+        document.getElementById('searchForm').submit();
+    });
+
+
+    window.onload = function() {
+        if (localStorage.getItem("showClearBtn") === "true") {
+            document.getElementById('clear-btn').style.display = 'block';
+        } else {
+            document.getElementById('clear-btn').style.display = 'none';
+        }
+    };
 
     </script>
 
