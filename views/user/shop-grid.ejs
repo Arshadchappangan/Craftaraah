@@ -123,11 +123,11 @@
                                 <div class="filter__sort">
                                     <span>Sort By</span>
                                     <select id="sortOptions" onchange="sortProducts()">
-                                            <option value="0">Default</option>
-                                            <option value="/sort?by=price&type=1">Price : Low - High</option>
-                                            <option value="/sort?by=price&type=-1">Price : High - Low</option>
-                                            <option value="/sort?by=productName&type=1">Product Name : A - Z</option>
-                                            <option value="/sort?by=productName&type=-1">Product Name : Z - A</option>
+                                            <option value="default">Default</option>
+                                            <option value="price:1">Price : Low - High</option>
+                                            <option value="price:-1">Price : High - Low</option>
+                                            <option value="name:1">Product Name : A - Z</option>
+                                            <option value="name:-1">Product Name : Z - A</option>
                                     </select>
                                 </div>
                             </div>
@@ -144,10 +144,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row" id="productsContainer">
                         <%for(let i=0;i<products.length;i++){%>
                         
-                        <div class="col-lg-4 col-md-6 col-sm-6">
+                        <div class="col-lg-4 col-md-6 col-sm-6 product-item" data-createdAt="<%= products[i].createdAt %>" data-price="<%= products[i].salePrice %>" data-name="<%= products[i].productName %>">
                             <div class="product__item">
                                 <div class="product__item__pic set-bg" data-setbg="<%=products[i].productImage[0]%>">
                                     <ul class="product__item__pic__hover">
@@ -267,10 +267,42 @@
     <script src="user/js/main.js"></script>
 
     <script>
-        function sortProducts() {
+
+    function sortProducts() {
         const selectedValue = document.getElementById("sortOptions").value;
-        window.location.href = selectedValue; 
+        const container = document.getElementById("productsContainer");
+        const products = Array.from(container.getElementsByClassName("product-item"));
+
+        let sortBy, sortOrder;
+
+        if (selectedValue.includes("price")) {
+            sortBy = "price";
+        } else if (selectedValue.includes("name")) {
+            sortBy = "name";
+        } else{
+            products.sort((a, b) => {
+            return new Date(b.getAttribute("data-createdAt")) - new Date(a.getAttribute("data-createdAt"));
+            });
+
+            container.innerHTML = "";
+            products.forEach(product => container.appendChild(product));
+            return;
+        }
+
+        sortOrder = selectedValue.includes("-1") ? -1 : 1;
+
+
+        products.sort((a, b) => {
+            let valA = sortBy === "price" ? parseFloat(a.getAttribute("data-price")) : a.getAttribute("data-name").toLowerCase();
+            let valB = sortBy === "price" ? parseFloat(b.getAttribute("data-price")) : b.getAttribute("data-name").toLowerCase();
+
+            return sortBy === "price" ? (valA - valB) * sortOrder : valA.localeCompare(valB) * sortOrder;
+        });
+
+        container.innerHTML = "";
+        products.forEach(product => container.appendChild(product));
     }
+
     </script>
 
 
