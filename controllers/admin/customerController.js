@@ -3,22 +3,16 @@ const User = require('../../models/userSchema');
 
 const customerInfo = async(req,res) => {
     try {
-        let search = '';
-        if (req.query.search){          //check any search keywords
-            search = req.query.search;
-        }
-
-        let page = 1;
-        if(req.query.page){             //check any pagination triggers
-            page = Number(req.query.page);
-        }
-        
+        let search = req.query.search || '';
+        let page = req.query.page || 1
         const limit = 5;
+
         const userData = await User.find({              //searching suitable data for search from User collection
             isAdmin : false,
             $or:[
                 {name:{$regex:'.*'+search+'.*',$options:'i'}},
-                {email:{$regex:'.*'+search+'.*',$options:'i'}}
+                {email:{$regex:'.*'+search+'.*',$options:'i'}},
+                {phone:{$regex:'.*'+search+'.*',$options:'i'}}
             ]
         })
         .sort({createdAt:-1})
@@ -65,6 +59,7 @@ const unblockCustomer = async (req,res) => {
         res.redirect('/pageError')
     }
 }
+
 
 module.exports = {
     customerInfo,
