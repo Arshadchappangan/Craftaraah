@@ -189,10 +189,10 @@
         });
     }
 
-    function confirmDelete(userId){
+    function confirmDelete(categoryId){
           Swal.fire({
             title: "Are you sure?",
-            text: "This user will be deleted!",
+            text: "This category will be deleted!",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -200,12 +200,12 @@
             confirmButtonText: "Delete"
         }).then((result) => {
             if (result) {
-                window.location.href = `/admin/deleteCategory?id=${userId}`;
+                window.location.href = `/admin/deleteCategory?id=${categoryId}`;
             }
         });
         }
 
-    function confirmRestore(userId){
+    function confirmRestore(categoryId){
         Swal.fire({
             title: "Are you sure?",
             text: "This category will be restored!",
@@ -216,7 +216,7 @@
             confirmButtonText: "Restore"
         }).then((result) => {
             if (result) {
-                window.location.href = `/admin/restoreCategory?id=${userId}`;
+                window.location.href = `/admin/restoreCategory?id=${categoryId}`;
             }
         });
         }

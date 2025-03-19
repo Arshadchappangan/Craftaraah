@@ -45,6 +45,11 @@ const productSchema = new Schema({
         required : true,
         default : false
     },
+    isDeleted : {
+        type : Boolean,
+        required : true,
+        default : false
+    },
     status : {
         type : String,
         enum : ["Available","Out of stock","Discontinued"],

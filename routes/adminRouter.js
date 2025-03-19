@@ -44,6 +44,9 @@ router.post('/addProducts',adminAuth,multer.array('images',4),productController.
 router.get('/editProduct',adminAuth,productController.loadEditProduct)
 router.post('/editProduct/:id',adminAuth,multer.array('images',4),productController.editProduct);
 router.post('/deleteImage',adminAuth,productController.deleteImage)
-router.get('/archivedProducts',adminAuth,productController.archivedProductInfo)
+router.get('/archivedProducts',adminAuth,productController.archivedProductInfo);
+router.get('/archiveProduct',adminAuth,productController.archiveProduct);
+router.get('/restoreProduct',adminAuth,productController.restoreProduct);
+router.get('/deleteProduct',adminAuth,productController.deleteProduct);
 
 module.exports = router

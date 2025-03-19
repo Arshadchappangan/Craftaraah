@@ -289,12 +289,12 @@
     function confirmArchive(userId){
           Swal.fire({
             title: "Are you sure?",
-            text: "This user will be deleted!",
+            text: "This category will be archived!",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
             cancelButtonColor: "#3085d6",
-            confirmButtonText: "Delete"
+            confirmButtonText: "Archive"
         }).then((result) => {
             if (result) {
                 window.location.href = `/admin/archiveCategory?id=${userId}`;

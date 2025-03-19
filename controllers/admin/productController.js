@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 const category = require('../../models/categorySchema');
+const { error } = require('console');
 
 
 
@@ -15,12 +16,14 @@ const productInfo = async (req, res) => {
         const limit = 5;
 
         const productData = await Product.find({
+            isDeleted : false,
             $or: [
                 {productName:{$regex:'.*'+search+'.*',$options:'i'}}
             ]
         }).limit(limit * 1).skip((page - 1) * limit).populate('category').exec();
 
         const count = await Product.find({
+            isDeleted : false,
             $or: [
                 {productName:{$regex:'.*'+search+'.*',$options:'i'}}
             ]
@@ -242,6 +245,47 @@ const archivedProductInfo = async(req,res) => {
     }
 }
 
+const archiveProduct = async (req,res) => {
+    try {
+        const id = req.query.id;
+        const archiveCategory = await Product.findOneAndUpdate({_id:id},{$set:{isDeleted:true}})
+        if(archiveCategory){
+            res.redirect('/admin/archivedCategories')
+        }else{
+            res.status(404).json({error:"Product not found"})
+        }
+    } catch (error) {
+        console.error("Error in archeiving product: ",error)
+    }
+}
+
+const restoreProduct = async(req,res) => {
+    try {
+        const id = req.query.id;
+        const restoreProduct = await Product.findOneAndUpdate({_id:id},{$set:{isDeleted:false}})
+        if(restoreProduct){
+            res.redirect('/admin/archivedProducts')
+        }else{
+            res.status(404).json({error:"Product not found"})
+        }
+    } catch (error) {
+        console.error("Error in restoring product : ",error)
+    }
+}
+
+const deleteProduct = async (req,res) => {
+    try {
+        const id = req.query.id;
+        const deleteProduct = await Product.findByIdAndDelete(id)
+        if(deleteProduct){
+            res.redirect('/admin/archivedProducts')
+        }else{
+            res.status(404).json({error:"Product not found"})
+        }
+    } catch (error) {
+        console.error("Error in deleting product : ",error)
+    }
+}
 
 
 module.exports = {
@@ -251,5 +295,8 @@ module.exports = {
     loadEditProduct,
     editProduct,
     deleteImage,
-    archivedProductInfo
+    archivedProductInfo,
+    archiveProduct,
+    restoreProduct,
+    deleteProduct
 }

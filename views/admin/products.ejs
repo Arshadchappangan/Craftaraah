@@ -85,8 +85,7 @@
                                                 <a href="/admin/editProduct?id=<%=data[i]._id%>">
                                                   <i class="fas fa-pencil-alt mx-2 text-dark"></i>
                                                 </a>
-                                                  <i class="fas fa-trash-alt mx-2"></i>
-                                                
+                                                  <i class="fas fa-archive mx-2" onclick="confirmArchive('<%=data[i]._id%>')"></i>
                                               </td>
                             
                                         </tr>
@@ -191,6 +190,22 @@ function searchSubmit(event) {
         }
     }
   )
+
+  function confirmArchive(productId){
+          Swal.fire({
+            title: "Are you sure?",
+            text: "This product will be archived!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Archive"
+        }).then((result) => {
+            if (result) {
+                window.location.href = `/admin/archiveProduct?id=${productId}`;
+            }
+        });
+        }
         
     </script>
   </body>
