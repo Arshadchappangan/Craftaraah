@@ -61,7 +61,6 @@
                                         <tr>
                                             <th scope="col" class="text-start">Name</th>
                                             <th scope="col" class="text-start">Description</th>
-                                            <th scope="col" class="text-end">Status</th>
                                             <th scope="col" class="text-end">Actions</th>
                                         </tr>
                                     </thead>
@@ -71,15 +70,6 @@
                                         <tr>
                                             <td class="text-start"><%=cat.name%></td>
                                             <td class="text-start"><%=cat.description%></td>
-                                            <td class="text-end">
-                                              <%if(cat.isListed){%>
-                                                <button class="badge badge-success">Listed</button>
-                                                <i class="fas fa-sync ms-2 text-dark" onclick="confirmUnlist('<%=cat._id%>')"></i>
-                                                <%}else{%>
-                                                  <button class="badge badge-danger">Unlisted</button>
-                                                    <i class="fas fa-sync ms-2 text-dark" onclick="confirmList('<%=cat._id%>')"></i>
-                                                  <%}%>
-                                            </td>
                                             <td class="text-end">
                                                 <i class="fas fa-undo mx-2 text-dark" onclick="confirmRestore('<%=cat._id%>')"></i>
                                                 <i class="fas fa-trash-alt mx-2" onclick="confirmDelete('<%=cat._id%>')"></i>
@@ -157,38 +147,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         
-        function confirmUnlist(userId){
-          Swal.fire({
-            title: "Are you sure?",
-            text: "This user will be unlisted!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Unlist"
-        }).then((result) => {
-            if (result) {
-                window.location.href = `/admin/unlistCategory?id=${userId}`;
-            }
-        });
-        }
-
-        function confirmList(userId) {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "This user will be Listed!",
-            icon: "info",
-            showCancelButton: true,
-            confirmButtonColor: "#28a745",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "List"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = `/admin/listCategory?id=${userId}`;
-            }
-        });
-    }
-
     function confirmDelete(categoryId){
           Swal.fire({
             title: "Are you sure?",
@@ -199,7 +157,7 @@
             cancelButtonColor: "#3085d6",
             confirmButtonText: "Delete"
         }).then((result) => {
-            if (result) {
+            if (result.isConfirmed) {
                 window.location.href = `/admin/deleteCategory?id=${categoryId}`;
             }
         });
@@ -215,7 +173,7 @@
             cancelButtonColor: "#3085d6",
             confirmButtonText: "Restore"
         }).then((result) => {
-            if (result) {
+            if (result.isConfirmed) {
                 window.location.href = `/admin/restoreCategory?id=${categoryId}`;
             }
         });

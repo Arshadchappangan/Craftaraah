@@ -59,10 +59,9 @@
             <div class="row">
                 <div class="col-lg-6 col-md-6">
                     <div class="product__details__pic">
-                        <div class="product__details__pic__item">
+                        <div class="product__details__pic__item zoom-container">
                             <img class="product__details__pic__item--large"
                                 src="<%=product.productImage[0]%>" alt="Product image" id="mainImage">
-                            <div class="zoom-lens"></div>
                         </div>
                         <div class="product__details__pic__slider owl-carousel">
                             <%for(let i=0;i<product.productImage.length;i++){%>
@@ -141,8 +140,13 @@
                             </div>
                             <div class="tab-pane" id="tabs-2" role="tabpanel">
                                 <div class="product__details__tab__desc">
-                                    <h6>Products Infomation</h6>
-                                    <p><%=product.description%></p>
+                                    <h6>Product Specifications : </h6>
+                                    <ul>
+                                        <%for(let i=0;i<product.specifications.length;i++){%>
+                                            <li class="my-2"><%=product.specifications[i]%></li>
+                                            <%}%>
+                                    </ul>
+                                    <p></p>
                                 </div>
                             </div>
                             <div class="tab-pane" id="tabs-3" role="tabpanel">
@@ -271,6 +275,19 @@
         });
 
 
+        const img = document.getElementById("mainImage");
+
+        img.addEventListener("mousemove", (e) => {
+            const { left, top, width, height } = img.getBoundingClientRect();
+            const x = ((e.clientX - left) / width) * 100;
+            const y = ((e.clientY - top) / height) * 100;
+            img.style.transformOrigin = `${x}% ${y}%`;
+            img.style.transform = "scale(1.5)";
+        });
+
+        img.addEventListener("mouseleave", () => {
+            img.style.transform = "scale(1)";
+        });
 
     </script>
 

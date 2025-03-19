@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const category = require('./categorySchema');
+const { array } = require('../middlewares/multer');
 const {Schema} = mongoose;
 
 const productSchema = new Schema({
@@ -9,6 +10,10 @@ const productSchema = new Schema({
     },
     description : {
         type : String,
+        required : true
+    },
+    specifications : {
+        type : Array,
         required : true
     },
     brand : {

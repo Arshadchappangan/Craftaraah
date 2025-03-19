@@ -121,6 +121,7 @@ const archiveCategory = async (req,res) =>{
         }
     } catch (error) {
         console.error("Error in deleting category : ",error)
+        res.redirect('/pageError')
     }
 }
 
@@ -171,17 +172,23 @@ const deleteCategory = async(req,res) => {
         }
     } catch (error) {
         console.error("Error in deleting category : ",error)
+        res.redirect('/pageError')
     }
 }
 
 const restoreCategory = async(req,res) => {
     try {
         const id = req.query.id;
-        console.log("id : ",id)
-        await Category.findOneAndUpdate({_id:id},{$set:{isDeleted:false}})
-        res.redirect('/admin/archivedCategories')
+        const restoreCategory = await Category.findOneAndUpdate({_id:id},{$set:{isDeleted:false}});
+        if(restoreCategory){
+            res.redirect('/admin/archivedCategories')
+        }else{
+            res.status(404).json({error:"Category not found"});
+        }
+        
     } catch (error) {
         console.error("Error in deleting category : ",error)
+        res.redirect('/pageError')
     }
 }
 

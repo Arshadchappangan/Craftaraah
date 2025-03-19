@@ -201,7 +201,7 @@ function searchSubmit(event) {
             cancelButtonColor: "#3085d6",
             confirmButtonText: "Archive"
         }).then((result) => {
-            if (result) {
+            if (result.isConfirmed) {
                 window.location.href = `/admin/archiveProduct?id=${productId}`;
             }
         });

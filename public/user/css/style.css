@@ -1679,6 +1679,18 @@ ol {
     border: 1px solid #ddd;
 }
 
+.product__details__pic .zoom-container{
+	overflow: hidden;
+    width: 500px; /* Adjust size */
+    height: 500px;
+    position: relative;
+}
+
+.product__details__pic .zoom-container img{
+	width: 100%;
+    transition: transform 0.2s ease-out;
+}
+
 .product__details__pic__item img {
 	min-width: 100%;
 	width: 100%;

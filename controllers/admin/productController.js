@@ -81,11 +81,14 @@ const addProducts = async (req, res) => {
                 }
             }
 
+            let specsArray = products.specification.split(',')
+
             let categoryId = await Category.findOne({ name: products.category })
 
             const newProduct = new Product({
                 productName: products.productName,
                 description: products.description,
+                specifications:specsArray,
                 category: categoryId,
                 regularPrice: products.regularPrice,
                 salePrice: products.salePrice,
@@ -256,6 +259,7 @@ const archiveProduct = async (req,res) => {
         }
     } catch (error) {
         console.error("Error in archeiving product: ",error)
+        res.redirect('/pageError')
     }
 }
 
@@ -270,6 +274,7 @@ const restoreProduct = async(req,res) => {
         }
     } catch (error) {
         console.error("Error in restoring product : ",error)
+        res.redirect('/pageError')
     }
 }
 
@@ -284,6 +289,7 @@ const deleteProduct = async (req,res) => {
         }
     } catch (error) {
         console.error("Error in deleting product : ",error)
+        res.redirect('/pageError')
     }
 }
 

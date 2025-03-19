@@ -79,6 +79,14 @@
                                 </div>
                             </div>
                             <div class="row">
+                                <div class="mb-4">
+                                    <label class="form-label">Specifications</label>
+                                    <textarea placeholder="Type product specifications seperated by comma..." id="specification" name="specification"
+                                        class="form-control border" rows="4"></textarea>
+                                    <div id="specification-error" class="error-message"></div>
+                                </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-lg-6 mb-4">
                                     <label for="product_name" class="form-label">Regular Price</label>
                                     <input type="text" placeholder="₹" name="regularPrice" class="form-control border"
@@ -266,6 +274,7 @@
             clearErrorMessages();
             const name = document.getElementById('product-name').value.trim();
             const description = document.getElementById('description').value.trim();
+            const specification = document.getElementById('specification').value.trim();
             const regularPrice = document.getElementById('regular-price').value;
             const salePrice = document.getElementById('sale-price').value;
             const quantity = document.getElementById('quantity').value;
@@ -282,6 +291,11 @@
 
             if (description === "") {
                 displayErrorMessage('description-error', 'Please enter the description for product.');
+                isValid = false;
+            }
+
+            if (specification === "") {
+                displayErrorMessage('specification-error', 'Please enter the specifications for product.');
                 isValid = false;
             }
 

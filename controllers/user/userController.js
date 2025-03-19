@@ -10,12 +10,21 @@ const category = require('../../models/categorySchema');
 
 const loadHome = async (req, res) => {
     try {
+        const category = await Category.find({isDeleted:false});
+        const product = await Product.find({isDeleted:false}).sort({createdAt:-1});
         const user = req.session.user;
         if (user) {
             const userData = await User.findOne({ _id: user })
-            res.render("home", { user: userData });
+            res.render("home", { 
+                user: userData,
+                category : category,
+                product : product
+             });
         } else {
-            return res.render('home');
+            return res.render('home',{
+                category : category,
+                product : product
+            });
         }
 
     } catch (error) {

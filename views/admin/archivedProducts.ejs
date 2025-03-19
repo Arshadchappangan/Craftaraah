@@ -194,7 +194,7 @@ function searchSubmit(event) {
             cancelButtonColor: "#3085d6",
             confirmButtonText: "Delete"
         }).then((result) => {
-            if (result) {
+            if (result.isConfirmed) {
                 window.location.href = `/admin/deleteProduct?id=${productId}`;
             }
         });
@@ -210,12 +210,11 @@ function searchSubmit(event) {
             cancelButtonColor: "#3085d6",
             confirmButtonText: "Restore"
         }).then((result) => {
-            if (result) {
+            if (result.isConfirmed) {
                 window.location.href = `/admin/restoreProduct?id=${productId}`;
             }
         });
         }
-        
     </script>
   </body>
 </html>
