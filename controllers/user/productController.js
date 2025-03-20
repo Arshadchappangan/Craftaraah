@@ -10,11 +10,16 @@ const loadProductDetails = async(req,res) => {
         const userData = await User.findById(userId);
         const productId = req.query.id;
         const product = await Product.findById(productId).populate('category');
-        const findCategory = Product.category;
+        const findCategory = product.category;
+        const related = await Product.find({
+            category : findCategory,
+            _id : {$ne:productId}
+        }).limit(4)
         res.render('shop-details',{
             user : userData,
             product : product,
-            category : findCategory
+            category : findCategory,
+            related : related
         })
 
         
