@@ -16,10 +16,6 @@ const productSchema = new Schema({
         type : Array,
         required : true
     },
-    brand : {
-        type : String,
-        required : false,
-    },
     category : {
         type : Schema.Types.ObjectId,
         ref : "Category",
@@ -44,6 +40,9 @@ const productSchema = new Schema({
     productImage : {
         type : [{type : String}],
         required : true
+    },
+    productRating : {
+        type : Number,
     },
     isBlocked : {
         type : Boolean,

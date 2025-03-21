@@ -16,11 +16,17 @@ const loadProductDetails = async(req,res) => {
             category : findCategory,
             _id : {$ne:productId}
         }).limit(4)
+
+        const review = await Review.find({productId:productId}).populate('userId').sort({createdAt:-1});
+        const overallRating = review.length > 0 ? Math.ceil(product.productRating / review.length) : 0
+
         res.render('shop-details',{
             user : userData,
             product : product,
             category : findCategory,
-            related : related
+            related : related,
+            review : review,
+            overallRating : overallRating
         })
 
         
@@ -45,6 +51,7 @@ const reviewSubmission = async (req,res) => {
         })
 
         await saveReview.save();
+        await Product.findByIdAndUpdate(productId,{$inc:{productRating:rating}})
         res.redirect('/shop')
 
     } catch (error) {

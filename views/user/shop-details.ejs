@@ -76,12 +76,14 @@
                         <h3><%=product.productName%></h3>
                         <h5 class="my-2"><%=product.category.name%></h5>
                         <div class="product__details__rating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star-half-o"></i>
-                            <span>(18 reviews)</span>
+                            <%for(let i=1;i<= 5;i++){%>
+                                <%if(i <= overallRating){%>
+                                <i class="fa fa-star"></i>
+                                <%}else{%>
+                                <i class="fa fa-star-o"></i>
+                            <%}%>
+                            <%}%>
+                            <span>(<%=review.length%> reviews)</span>
                         </div>
                         <div class="product__details__price" style="display: inline-block;">₹<%=product.salePrice%></div>
                         <span><strike>₹<%=product.regularPrice%></strike></span>
@@ -152,33 +154,40 @@
                             <div class="tab-pane" id="tabs-3" role="tabpanel">
                                 <div class="product__details__tab__desc">
                                     <div class="container">
-
+                                        <%for (let i=0;i<review.length;i++){%>
                                         <div v-for="item in list" class="review">
     
                                             <div class="review-photo">
-                                              <img v-bind:src="item.photo">
+                                              <img src="/user/img/profile_img.png">
                                             </div>
                                             
                                             <div class="review-box">
                                               
                                               <div class="review-author">
-                                                <p><strong>Hélio Marcondes</strong> - <i class="fa fa-star" aria-hidden="true"></i>
+                                                <p><strong><%=review[i].userId.name%></strong> - 
+                                                    <%for (let j=1;j<=5;j++){%>
+                                                        <%if(j <= review[i].rating){%>
+                                                            <i style="color:#FFD700;" class="fa fa-star" aria-hidden="true"></i>
+                                                            <%}else{%>
+                                                    <i class="fa fa-star-o" aria-hidden="true"></i>
+                                                    <%}%>
+                                                <!-- <i class="fa fa-star" aria-hidden="true"></i>
                                                 <i class="fa fa-star" aria-hidden="true"></i>
-                                                <i class="fa fa-star" aria-hidden="true"></i>
-                                                <i class="fa fa-star" aria-hidden="true"></i>
-                                                <i class="fa fa-star" aria-hidden="true"></i></p>
+                                                <i class="fa fa-star" aria-hidden="true"></i></p> -->
+                                                <%}%>
                                               </div>
                                               <div class="review-comment">
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur consequat magna ut dui egestas, in varius diam ultricies. Phasellus suscipit magna id arcu auctor, nec vulputate dolor elementum.</p>
+                                                <p><%=review[i].review%></p>
                                               </div>
                                               
                                               <div class="review-date">
-                                                <time>July, 27th, 2016</time>
+                                                <time><%=review[i].createdAt.toLocaleString('default', { month: 'short' })%> - <%=review[i].createdAt.getDate()%>, <%=review[i].createdAt.getFullYear()%></time>
                                               </div>
                                               
                                             </div>
                                               
                                             </div>
+                                            <%}%>
 
                                     <div id="review-header">Write your review</div>
                                     <form action="/review" method="post">

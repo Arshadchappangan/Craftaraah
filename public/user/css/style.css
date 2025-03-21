@@ -1898,12 +1898,12 @@ ol {
 
 #review-header{
 	width:100%;
-	font-size:2em;
+	font-size:1.5em;
 	text-align:center;
-	background:#34495e;
+	background:#7fad39;
 	color:#fff;
-	padding:0.5em;
-	margin-bottom: 30px;
+	padding:5px;
+	margin: 20px 0px;
 }
 
 .review-label{
