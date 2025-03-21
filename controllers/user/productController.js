@@ -1,6 +1,7 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const User = require('../../models/userSchema');  
+const Review = require('../../models/reviewSchema')
 
 
 const loadProductDetails = async(req,res) => {
@@ -29,7 +30,31 @@ const loadProductDetails = async(req,res) => {
         }
 }
 
+const reviewSubmission = async (req,res) => {
+    try {
+        const userId = req.session.user;
+        const productId = req.body.productId;
+        const review = req.body.review;
+        const rating = req.body.rating;
+
+        const saveReview = new Review({
+            userId : userId,
+            productId : productId,
+            review : review,
+            rating : rating
+        })
+
+        await saveReview.save();
+        res.redirect('/shop')
+
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound')
+    }
+}
+
 
 module.exports = {
-    loadProductDetails
+    loadProductDetails,
+    reviewSubmission
 }

@@ -40,6 +40,7 @@ router.get('/sort',userAuth,userController.sortProducts)
 //product details
 
 router.get('/productDetails',userAuth,productController.loadProductDetails)
+router.post('/review',userAuth,productController.reviewSubmission)
 
 
 

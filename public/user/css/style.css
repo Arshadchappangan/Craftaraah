@@ -1896,6 +1896,97 @@ ol {
 	color: #666666;
 }
 
+#review-header{
+	width:100%;
+	font-size:2em;
+	text-align:center;
+	background:#34495e;
+	color:#fff;
+	padding:0.5em;
+	margin-bottom: 30px;
+}
+
+.review-label{
+	width:15%;
+	margin:10px 1% 0 0;
+	display:inline-block;
+	float:left;
+  }
+
+#review-input{
+	width:84%;
+	border:none;
+	background:#F6F6F6;
+	margin:10px 0;
+	height:100px;
+	padding:1em;
+}
+
+.review{
+	width:100%;
+	display:inline-block;
+	margin:10px 0;
+  }
+  .review-photo{
+	height:80px;
+	width:80px;
+	display:inline-block;
+	float:left;
+	margin-right:3em;
+  }
+  .review-box{
+	float:left;
+	display:inline-block;
+	width:87.5%;
+	background:#F6F6F6;
+	padding:1.5em;
+	position: relative;
+  }
+  .review-box:after, .review-box:before {
+	  right: 100%;
+	  top: 10%;
+	  border: solid transparent;
+	  content: " ";
+	  height: 0;
+	  width: 0;
+	  position: absolute;
+	  pointer-events: none;
+  }
+  .review-box:after {
+	  border-right-color: #F6F6F6;
+	  border-width: 25px;
+  }
+  .review-comment{
+	color:#9A9999;
+  }
+  .review-date{
+	color:#C7C7C7;
+  }
+  .review-author{
+	color:#C7C7C7;
+  }
+  .review-author strong{
+	color:black;
+  }
+
+
+  .star-rating {
+	direction: rtl; 
+	font-size: 2rem;
+	unicode-bidi: bidi-override;
+  }
+  
+  .star {
+	cursor: pointer;
+	color: lightgray;
+  }
+  
+  .star.selected,
+  .star:hover,
+  .star:hover ~ .star {
+	color: gold;
+  }
+
 /*---------------------
   Shop Details
 -----------------------*/

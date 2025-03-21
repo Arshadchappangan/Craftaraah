@@ -151,7 +151,54 @@
                             </div>
                             <div class="tab-pane" id="tabs-3" role="tabpanel">
                                 <div class="product__details__tab__desc">
-                                    <p>Reviews</p>
+                                    <div class="container">
+
+                                        <div v-for="item in list" class="review">
+    
+                                            <div class="review-photo">
+                                              <img v-bind:src="item.photo">
+                                            </div>
+                                            
+                                            <div class="review-box">
+                                              
+                                              <div class="review-author">
+                                                <p><strong>Hélio Marcondes</strong> - <i class="fa fa-star" aria-hidden="true"></i>
+                                                <i class="fa fa-star" aria-hidden="true"></i>
+                                                <i class="fa fa-star" aria-hidden="true"></i>
+                                                <i class="fa fa-star" aria-hidden="true"></i>
+                                                <i class="fa fa-star" aria-hidden="true"></i></p>
+                                              </div>
+                                              <div class="review-comment">
+                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur consequat magna ut dui egestas, in varius diam ultricies. Phasellus suscipit magna id arcu auctor, nec vulputate dolor elementum.</p>
+                                              </div>
+                                              
+                                              <div class="review-date">
+                                                <time>July, 27th, 2016</time>
+                                              </div>
+                                              
+                                            </div>
+                                              
+                                            </div>
+
+                                    <div id="review-header">Write your review</div>
+                                    <form action="/review" method="post">
+                                        <label class="review-label">Rate this product:</label>
+                                        <div class="star-rating">
+                                            <span class="star" data-value="5">&#9733;</span>
+                                            <span class="star" data-value="4">&#9733;</span>
+                                            <span class="star" data-value="3">&#9733;</span>
+                                            <span class="star" data-value="2">&#9733;</span>
+                                            <span class="star" data-value="1">&#9733;</span>
+                                          </div>
+                                          <input type="hidden" name="productId" value="<%=product._id%>">
+                                          <input type="hidden" id="rating-value" name="rating" />
+<br>
+                                        <label class="review-label">Insert your Review:</label>
+                                        <textarea id="review-input" name="review" v-model="content"></textarea>
+                                        <button type="submit" style="float: right;" class="btn btn-success">Submit</button>
+                                    </form>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -244,6 +291,25 @@
         img.addEventListener("mouseleave", () => {
             img.style.transform = "scale(1)";
         });
+
+
+        const stars = document.querySelectorAll('.star');
+        const ratingInput = document.getElementById('rating-value');
+
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+            const value = star.getAttribute('data-value');
+            ratingInput.value = value;
+
+            stars.forEach(s => {
+            s.classList.remove('selected');
+            if (s.getAttribute('data-value') <= value) {
+            s.classList.add('selected');
+        }
+        });
+    });
+    });
+
 
     </script>
 
