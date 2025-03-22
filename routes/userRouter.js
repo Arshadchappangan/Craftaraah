@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user/userController');
 const productController = require('../controllers/user/productController');
+const profileController = require('../controllers/user/profileController')
 const passport = require('passport');
 const {userAuth,adminAuth} = require('../middlewares/auth')
 
@@ -11,7 +12,8 @@ router.get('/',userController.loadHome);
 router.get('/login',userController.loadLogin)
 router.get('/logout',userController.logout)
 
-//signupn management
+//signin & signupn management
+router.post('/signin',userController.signin)
 router.post('/signup',userController.signup)
 router.post('/verifyOtp',userController.verifyOtp)
 router.post('/resendOtp',userController.resendOtp)
@@ -20,14 +22,6 @@ router.get('/auth/google/callback',passport.authenticate('google',{failureRedire
     res.redirect('/')
 });
 
-//signin management
-router.post('/signin',userController.signin)
-router.get('/forgotPassword',userController.loadForgotPassword)
-router.post('/forgotEmailVerify',userController.forgotEmailVerify)
-router.post('/verifyForgotOtp',userController.verifyForgotOtp)
-router.get('/resetPassword',userController.loadResetPassword)
-router.post('/resendForgotOtp',userController.resendForgotOtp)
-router.post('/resetPassword',userController.resetPassword)
 
 // Shopping page
 
@@ -43,9 +37,15 @@ router.get('/productDetails',userAuth,productController.loadProductDetails)
 router.post('/review',userAuth,productController.reviewSubmission)
 
 
+//profile management
 
-
-
+router.get('/forgotPassword',profileController.loadForgotPassword);
+router.post('/forgotEmailVerify',profileController.forgotEmailVerify);
+router.post('/verifyForgotOtp',profileController.verifyForgotOtp);
+router.get('/resetPassword',profileController.loadResetPassword);
+router.post('/resendForgotOtp',profileController.resendForgotOtp);
+router.post('/resetPassword',profileController.resetPassword);
+router.get('/userProfile',userAuth,profileController.userProfile)
 
 
 

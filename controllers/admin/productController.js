@@ -253,7 +253,7 @@ const archiveProduct = async (req,res) => {
         const id = req.query.id;
         const archiveCategory = await Product.findOneAndUpdate({_id:id},{$set:{isDeleted:true}})
         if(archiveCategory){
-            res.redirect('/admin/archivedCategories')
+            res.redirect('/admin/products')
         }else{
             res.status(404).json({error:"Product not found"})
         }

@@ -1,0 +1,33 @@
+
+      .hero__categories__all{
+        background-color: #fff;
+    }
+
+    .hero__categories__all:hover{
+        background-color: #7fad39;
+    }
+
+    .hero__categories__all span{
+        color: #7fad39;
+    }
+
+    .hero__categories__all:hover span{
+        color: #fff;
+    }
+
+    .main {
+        margin-top: 2%;
+        font-size: 16px;
+        padding: 0 10px;
+        width: 100%;
+    }
+    
+    
+    .main .card {
+        background-color: #fff;
+        border-radius: 18px;
+        box-shadow: 1px 1px 8px 0 lightgray;
+        height: auto;
+        margin-bottom: 20px;
+        padding: 20px 0 20px 50px;
+    }

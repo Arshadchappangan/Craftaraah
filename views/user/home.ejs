@@ -153,7 +153,7 @@
                         <div class="latest-product__slider owl-carousel">
                             <div class="latest-prdouct__slider__item">
                                 <%for(let i=0;i<3;i++){%>
-                                <a href="#" class="latest-product__item">
+                                <a href="/productDetails?id=<%=product[i]._id%>" class="latest-product__item">
                                     <div class="latest-product__item__pic">
                                         <img src="<%=product[i].productImage[0]%>" alt="">
                                     </div>
@@ -166,7 +166,7 @@
                             </div>
                             <div class="latest-prdouct__slider__item">
                                 <%for(let i=3;i<6;i++){%>
-                                    <a href="#" class="latest-product__item">
+                                    <a href="/productDetails?id=<%=product[i]._id%>" class="latest-product__item">
                                         <div class="latest-product__item__pic">
                                             <img src="<%=product[i].productImage[0]%>" alt="">
                                         </div>
