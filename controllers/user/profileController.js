@@ -47,6 +47,15 @@ const verificationMail = async (email, otp) => {
     }
 }
 
+const securePassword = async (password) => {
+    try {
+        const passwordHashed = await bcrypt.hash(password, 10);
+        return passwordHashed;
+    } catch (error) {
+
+    }
+}
+
 
 const loadForgotPassword = async (req, res) => {
     try {
@@ -131,14 +140,16 @@ const resendForgotOtp = async (req, res) => {
 const resetPassword = async (req, res) => {
     try {
         const { password } = req.body;
-        const email = req.session.email;
+        const userId = req.session.user._id;
         const passwordHashed = await securePassword(password);
-        await User.updateOne({ email: email }, { $set: { password: passwordHashed } })
+        await User.findByIdAndUpdate(userId, { $set: { password: passwordHashed } })
         res.redirect('/login')
     } catch (error) {
+        console.error(error)
         res.redirect('/pageNotFound')
     }
 }
+
 
 
 const userProfile = async (req, res) => {
@@ -213,9 +224,19 @@ const updateEmail = async (req,res) => {
         const newEmail = req.body.email;
         const userId = req.session.user._id;
         await User.findByIdAndUpdate(userId,{email:newEmail});
+        req.session.email = newEmail
         res.redirect('/userProfile')
+
     } catch (error) {
         console.error(error)
+        res.redirect('/pageNotFound')
+    }
+}
+
+const changePassword = async (req,res) => {
+    try {
+        res.render('resetPassword')
+    } catch (error) {
         res.redirect('/pageNotFound')
     }
 }
@@ -231,5 +252,6 @@ module.exports = {
     changeEmail,
     verifyEmailOtp,
     loadNewEmailEnter,
-    updateEmail
+    updateEmail,
+    changePassword
 }

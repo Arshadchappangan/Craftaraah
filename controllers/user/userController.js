@@ -106,6 +106,7 @@ const signup = async (req, res) => {
             return res.json('Email error')
         }
 
+        req.session.email = email;
         req.session.userOTP = otp;
         req.session.userData = { name, email, phone, password }
 

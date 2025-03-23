@@ -50,6 +50,7 @@ router.get('/changeEmail',userAuth,profileController.changeEmail);
 router.post('/verifyEmailOtp',userAuth,profileController.verifyEmailOtp);
 router.get('/newEmailEnter',userAuth,profileController.loadNewEmailEnter);
 router.post('/updateEmail',userAuth,profileController.updateEmail);
+router.get('/changePassword',userAuth,profileController.changePassword);
 
 
 
