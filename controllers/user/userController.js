@@ -90,8 +90,7 @@ const verificationMail = async (email, otp) => {
     }
 }
 
-const 
-signup = async (req, res) => {
+const signup = async (req, res) => {
     try {
         const { name, email, phone, password } = req.body;
         const existingUser = await User.findOne({ email })

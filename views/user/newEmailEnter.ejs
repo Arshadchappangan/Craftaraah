@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Slide Navbar</title>
+    <link rel="stylesheet" type="text/css" href="/user/css/login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="main">
+        <div class="signup">
+            <form action="/updateEmail" method="post" id="verifyEmail">
+                <label for="chk" aria-hidden="true">Change Email</label>
+                <input type="email" name="email" placeholder="Enter New Email" id="email">
+                <div id="emailError" class="error"></div>
+                <button>Verify</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+
+        const emailValidate = (event) => {
+            const email = document.getElementById('email');
+            const emailValue = email.value;
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+            if (!emailPattern.test(emailValue)) {
+                emailError.style.display = 'block';
+                emailError.innerHTML = 'Please Enter a Valid Email'
+            } else {
+                emailError.style.display = 'none';
+                emailError.innerHTML = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+			document.getElementById('verifyEmail').addEventListener('submit', (event) => {
+				emailValidate();
+
+				if (emailError.innerHTML) {
+					event.preventDefault();
+				}
+			})
+		})
+    </script>
+</body>
+
+</html>

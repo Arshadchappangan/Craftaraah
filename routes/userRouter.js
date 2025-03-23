@@ -45,8 +45,11 @@ router.post('/verifyForgotOtp',profileController.verifyForgotOtp);
 router.get('/resetPassword',profileController.loadResetPassword);
 router.post('/resendForgotOtp',profileController.resendForgotOtp);
 router.post('/resetPassword',profileController.resetPassword);
-router.get('/userProfile',userAuth,profileController.userProfile)
-
+router.get('/userProfile',userAuth,profileController.userProfile);
+router.get('/changeEmail',userAuth,profileController.changeEmail);
+router.post('/verifyEmailOtp',userAuth,profileController.verifyEmailOtp);
+router.get('/newEmailEnter',userAuth,profileController.loadNewEmailEnter);
+router.post('/updateEmail',userAuth,profileController.updateEmail);
 
 
 

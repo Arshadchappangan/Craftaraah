@@ -7,6 +7,45 @@ const session = require('express-session')
 const bcrypt = require('bcrypt');
 const { name } = require('ejs');
 const category = require('../../models/categorySchema');
+const { reviewSubmission } = require('./productController');
+
+
+const generateOtp = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+const verificationMail = async (email, otp) => {
+    try {
+        const transporter = nodeMailer.createTransport({
+            service: 'gmail',
+            port: 587,
+            secure: false,
+            requireTLS: true,
+            auth: {
+                user: process.env.NODEMAILER_EMAIL,
+                pass: process.env.NODEMAILER_PASSWORD
+            }
+        })
+
+        const info = await transporter.sendMail({
+            from: process.env.NODEMAILER_EMAIL,
+            to: email,
+            subject: "Verify your account",
+            text: `Your OTP is ${otp}`,
+            html: `<h3>Your one-time password (OTP) for account verification is :</h3>
+            <h1> OTP : ${otp}</h1>
+            <h3>This OTP is valid for 1 minute and should not be shared with anyone for security reasons. <br>If you did not request this OTP, please ignore this email or contact our support team immediately.</h3>
+            <h3>Best regards,</h3>
+            <h3>craftaraah</h3>`
+        })
+
+        return info.accepted.length > 0;
+
+    } catch (error) {
+        console.error("Error in sending Email");
+        return false
+    }
+}
 
 
 const loadForgotPassword = async (req, res) => {
@@ -42,20 +81,20 @@ const forgotEmailVerify = async (req, res) => {
 }
 
 
-const verifyForgotOtp = async (req,res) => {
+const verifyForgotOtp = async (req, res) => {
     try {
         const otp = req.body.otp;
-        if(otp === req.session.userOTP){
-            res.json({success:true,redirectUrl:'/resetPassword'})
-        }else{
-            res.json({success:false,message:'OTP not matching'})
+        if (otp === req.session.userOTP) {
+            res.json({ success: true, redirectUrl: '/resetPassword' })
+        } else {
+            res.json({ success: false, message: 'OTP not matching' })
         }
     } catch (error) {
-        res.status(500).json({success:false,message:'An error occured, please try again'})
+        res.status(500).json({ success: false, message: 'An error occured, please try again' })
     }
 }
 
-const loadResetPassword = async(req,res) => {
+const loadResetPassword = async (req, res) => {
     try {
         res.render('resetPassword')
     } catch (error) {
@@ -64,7 +103,7 @@ const loadResetPassword = async(req,res) => {
 }
 
 
-const resendForgotOtp = async(req,res) => {
+const resendForgotOtp = async (req, res) => {
     try {
 
         const email = req.session.email;
@@ -75,7 +114,7 @@ const resendForgotOtp = async(req,res) => {
         const otp = generateOtp();
         req.session.userOTP = otp;
         const emailSent = await verificationMail(email, otp);
-        console.log('mail sent to : ',email)
+        console.log('mail sent to : ', email)
         if (emailSent) {
             console.log("Resend OTP : ", otp);
             res.status(200).json({ success: true, message: "OTP Resent successfully" })
@@ -89,12 +128,12 @@ const resendForgotOtp = async(req,res) => {
     }
 }
 
-const resetPassword = async (req,res) => {
+const resetPassword = async (req, res) => {
     try {
-        const {password} = req.body;
+        const { password } = req.body;
         const email = req.session.email;
         const passwordHashed = await securePassword(password);
-        await User.updateOne({email:email},{$set:{password:passwordHashed}})
+        await User.updateOne({ email: email }, { $set: { password: passwordHashed } })
         res.redirect('/login')
     } catch (error) {
         res.redirect('/pageNotFound')
@@ -102,17 +141,84 @@ const resetPassword = async (req,res) => {
 }
 
 
-const userProfile = async (req,res) => {
+const userProfile = async (req, res) => {
     try {
         const userId = req.session.user;
         const userData = await User.findById(userId);
-        res.render('profile',{user:userData})
+        res.render('profile', { user: userData })
     } catch (error) {
         console.error(error);
         res.redirect('/pageNotFound')
     }
 }
 
+
+
+const changeEmail = async (req, res) => {
+    try {
+        const email = req.query.email;
+
+        if (!req.session.email || req.session.email !== email || !req.session.otpSent) {
+            const otp = generateOtp();
+            const emailSent = await verificationMail(email, otp);
+            if (emailSent) {
+                req.session.userOTP = otp;
+                req.session.email = email;
+                req.session.otpSent = true; 
+                console.log('Change Email OTP : ', otp);
+            } else {
+                return res.json("Email Error");
+            }
+        }
+
+        res.render('changeEmailOtp'); 
+
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound');
+    }
+}
+
+
+const verifyEmailOtp = async (req,res) => {
+    try {
+        const otp = req.body.otp;
+
+        if (otp === req.session.userOTP) {
+            return res.json({ success: true, redirectUrl: '/newEmailEnter' });
+        } else {
+            return res.json({ success: false, message: 'Invalid OTP !!!' });
+        }
+
+    } catch (error) {
+        console.error(error)
+        res.redirect('/pageNotFound')
+    }
+}
+
+
+const loadNewEmailEnter = async (req,res) => {
+    try {
+        res.render('newEmailEnter',{
+            user : req.session.user || null
+        })
+    } catch (error) {
+        console.error(error)
+        res.redirect('/pageNotFound')
+    }
+}
+
+const updateEmail = async (req,res) => {
+    try {
+        const newEmail = req.body.email;
+        const userId = req.session.user._id;
+        await User.findByIdAndUpdate(userId,{email:newEmail});
+        res.redirect('/userProfile')
+    } catch (error) {
+        console.error(error)
+        res.redirect('/pageNotFound')
+    }
+}
 
 module.exports = {
     loadForgotPassword,
@@ -121,5 +227,9 @@ module.exports = {
     loadResetPassword,
     resendForgotOtp,
     resetPassword,
-    userProfile
+    userProfile,
+    changeEmail,
+    verifyEmailOtp,
+    loadNewEmailEnter,
+    updateEmail
 }

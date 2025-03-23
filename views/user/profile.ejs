@@ -110,8 +110,8 @@
                                 </table>
                             </div>
                             <div class="d-flex">
-                                <button style="margin-right: 20px;" class="btn btn-primary"><i class="fas fa-envelope"></i> Change Email</button>
-                                <button class="btn btn-primary"><i class="fas fa-lock"></i> Change Password</button>
+                                <a href="javascript:void(0)" onclick="confirmEmailChange('<%= encodeURIComponent(user.email) %>')" style="margin-right: 20px;" class="btn btn-primary"><i class="fas fa-envelope"></i> Change Email</a>
+                                <a href="/changePassword" class="btn btn-primary"><i class="fas fa-lock"></i> Change Password</a>
                             </div>
                         </div>
                     </div>
@@ -153,3 +153,24 @@
     <!-- Contact Form End -->
 
     <%-include("../../views/partials/user/footer")%>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function confirmEmailChange(email) {
+          Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to change your email?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, change it!',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Navigate to the route
+              window.location.href = `/changeEmail?email=${email}`;
+            }
+          });
+        }
+      </script>
+      
