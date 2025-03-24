@@ -1,6 +1,7 @@
 const User = require('../../models/userSchema')
 const Category = require('../../models/categorySchema')
 const Product = require('../../models/productSchema')
+const Address = require('../../models/addressSchema')
 const nodeMailer = require('nodemailer');
 const env = require('dotenv').config();
 const session = require('express-session')
@@ -241,6 +242,27 @@ const changePassword = async (req,res) => {
     }
 }
 
+const myAddresses = async (req,res) => {
+    try {
+        const userId = req.session.user;
+        const userAddress = await Address.find({userId:userId})
+        res.render('myAddresses', { userAddress: userAddress })
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound')
+    }
+}
+
+const addAddress = async (req,res) =>{
+    try {
+        const user = req.session.user;
+        res.render('addAddress',{user:user});
+    } catch (error) {
+        console.error(error)
+        res.redirect('/pageNotFound')
+    }
+}
+
 module.exports = {
     loadForgotPassword,
     forgotEmailVerify,
@@ -253,5 +275,7 @@ module.exports = {
     verifyEmailOtp,
     loadNewEmailEnter,
     updateEmail,
-    changePassword
+    changePassword,
+    myAddresses,
+    addAddress
 }

@@ -4,15 +4,11 @@
     }
 
     .hero__categories__all:hover{
-        background-color: #7fad39;
+        background-color: rgb(212, 223, 218);
     }
 
     .hero__categories__all span{
         color: #7fad39;
-    }
-
-    .hero__categories__all:hover span{
-        color: #fff;
     }
 
     .main {
@@ -21,7 +17,19 @@
         padding: 0 10px;
         width: 100%;
     }
+
+    .error{
+        font-size: small;
+        color: red;
+    }
     
+    .hero__categories .active{
+        background-color: #7fad39;
+    }
+
+    .hero__categories .active span{
+        color: #fff;
+    }
     
     .main .card {
         background-color: #fff;
@@ -29,5 +37,5 @@
         box-shadow: 1px 1px 8px 0 lightgray;
         height: auto;
         margin-bottom: 20px;
-        padding: 20px 0 20px 50px;
+        padding: 40px;
     }

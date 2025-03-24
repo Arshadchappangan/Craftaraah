@@ -51,6 +51,12 @@ router.post('/verifyEmailOtp',userAuth,profileController.verifyEmailOtp);
 router.get('/newEmailEnter',userAuth,profileController.loadNewEmailEnter);
 router.post('/updateEmail',userAuth,profileController.updateEmail);
 router.get('/changePassword',userAuth,profileController.changePassword);
+router.get('/myAddresses',userAuth,profileController.myAddresses);
+
+
+//address management
+
+router.get('/addAddress',userAuth,profileController.addAddress);
 
 
 
