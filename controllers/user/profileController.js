@@ -245,7 +245,11 @@ const changePassword = async (req,res) => {
 const myAddresses = async (req,res) => {
     try {
         const userId = req.session.user;
-        const userAddress = await Address.find({userId:userId})
+        const userData = await User.findById(userId);
+        res.locals.user = userData
+        console.log('suerData;',userData)
+        const userAddress = await Address.find({userId:userData._id})
+        console.log(userAddress)
         res.render('myAddresses', { userAddress: userAddress })
     } catch (error) {
         console.error(error);
@@ -253,10 +257,54 @@ const myAddresses = async (req,res) => {
     }
 }
 
-const addAddress = async (req,res) =>{
+const loadAddAddress = async (req,res) =>{
     try {
         const user = req.session.user;
         res.render('addAddress',{user:user});
+    } catch (error) {
+        console.error(error)
+        res.redirect('/pageNotFound')
+    }
+}
+
+const addAddress = async (req,res) => {
+    try {
+        const userId = req.session.user;
+        const userData = await User.findOne({_id:userId});
+
+        const {addressType,name,city,landMark,state,pincode,phone,altPhone} = req.body;
+
+        const userAddress = await Address.findOne({userId:userId});
+        if(!userAddress){
+            const newAddress = new Address({
+                userId : userId,
+                address : [{
+                    addressType,
+                    name,
+                    city,
+                    landMark,
+                    state,
+                    pincode,
+                    phone,
+                    altPhone
+                }]
+            });
+            await newAddress.save();
+        }else{
+            userAddress.address.push({
+                addressType,
+                name,
+                city,
+                landMark,
+                state,
+                pincode,
+                phone,
+                altPhone
+            })
+            await userAddress.save();
+        }
+
+        res.redirect('/myAddresses')
     } catch (error) {
         console.error(error)
         res.redirect('/pageNotFound')
@@ -277,5 +325,6 @@ module.exports = {
     updateEmail,
     changePassword,
     myAddresses,
+    loadAddAddress,
     addAddress
 }

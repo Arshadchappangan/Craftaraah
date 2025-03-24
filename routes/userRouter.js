@@ -56,7 +56,8 @@ router.get('/myAddresses',userAuth,profileController.myAddresses);
 
 //address management
 
-router.get('/addAddress',userAuth,profileController.addAddress);
+router.get('/addAddress',userAuth,profileController.loadAddAddress);
+router.post('/addAddress',userAuth,profileController.addAddress)
 
 
 

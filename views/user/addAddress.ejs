@@ -155,31 +155,15 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-            
-     
-            const addressType = document.getElementById('addressType').value;
-            const name = document.getElementById('name').value;
-            const city = document.getElementById('city').value;
-            const landMark = document.getElementById('landMark').value;
-            const state = document.getElementById('state').value;
-            const pincode = document.getElementById('pincode').value;
-            const phone = document.getElementById('phone').value;
-            const altPhone = document.getElementById('altPhone').value;
-
-            const addressTypeError = document.getElementById('addressTypeError');
-            const nameError = document.getElementById('nameError');
-            const cityError = document.getElementById('cityError');
-            const landMarkError = document.getElementById('landMarkError');
-            const stateError = document.getElementById('stateError');
-            const pincodeError = document.getElementById('pincodeError');
-            const phoneError = document.getElementById('phoneError');
-            const altPhoneError = document.getElementById('altPhoneError');
 
             const namePattern = /^[A-Za-z\s]+$/;
             const pincodePattern = /^\d{6}$/;
             const phonePattern = /^\d{10}$/;
 
         const addressTypeValidate = (event) => {
+            const addressType = document.getElementById('addressType').value;
+            const addressTypeError = document.getElementById('addressTypeError');
+
 			if (addressType.trim() === '') {
 				addressTypeError.style.display = 'block';
 				addressTypeError.innerHTML = 'Please Enter the Address Type'
@@ -190,6 +174,9 @@
 		}
             
         const nameValidate = (event) => {
+            const name = document.getElementById('name').value;
+            const nameError = document.getElementById('nameError');
+
 			if (name.trim() === '') {
 				nameError.style.display = 'block';
 				nameError.innerHTML = 'Please Enter a Valid Name'
@@ -203,6 +190,9 @@
 		}
 
         const cityValidate = (event) => {
+            const city = document.getElementById('city').value;
+            const cityError = document.getElementById('cityError');
+
             if (city.trim() === '') {
                 cityError.style.display = 'block';
                 cityError.innerHTML = 'Please Enter the City'
@@ -213,6 +203,9 @@
         }
 
         const landMarkValidate = (event) => {
+            const landMark = document.getElementById('landMark').value;
+            const landMarkError = document.getElementById('landMarkError');
+
             if (landMark.trim() === '') {
                 landMarkError.style.display = 'block';
                 landMarkError.innerHTML = 'Please Enter the Land Mark'
@@ -223,6 +216,9 @@
         }
 
         const stateValidate = (event) => {
+            const state = document.getElementById('state').value;
+            const stateError = document.getElementById('stateError');
+
             if (state.trim() === '') {
                 stateError.style.display = 'block';
                 stateError.innerHTML = 'Please Enter the State'
@@ -233,6 +229,9 @@
         }
 
         const pincodeValidate = (event) => {
+            const pincode = document.getElementById('pincode').value;
+            const pincodeError = document.getElementById('pincodeError');
+
 			if (pincode.trim() === '') {
 				pincodeError.style.display = 'block';
 				pincodeError.innerHTML = 'Please Enter a Valid Pincode'
@@ -246,6 +245,9 @@
 		}
 
         const phoneValidate = (event) => {
+            const phone = document.getElementById('phone').value;
+            const phoneError = document.getElementById('phoneError');
+
 			if (phone.trim() === '') {
 				phoneError.style.display = 'block';
 				phoneError.innerHTML = 'Please Enter a Valid Phone number'
@@ -259,6 +261,9 @@
 		}
 
         const altPhoneValidate = (event) => {
+            const altPhone = document.getElementById('altPhone').value;
+            const altPhoneError = document.getElementById('altPhoneError');
+
 			if (altPhone.trim() === '') {
 				altPhoneError.style.display = 'block';
 				altPhoneError.innerHTML = 'Please Enter a Valid Phone number'
