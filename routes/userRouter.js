@@ -57,7 +57,10 @@ router.get('/myAddresses',userAuth,profileController.myAddresses);
 //address management
 
 router.get('/addAddress',userAuth,profileController.loadAddAddress);
-router.post('/addAddress',userAuth,profileController.addAddress)
+router.post('/addAddress',userAuth,profileController.addAddress);
+router.get('/editAddress',userAuth,profileController.loadEditAddress);
+router.post('/editAddress',userAuth,profileController.editAddress);
+router.get('/deleteAddress',userAuth,profileController.deleteAddress);
 
 
 

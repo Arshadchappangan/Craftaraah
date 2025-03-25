@@ -247,9 +247,7 @@ const myAddresses = async (req,res) => {
         const userId = req.session.user;
         const userData = await User.findById(userId);
         res.locals.user = userData
-        console.log('suerData;',userData)
         const userAddress = await Address.find({userId:userData._id})
-        console.log(userAddress)
         res.render('myAddresses', { userAddress: userAddress })
     } catch (error) {
         console.error(error);
@@ -311,6 +309,99 @@ const addAddress = async (req,res) => {
     }
 }
 
+const loadEditAddress = async (req,res) => {
+    try {
+        const addressId = req.query.id;
+        const user = req.session.user;
+        const currentAddress = await Address.findOne({
+            "address._id" : addressId
+        });
+
+        if(!currentAddress){
+            return res.redirect('/pageNotFound')
+        }
+
+        const addressData = currentAddress.address.find((item)=>{
+            return item._id.toString() === addressId.toString();
+        })
+
+        if(!addressData){
+           return res.redirect('/pageNotFound');
+        }
+
+        console.log(addressData)
+        res.render('editAddress',{
+            address:addressData,
+            user : user
+        })
+    } catch (error) {
+        console.error('error in edit address : ',error);
+        res.redirect('/pageNotFound')
+    }
+}
+
+
+const editAddress = async (req,res) => {
+    try {
+        const data = req.body;
+        const user = req.session.user;
+        const findAddress = await Address.findOne({
+            "address._id" : data.id
+        })
+
+        if(!findAddress){
+           return res.redirect('/pageNotFound')
+        }
+
+        await Address.updateOne({
+            "address._id" : data.id},
+            {$set : {
+                "address.$" : {
+                    _id : data.id,
+                    addressType : data.addressType,
+                    name : data.name,
+                    city : data.city,
+                    landMark : data.landMark,
+                    state : data.state,
+                    pincode : data.pincode,
+                    phone : data.phone,
+                    altPhone : data.altPhone
+                }
+            }}
+        )
+        res.redirect('/myAddresses');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound');
+    }
+}
+
+const deleteAddress = async (req,res) => {
+    try {
+        const addressId = req.query.id;
+        const findAddress = await Address.findOne({"address._id":addressId});
+        if(!findAddress){
+            return res.status(404).send("Address not found");
+        }
+        await Address.updateOne({
+            "address._id":addressId
+        },
+        {
+            $pull : {
+                address : {
+                    _id : addressId
+                }
+            }
+        }
+    )
+
+    res.redirect('/myAddresses')
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound')
+    }
+}
+
 module.exports = {
     loadForgotPassword,
     forgotEmailVerify,
@@ -326,5 +417,8 @@ module.exports = {
     changePassword,
     myAddresses,
     loadAddAddress,
-    addAddress
+    addAddress,
+    loadEditAddress,
+    editAddress,
+    deleteAddress
 }
