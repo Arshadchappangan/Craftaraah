@@ -64,15 +64,31 @@ const reviewSubmission = async (req,res) => {
 const loadShoppingCart = async (req,res) => {
     try {
         const user = req.session.user;
-        console.log(user)
         const findCart = await Cart.findOne({userId:user._id}).populate('items.productId');
-        console.log(findCart)
         if(!findCart){
             return res.redirect('/pageNotFound')
         }
+
+        let subtotal = 0;
+        findCart.items.forEach(item => {
+            subtotal += item.totalPrice;
+        });
+
+        let shippingCharge = 0;
+        if(subtotal < 1000){
+            shippingCharge = 50;
+        }
+
+        const tax = Math.floor(subtotal * 0.12);
+        const total = subtotal + shippingCharge + tax;
+
         res.render('shoppingCart',{
-            user : user,
-            cart : findCart});
+            cart : findCart,
+            subtotal : subtotal,
+            shippingCharge : shippingCharge,
+            tax : tax,
+            total : total
+        });
     } catch (error) {
         console.error(error)
         res.redirect('/pageNotFound')
@@ -123,7 +139,23 @@ const addToCart = async (req,res) => {
         
 
     } catch (error) {
-        
+        console.error(error);
+        res.redirect('/pageNotFound');
+    }
+}
+
+
+const removeFromCart = async(req,res) => {
+    try {
+        const user = req.session.user;
+        const productId = req.query.productId;
+        const cartExist = await Cart.findOne({userId:user._id});
+        cartExist.items.pull({_id:productId});
+        await cartExist.save();
+        res.redirect('/shoppingCart');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound');
     }
 }
 
@@ -131,5 +163,6 @@ module.exports = {
     loadProductDetails,
     reviewSubmission,
     loadShoppingCart,
-    addToCart
+    addToCart,
+    removeFromCart
 }

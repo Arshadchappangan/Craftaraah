@@ -91,7 +91,7 @@
                                 <% for (let i = 0; i < cart.items.length; i++) { %>
                                 <tr>
                                     <td class="shoping__cart__item">
-                                        <img style="height: 100px;" src="<%=cart.items[i].productId.productImage[i]%>" alt="">
+                                        <img style="height: 100px;" src="<%=cart.items[i].productId.productImage[0]%>" alt="">
                                         <h5><%=cart.items[i].productId.productName%></h5>
                                     </td>
                                     <td class="shoping__cart__price">
@@ -108,7 +108,9 @@
                                         ₹<%=cart.items[i].totalPrice%>
                                     </td>
                                     <td class="shoping__cart__item__close">
-                                        <span class="icon_close"></span>
+                                        <a href="/removeFromCart?productId=<%=cart.items[i]._id%>">
+                                            <span class="icon_close"></span>
+                                        </a>
                                     </td>
                                 </tr>
                                 <%}%>
@@ -141,8 +143,10 @@
                     <div class="shoping__checkout">
                         <h5>Cart Total</h5>
                         <ul>
-                            <li>Subtotal <span>$454.98</span></li>
-                            <li>Total <span>$454.98</span></li>
+                            <li>Subtotal <span>₹<%=subtotal%></span></li>
+                            <li>Shipping Charge <span>₹<%=shippingCharge%></span></li>
+                            <li>Tax (12%) <span>₹<%=tax%></span></li>
+                            <li><h5>Total <span>₹<%=total%></span></h5></li>
                         </ul>
                         <a href="#" class="primary-btn">PROCEED TO CHECKOUT</a>
                     </div>
