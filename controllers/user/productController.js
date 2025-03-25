@@ -1,7 +1,8 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const User = require('../../models/userSchema');  
-const Review = require('../../models/reviewSchema')
+const Review = require('../../models/reviewSchema');
+const Cart = require('../../models/cartSchema');
 
 
 const loadProductDetails = async(req,res) => {
@@ -60,8 +61,75 @@ const reviewSubmission = async (req,res) => {
     }
 }
 
+const loadShoppingCart = async (req,res) => {
+    try {
+        const user = req.session.user;
+        console.log(user)
+        const findCart = await Cart.findOne({userId:user._id}).populate('items.productId');
+        console.log(findCart)
+        if(!findCart){
+            return res.redirect('/pageNotFound')
+        }
+        res.render('shoppingCart',{
+            user : user,
+            cart : findCart});
+    } catch (error) {
+        console.error(error)
+        res.redirect('/pageNotFound')
+    }
+}
+
+
+const addToCart = async (req,res) => {
+    try {
+        const user = req.session.user;
+        const productId = req.query.productId;
+        const quantity = req.query.quantity || 1;
+        const productData = await Product.findOne({_id:productId})
+
+        const cartExist = await Cart.findOne({userId:user._id});
+
+        if(!cartExist){
+            const newProduct = new Cart({
+                userId : user._id,
+                items : [{
+                    productId : productId,
+                    quantity : quantity,
+                    price : productData.salePrice,
+                    totalPrice : productData.salePrice * quantity
+                }]
+            })
+            await newProduct.save();
+            res.redirect('/shoppingCart');
+        }else{
+            const findProduct = cartExist.items.findIndex((item) => item.productId == productId);
+            if(findProduct !== -1){
+                cartExist.items[findProduct].quantity += quantity;
+                cartExist.items[findProduct].totalPrice += productData.salePrice * quantity;
+                await cartExist.save();
+                res.redirect('/shoppingCart');
+            }else{
+                cartExist.items.push({
+                    productId : productId,
+                    quantity : quantity,
+                    price : productData.salePrice,
+                    totalPrice : productData.salePrice * quantity
+                })
+                await cartExist.save();
+                res.redirect('/shoppingCart');
+
+            }
+        }
+        
+
+    } catch (error) {
+        
+    }
+}
 
 module.exports = {
     loadProductDetails,
-    reviewSubmission
+    reviewSubmission,
+    loadShoppingCart,
+    addToCart
 }

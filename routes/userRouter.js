@@ -63,5 +63,10 @@ router.post('/editAddress',userAuth,profileController.editAddress);
 router.get('/deleteAddress',userAuth,profileController.deleteAddress);
 
 
+//cart management
+router.get('/shoppingCart',userAuth,productController.loadShoppingCart);
+router.get('/addToCart',userAuth,productController.addToCart);
+
+
 
 module.exports = router;
