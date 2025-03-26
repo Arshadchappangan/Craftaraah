@@ -7,11 +7,13 @@ const session = require('express-session')
 const bcrypt = require('bcrypt');
 const { name } = require('ejs');
 const category = require('../../models/categorySchema');
+const Cart = require('../../models/cartSchema');
 
 const loadHome = async (req, res) => {
     try {
         const category = await Category.find({isDeleted:false});
         const product = await Product.find({isDeleted:false}).sort({createdAt:-1});
+        const cartExist = await Cart.find({userId:req.session.user}).populate('items.productId');
         let userData = null;
 
         if (req.session.user) {

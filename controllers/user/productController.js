@@ -3,6 +3,7 @@ const Category = require('../../models/categorySchema');
 const User = require('../../models/userSchema');  
 const Review = require('../../models/reviewSchema');
 const Cart = require('../../models/cartSchema');
+const Wishlist = require('../../models/wishlistSchema');
 
 
 const loadProductDetails = async(req,res) => {
@@ -104,6 +105,13 @@ const addToCart = async (req,res) => {
         const productData = await Product.findOne({_id:productId})
 
         const cartExist = await Cart.findOne({userId:user._id});
+        const wishlistExist = await Wishlist.findOne({userId:user._id});
+
+        const checkWishlist = wishlistExist.products.findIndex((item) => item.productId.toString() === productId);
+        if(checkWishlist !== -1){
+            wishlistExist.products.pull({productId:productId});
+            await wishlistExist.save();
+        }
 
         if(!cartExist){
             const newProduct = new Cart({
@@ -159,10 +167,86 @@ const removeFromCart = async(req,res) => {
     }
 }
 
+const updateCart = async(req,res) => {
+    try {
+        const user = req.session.user;
+        const productId = req.query.productId;
+        const quantity = req.query.quantity;
+        cartExist = await Cart.findOne({userId:user._id});
+        const findProduct = cartExist.items.findIndex((item) => item.productId == productId);
+        if(quantity == 1){
+            cartExist.items[findProduct].quantity += 1;
+            cartExist.items[findProduct].totalPrice += cartExist.items[findProduct].price;
+        }else if(cartExist.items[findProduct].quantity > 1){
+            cartExist.items[findProduct].quantity -= 1;
+            cartExist.items[findProduct].totalPrice -= cartExist.items[findProduct].price;
+        }
+        await cartExist.save();
+        res.redirect('/shoppingCart');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound');
+    }
+}
+
+const addToWishlist = async (req, res) => {
+    try {
+      const userId = req.session.user._id;
+      const productId = req.query.productId;
+  
+      let wishlist = await Wishlist.findOne({ userId : userId });
+  
+      if (!wishlist) {
+        const wishlist = new Wishlist({
+          userId : userId,
+          products: [],
+        });
+        await wishlist.save();
+      }
+  
+      const productIndex = wishlist.products.findIndex(
+        (item) => item.productId.toString() === productId
+      );
+  
+      if (productIndex === -1) {
+        wishlist.products.push({productId});
+        await wishlist.save();
+        return res.status(200).json({ message: "Added to wishlist" });
+      } else {
+        return res.status(200).json({ message: "Already in wishlist" });
+      }
+    } catch (error) {
+      console.error("Error in addToWishlist:", error);
+      res.redirect("/pageNotFound");
+    }
+  };
+
+  const loadWishlist = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const wishlist = await Wishlist.findOne({userId:userId}).populate('products.productId');
+        if(!wishlist){
+            return res.redirect('/pageNotFound');
+        }else{
+            res.render('wishlist',{
+                wishlist : wishlist
+            })
+        }
+    } catch (error) {
+      console.error("Error in loadWishlist:", error);
+      res.redirect("/pageNotFound");
+        
+    }
+  }
+  
+
 module.exports = {
     loadProductDetails,
     reviewSubmission,
     loadShoppingCart,
     addToCart,
-    removeFromCart
+    removeFromCart,
+    updateCart,
+    addToWishlist,
+    loadWishlist
 }

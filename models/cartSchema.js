@@ -25,6 +25,10 @@ const cartSchema = new Schema({
             type : Number,
             required : true
         },
+        totalProducts : {
+            type : Number,
+            default : 1
+        },
         status : {
             type : String,
             default : "Placed"

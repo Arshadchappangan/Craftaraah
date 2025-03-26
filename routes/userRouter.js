@@ -67,6 +67,12 @@ router.get('/deleteAddress',userAuth,profileController.deleteAddress);
 router.get('/shoppingCart',userAuth,productController.loadShoppingCart);
 router.get('/addToCart',userAuth,productController.addToCart);
 router.get('/removeFromCart',userAuth,productController.removeFromCart);
+router.get('/updateCart',userAuth,productController.updateCart);
+
+
+//wishlist management
+router.get('/wishlist',userAuth,productController.loadWishlist);
+router.get('/addToWishlist',userAuth,productController.addToWishlist);
 
 
 
