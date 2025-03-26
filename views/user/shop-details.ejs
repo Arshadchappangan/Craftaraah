@@ -92,12 +92,16 @@
                             <div class="quantity">
                                 <div class="pro-qty">
                                     <span class="dec qtybtn" id="minus">-</span>
-                                    <input type="text" value="1" id="numberDisplayInput">
+                                    <input type="text" value="1" id="numberDisplayInput" disabled>
                                     <span class="dec qtybtn" id="plus">+</span>
                                 </div>
                             </div>
                         </div>
-                        <a href="#" class="primary-btn">ADD TO CARD</a>
+                        <%if(product.quantity){%>
+                        <a href="#" class="primary-btn">ADD TO CART</a>
+                        <%}else{%>
+                        <a href="#" class="primary-btn" style="background-color: grey; cursor: not-allowed;">OUT OF STOCK</a>
+                        <%}%>
                         <a href="#" class="heart-icon"><span class="icon_heart_alt"></span></a>
                         <ul>
                             <%if(product.quantity > 0){%>

@@ -84,6 +84,7 @@ const loadShoppingCart = async (req,res) => {
         const total = subtotal + shippingCharge + tax;
 
         res.render('shoppingCart',{
+            user : user,
             cart : findCart,
             subtotal : subtotal,
             shippingCharge : shippingCharge,
@@ -101,13 +102,23 @@ const addToCart = async (req,res) => {
     try {
         const user = req.session.user;
         const productId = req.query.productId;
-        const quantity = req.query.quantity || 1;
+        const quantity = 1;
         const productData = await Product.findOne({_id:productId})
 
         const cartExist = await Cart.findOne({userId:user._id});
+        const findProduct = cartExist.items.findIndex((item) => item.productId == productId);
         const wishlistExist = await Wishlist.findOne({userId:user._id});
+        if(wishlistExist){
+            checkWishlist = wishlistExist.products.findIndex((item) => item.productId.toString() === productId);
+        }
 
-        const checkWishlist = wishlistExist.products.findIndex((item) => item.productId.toString() === productId);
+        if (cartExist && findProduct !== -1) {
+            const existingQty = cartExist.items[findProduct].quantity;
+            if (productData.quantity < existingQty + quantity) {
+                return res.status(200).json({ success: false, message: "Product out of stock" });
+            }
+        }
+        
         if(checkWishlist !== -1){
             wishlistExist.products.pull({productId:productId});
             await wishlistExist.save();
@@ -124,14 +135,13 @@ const addToCart = async (req,res) => {
                 }]
             })
             await newProduct.save();
-            res.redirect('/shoppingCart');
+            return res.status(200).json({success : true, message: "Added to cart" });
         }else{
-            const findProduct = cartExist.items.findIndex((item) => item.productId == productId);
-            if(findProduct !== -1){
+            if(findProduct !== -1 && cartExist.items[findProduct].quantity + quantity <= 5){
                 cartExist.items[findProduct].quantity += quantity;
                 cartExist.items[findProduct].totalPrice += productData.salePrice * quantity;
                 await cartExist.save();
-                res.redirect('/shoppingCart');
+                return res.status(200).json({success : true, message: "Added to cart" });
             }else{
                 cartExist.items.push({
                     productId : productId,
@@ -140,8 +150,7 @@ const addToCart = async (req,res) => {
                     totalPrice : productData.salePrice * quantity
                 })
                 await cartExist.save();
-                res.redirect('/shoppingCart');
-
+                return res.status(200).json({success : true, message: "Added to cart" });
             }
         }
         
@@ -174,7 +183,7 @@ const updateCart = async(req,res) => {
         const quantity = req.query.quantity;
         cartExist = await Cart.findOne({userId:user._id});
         const findProduct = cartExist.items.findIndex((item) => item.productId == productId);
-        if(quantity == 1){
+        if(quantity == 1 && cartExist.items[findProduct].quantity < 5){
             cartExist.items[findProduct].quantity += 1;
             cartExist.items[findProduct].totalPrice += cartExist.items[findProduct].price;
         }else if(cartExist.items[findProduct].quantity > 1){
@@ -193,6 +202,14 @@ const addToWishlist = async (req, res) => {
     try {
       const userId = req.session.user._id;
       const productId = req.query.productId;
+
+      let cartExist = await Cart.findOne({userId:userId});
+      if(cartExist){
+        const findProduct = cartExist.items.findIndex((item) => item.productId == productId);
+        if(findProduct !== -1){
+            return res.status(200).json({success : false, message: "Product already in cart" });
+        }
+      }
   
       let wishlist = await Wishlist.findOne({ userId : userId });
   
@@ -211,9 +228,9 @@ const addToWishlist = async (req, res) => {
       if (productIndex === -1) {
         wishlist.products.push({productId});
         await wishlist.save();
-        return res.status(200).json({ message: "Added to wishlist" });
+        return res.status(200).json({success : true, message: "Added to wishlist" });
       } else {
-        return res.status(200).json({ message: "Already in wishlist" });
+        return res.status(200).json({success : false, message: "Already in wishlist" });
       }
     } catch (error) {
       console.error("Error in addToWishlist:", error);
@@ -223,12 +240,17 @@ const addToWishlist = async (req, res) => {
 
   const loadWishlist = async (req, res) => {
     try {
-        const userId = req.session.user._id;
-        const wishlist = await Wishlist.findOne({userId:userId}).populate('products.productId');
+        const user = req.session.user;
+        const wishlist = await Wishlist.findOne({userId:user._id}).populate('products.productId');
         if(!wishlist){
-            return res.redirect('/pageNotFound');
+            wishlist = {products:[]}
+            res.render('wishlist',{
+                user : user,
+                wishlist : wishlist
+            })
         }else{
             res.render('wishlist',{
+                user : user,
                 wishlist : wishlist
             })
         }
@@ -240,6 +262,20 @@ const addToWishlist = async (req, res) => {
   }
   
 
+  const removeFromWishlist = async (req, res) => {
+    try {
+        const user = req.session.user;
+        const productId = req.query.productId;
+        const wishlist = await Wishlist.findOne({userId:user._id});
+        wishlist.products.pull({productId:productId});
+        await wishlist.save();
+        return res.status(200).json({success : true, message: "Removed from wishlist" });
+    } catch (error) {
+      console.error("Error in removeFromWishlist:", error);
+      return res.status(500).json({success : false, message: "Internal server error" });
+    }
+  }
+
 module.exports = {
     loadProductDetails,
     reviewSubmission,
@@ -248,5 +284,6 @@ module.exports = {
     removeFromCart,
     updateCart,
     addToWishlist,
-    loadWishlist
+    loadWishlist,
+    removeFromWishlist
 }

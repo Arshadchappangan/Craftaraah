@@ -150,8 +150,8 @@
                             <div class="product__item">
                                 <div class="product__item__pic set-bg" data-setbg="<%=products[i].productImage[0]%>">
                                     <ul class="product__item__pic__hover">
-                                        <li><a href="/addToWishlist?productId=<%=products[i]._id%>"><i class="fa fa-heart"></i></a></li>
-                                        <li><a href="/addToCart?productId=<%=products[i]._id%>"><i class="fa fa-shopping-cart"></i></a></li>
+                                        <li onclick="addToWishlist('<%=products[i]._id%>')"><a><i class="fa fa-heart"></i></a></li>
+                                        <li onclick="addToCart('<%=products[i]._id%>')"><a><i class="fa fa-shopping-cart"></i></a></li>
                                     </ul>
                                 </div>
                                 <div class="product__item__text">
@@ -188,6 +188,7 @@
     <!-- Product Section End -->
 
     <%-include("../../views/partials/user/footer")%>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
 
@@ -246,6 +247,73 @@
             document.getElementById('clear-btn').style.display = 'none';
         }
     };
+
+
+    function addToWishlist(productId) {
+        fetch(`/addToWishlist?productId=${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added!',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Oops!',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Something went wrong.',
+                });
+            });
+    }
+
+
+    function addToCart(productId) {
+        fetch(`/addToCart?productId=${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added!',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }else{
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Oops!',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Something went wrong.',
+                });
+            });
+    }
+
 
     </script>
 

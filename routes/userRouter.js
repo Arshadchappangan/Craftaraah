@@ -73,6 +73,7 @@ router.get('/updateCart',userAuth,productController.updateCart);
 //wishlist management
 router.get('/wishlist',userAuth,productController.loadWishlist);
 router.get('/addToWishlist',userAuth,productController.addToWishlist);
+router.get('/removeFromWishlist',userAuth,productController.removeFromWishlist);
 
 
 
