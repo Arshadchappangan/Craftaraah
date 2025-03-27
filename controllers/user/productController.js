@@ -4,6 +4,7 @@ const User = require('../../models/userSchema');
 const Review = require('../../models/reviewSchema');
 const Cart = require('../../models/cartSchema');
 const Wishlist = require('../../models/wishlistSchema');
+const Address = require('../../models/addressSchema');
 
 
 const loadProductDetails = async(req,res) => {
@@ -80,8 +81,12 @@ const loadShoppingCart = async (req,res) => {
             shippingCharge = 50;
         }
 
-        const tax = Math.floor(subtotal * 0.12);
-        const total = subtotal + shippingCharge + tax;
+        let tax = 0;
+        if(subtotal > 3000){
+            tax = Math.floor(subtotal * 0.12);
+        }
+
+       let total = subtotal + shippingCharge + tax;
 
         res.render('shoppingCart',{
             user : user,
@@ -276,6 +281,66 @@ const addToWishlist = async (req, res) => {
     }
   }
 
+
+    const checkCartStatus = async (req, res) => {
+        try {
+            const user = req.session.user;
+            const cart = await Cart.findOne({ userId: user._id });
+
+            if (!cart || cart.items.length === 0) {
+                return res.status(200).json({ success: false, message: "Cart is empty" });
+            }
+
+            res.status(200).json({ success: true });
+        } catch (error) {
+            console.error("Error in checkCartStatus:", error);
+            res.status(500).json({ success: false, message: "Server error" });
+        }
+    };
+
+
+
+  const checkout = async (req, res) => {
+    try {
+        const user = req.session.user;
+        const cart = await Cart.findOne({userId:user._id}).populate('items.productId');
+
+        let subtotal = 0;
+        cart.items.forEach(item => {
+            subtotal += item.totalPrice;
+        });
+
+        let shippingCharge = 0;
+        if(subtotal < 1000){
+            shippingCharge = 50;
+        }
+
+        let tax = 0;
+        if(subtotal > 3000){
+            tax = Math.floor(subtotal * 0.12);
+        }
+        
+        let total = subtotal + shippingCharge + tax;
+
+        const address = await Address.findOne({userId:user._id});
+
+
+        res.render('checkout',{
+            user : user,
+            cart : cart,
+            subtotal : subtotal,
+            shippingCharge : shippingCharge,
+            tax : tax,
+            total : total,
+            address : address
+        });
+    } catch (error) {
+        console.error("Error in checkout:", error);
+        res.redirect("/pageNotFound");
+    }
+}
+
+
 module.exports = {
     loadProductDetails,
     reviewSubmission,
@@ -285,5 +350,7 @@ module.exports = {
     updateCart,
     addToWishlist,
     loadWishlist,
-    removeFromWishlist
+    removeFromWishlist,
+    checkCartStatus,
+    checkout
 }

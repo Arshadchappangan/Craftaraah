@@ -76,5 +76,9 @@ router.get('/addToWishlist',userAuth,productController.addToWishlist);
 router.get('/removeFromWishlist',userAuth,productController.removeFromWishlist);
 
 
+//order management
+router.get('/checkCart',userAuth,productController.checkCartStatus);
+router.get('/checkout',userAuth,productController.checkout);
+
 
 module.exports = router;

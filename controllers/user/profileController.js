@@ -9,6 +9,7 @@ const bcrypt = require('bcrypt');
 const { name } = require('ejs');
 const category = require('../../models/categorySchema');
 const { reviewSubmission } = require('./productController');
+const { use } = require('passport');
 
 
 const generateOtp = () => {
@@ -257,8 +258,9 @@ const myAddresses = async (req,res) => {
 
 const loadAddAddress = async (req,res) =>{
     try {
+        const source = req.query.source;
         const user = req.session.user;
-        res.render('addAddress',{user:user});
+        res.render('addAddress',{user:user,source:source});
     } catch (error) {
         console.error(error)
         res.redirect('/pageNotFound')
@@ -270,9 +272,14 @@ const addAddress = async (req,res) => {
         const userId = req.session.user;
         const userData = await User.findOne({_id:userId});
 
-        const {addressType,name,city,landMark,state,pincode,phone,altPhone} = req.body;
+        const {addressType,name,city,landMark,state,pincode,phone,altPhone,isDefault,source} = req.body;
 
         const userAddress = await Address.findOne({userId:userId});
+
+        if(userAddress && isDefault){
+            await Address.updateOne({userId:userId},{$set : {"address.$[].isDefault" : false}})
+        }
+
         if(!userAddress){
             const newAddress = new Address({
                 userId : userId,
@@ -284,7 +291,8 @@ const addAddress = async (req,res) => {
                     state,
                     pincode,
                     phone,
-                    altPhone
+                    altPhone,
+                    isDefault : isDefault ? true : false
                 }]
             });
             await newAddress.save();
@@ -297,12 +305,17 @@ const addAddress = async (req,res) => {
                 state,
                 pincode,
                 phone,
-                altPhone
+                altPhone,
+                isDefault : isDefault ? true : false
             })
             await userAddress.save();
         }
 
-        res.redirect('/myAddresses')
+        if(source === 'checkout'){
+            res.redirect('/checkout');
+        }else if(source === 'myAddresses'){
+            res.redirect('/myAddresses')
+        }
     } catch (error) {
         console.error(error)
         res.redirect('/pageNotFound')
@@ -312,6 +325,7 @@ const addAddress = async (req,res) => {
 const loadEditAddress = async (req,res) => {
     try {
         const addressId = req.query.id;
+        const source = req.query.source;
         const user = req.session.user;
         const currentAddress = await Address.findOne({
             "address._id" : addressId
@@ -332,7 +346,8 @@ const loadEditAddress = async (req,res) => {
         console.log(addressData)
         res.render('editAddress',{
             address:addressData,
-            user : user
+            user : user,
+            source : source
         })
     } catch (error) {
         console.error('error in edit address : ',error);
@@ -365,11 +380,16 @@ const editAddress = async (req,res) => {
                     state : data.state,
                     pincode : data.pincode,
                     phone : data.phone,
-                    altPhone : data.altPhone
+                    altPhone : data.altPhone,
+                    isDefault : data.isDefault ? true : false
                 }
             }}
         )
-        res.redirect('/myAddresses');
+        if(data.source === 'checkout'){
+            res.redirect('/checkout');
+        }else if(data.source === 'myAddresses'){
+            res.redirect('/myAddresses');
+        }
     } catch (error) {
         console.error(error);
         res.redirect('/pageNotFound');

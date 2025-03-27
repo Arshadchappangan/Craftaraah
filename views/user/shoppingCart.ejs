@@ -152,7 +152,7 @@
                             <li>Tax (12%) <span>₹<%=tax%></span></li>
                             <li><h5>Total <span>₹<%=total%></span></h5></li>
                         </ul>
-                        <a href="/checkout" class="primary-btn">PROCEED TO CHECKOUT</a>
+                        <a onclick="checkout()" class="primary-btn" style="cursor: pointer;">PROCEED TO CHECKOUT</a>
                     </div>
                 </div>
             </div>
@@ -161,6 +161,8 @@
     <!-- Shoping Cart Section End -->
 
     <%-include("../../views/partials/user/footer")%>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         const minus = document.getElementById('minus');
@@ -178,4 +180,31 @@
         let currentValue = Number(input.value);
         input.value = currentValue + 1;
         });
+
+        function checkout() {
+            fetch(`/checkCart`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/checkout';
+                    } else {
+                        Swal.fire({
+                        icon: 'info',
+                        title: 'Oops!',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Something went wrong.',
+                    });
+                });
+        }
+
     </script>
