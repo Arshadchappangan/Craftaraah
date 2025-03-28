@@ -437,8 +437,10 @@ const placeOrder = async (req, res) => {
 const orderPlaced = async (req,res) => {
     try {
         const user = req.session.user;
+        const order = await Order.findOne({userId:user._id}).sort({createdAt:-1}).populate('address','userId')
         res.render('orderPlaced',{
-            user : user
+            user : user,
+            order : order
         })
     } catch (error) {
         console.error("Error in orderPlaced:", error);
