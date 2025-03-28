@@ -2227,6 +2227,11 @@ ol {
 	margin-bottom: 20px;
 }
 
+.checkout .shoping__cart__item h5 {
+	font-size: 18px;
+	font-weight: 600;
+}
+
 .checkout__address{
 	background-color: #f5f5f5;
 	padding: 20px;

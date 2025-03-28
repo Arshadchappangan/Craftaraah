@@ -98,16 +98,16 @@
                             </div>
                         </div>
                         <%if(product.quantity){%>
-                        <a href="#" class="primary-btn">ADD TO CART</a>
+                        <a onclick="addToCart('<%=product._id%>')" class="primary-btn">ADD TO CART</a>
                         <%}else{%>
                         <a href="#" class="primary-btn" style="background-color: grey; cursor: not-allowed;">OUT OF STOCK</a>
                         <%}%>
-                        <a href="#" class="heart-icon"><span class="icon_heart_alt"></span></a>
+                        <a onclick="addToWishlist('<%=product._id%>')" class="heart-icon"><span class="icon_heart_alt"></span></a>
                         <ul>
                             <%if(product.quantity > 0){%>
                             <li><b>Availability</b> <span>Only <%=product.quantity%> left in stock!</span></li>
                             <%}else{%>
-                            <li><b>Availability</b> <span><%=product.status%></span></li>
+                            <li><b>Availability</b> <span>Out of stocks</span></li>
                             <%}%>
                             <li><b>Shipping</b> <span>01 day shipping. <samp>Free pickup today</samp></span></li>
                             <!-- <li><b>Share on</b>
@@ -134,7 +134,7 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab"
-                                    aria-selected="false">Reviews <span>(1)</span></a>
+                                    aria-selected="false">Reviews <span>(<%=review.length%>)</span></a>
                             </li>
                         </ul>
                         <div class="tab-content">
@@ -266,6 +266,8 @@
     <script src="user/js/owl.carousel.min.js"></script>
     <script src="user/js/main.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
 
         function viewImage(imageSrc){
@@ -322,6 +324,72 @@
         });
     });
     });
+
+
+    function addToCart(productId) {
+        fetch(`/addToCart?productId=${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added!',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }else{
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Oops!',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Something went wrong.',
+                });
+            });
+    }
+
+
+    function addToWishlist(productId) {
+        fetch(`/addToWishlist?productId=${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added!',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Oops!',
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Something went wrong.',
+                });
+            });
+    }
 
 
     </script>
