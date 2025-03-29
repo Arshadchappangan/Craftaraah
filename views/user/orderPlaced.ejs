@@ -46,10 +46,27 @@
                 <p><strong>Order ID:</strong> <%= order.orderId %></p>
                 <p><strong>Total Amount:</strong> ₹<%= order.finalAmount %></p>
                 <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
-
+                <div class="col-md-6 mb-3 mx-auto">
+                    <% if (order.address) { %>
+                        <p>
+                            <strong>Deliver to :</strong><br>
+                            <%= order.address.name %><br>
+                            <%= order.address.landMark %>, <%= order.address.city %><br>
+                            <%= order.address.state %> - <%= order.address.pincode %><br>
+                        </p>
+                    <% } else { %>
+                        <p class="text-danger">Address details not available.</p>
+                    <% } %>
+                </div>
+                <p><strong>Contact Details : </strong></p>
+                <p>Phone 1 : <%=order.address.phone%></p>
+                <p>Phone 2 : <%=order.address.altPhone%></p>
+                <p>Email : <%=user.email%></p>
             </div>
+            
 
             <a href="/shop" class="site-btn mt-4">Continue Shopping</a>
+            <a href="/orderDetails?id=<%= order._id %>" class="site-btn mt-4">Order Datails</a>
         </div>
     </div>
 </section>

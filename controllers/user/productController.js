@@ -6,8 +6,14 @@ const Cart = require('../../models/cartSchema');
 const Wishlist = require('../../models/wishlistSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
-const { v4: uuidv4 } = require('uuid');
 
+
+function generateOrderId() {
+    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
+    return `ORD-${date}-${randomStr}`;
+  }
+  
 
 const loadProductDetails = async(req,res) => {
     try {
@@ -380,8 +386,7 @@ const placeOrder = async (req, res) => {
         const user = req.session.user;
         const cart = await Cart.findOne({userId:user._id}).populate('items.productId');
         const address = await Address.findOne({userId:user._id});
-        const orderId = uuidv4();
-        console.log("req.body : ",req.body)
+        const orderId = generateOrderId();
         const { paymentMethod,selectedAddress } = req.body;
         
 
@@ -395,8 +400,7 @@ const placeOrder = async (req, res) => {
             shippingCharge = 50;
         }
 
-        total = subtotal + shippingCharge;
-
+        let total = subtotal + shippingCharge;
 
 
         const orderedItems = cart.items.map(item => ({
@@ -405,13 +409,15 @@ const placeOrder = async (req, res) => {
             price: item.price
           }));
 
+          let selectedAddressDetails = address.address[selectedAddress];
+
         const placeOrder = new Order({
             orderId : orderId,
             userId : user._id,
             orderedItems : orderedItems,
             totalPrice : subtotal,
             finalAmount : total,
-            address : address.address[selectedAddress],
+            address : selectedAddressDetails,
             paymentMethod : paymentMethod
         })
 
@@ -437,14 +443,33 @@ const placeOrder = async (req, res) => {
 const orderPlaced = async (req,res) => {
     try {
         const user = req.session.user;
-        const order = await Order.findOne({userId:user._id}).sort({createdAt:-1}).populate('address','userId')
+        const order = await Order.findOne({userId:user._id})
+        .sort({createdAt:-1})
+        .populate('orderedItems.product');
+
         res.render('orderPlaced',{
             user : user,
             order : order
         })
+
+        return 
     } catch (error) {
         console.error("Error in orderPlaced:", error);
         res.redirect("/pageNotFound");
+    }
+}
+
+const orderDetails = async(req,res) => {
+    try {
+        const user = req.session.user;
+        const id = req.query.id;
+        const order = await Order.findById(id).populate('orderedItems.product').populate('address');
+        res.render('orderDetails',{
+            order:order
+        })
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound')
     }
 }
 
@@ -461,5 +486,6 @@ module.exports = {
     checkCartStatus,
     checkout,
     placeOrder,
-    orderPlaced
+    orderPlaced,
+    orderDetails
 }

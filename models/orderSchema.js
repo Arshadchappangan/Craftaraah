@@ -1,12 +1,10 @@
 const mongoose = require('mongoose');
 const {Schema} = mongoose;
-const {v4:uuidv4} = require('uuid');
 const Address = require('./addressSchema');
 
 const orderSchema = new Schema({
     orderId : {
         type : String,
-        default : () => uuidv4(),
         unique : true,
         required : true
     },
@@ -42,10 +40,15 @@ const orderSchema = new Schema({
         type : Number,
         required : true
     },
-    address : {
-        type : Schema.Types.ObjectId,
-        ref : 'Address',
-        required : true
+    address: {
+        addressType: String,
+        name: String,
+        landMark: String,
+        city: String,
+        state: String,
+        pincode: String,
+        phone: String,
+        altPhone: String
     },
     paymentMethod : {
         type : String,

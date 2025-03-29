@@ -52,6 +52,7 @@ router.get('/newEmailEnter',userAuth,profileController.loadNewEmailEnter);
 router.post('/updateEmail',userAuth,profileController.updateEmail);
 router.get('/changePassword',userAuth,profileController.changePassword);
 router.get('/myAddresses',userAuth,profileController.myAddresses);
+router.get('/myOrders',userAuth,profileController.myOrders);
 
 
 //address management
@@ -81,6 +82,7 @@ router.get('/checkCart',userAuth,productController.checkCartStatus);
 router.get('/checkout',userAuth,productController.checkout);
 router.post('/placeOrder',userAuth,productController.placeOrder);
 router.get('/orderPlaced',userAuth,productController.orderPlaced);
+router.get('/orderDetails',userAuth,productController.orderDetails);
 
 
 module.exports = router;

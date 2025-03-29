@@ -1,0 +1,54 @@
+<%- include("../../views/partials/user/header") %>
+
+<section class="breadcrumb-section set-bg" data-setbg="user/img/image.png">
+    <div class="container text-center">
+        <div class="breadcrumb__text">
+            <h2>Your Orders</h2>
+            <div class="breadcrumb__option">
+                <a href="/">Home</a>
+                <span> My Orders</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="order-list spad">
+    <div class="container">
+        <% if (orders.length === 0) { %>
+            <h4 class="text-center">No orders placed yet.</h4>
+        <% } else { %>
+            <% orders.forEach(order => { %>
+                <div class="card my-4 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><strong>Order ID:</strong> <%= order.orderId %></span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span><strong>Status:</strong> <%= order.status %></span>
+                            <a href="/orderDetails?id=<%=order._id%>" class="btn btn-sm btn-outline-primary mx-3">View Details</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
+                        <p><strong>Number of items:</strong> <%= order.orderedItems.length%></p>
+                        <p><strong>Total Amount:</strong> ₹<%= order.finalAmount %></p>
+
+                        <!-- Product Listing View -->
+                        <div class="list-group">
+                            <% order.orderedItems.forEach(item => { %>
+                                <div class="list-group-item d-flex align-items-center mb-3 rounded shadow-sm">
+                                    <img src="<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>" class="img-thumbnail me-4" style="width: 120px; height: auto;">
+                                    <div class="mx-3">
+                                        <h5><%= item.product.productName %></h5>
+                                        <p class="mb-1">Quantity: <%= item.quantity %></p>
+                                        <p class="mb-0">Price: ₹<%= item.price * item.quantity %></p>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        <% } %>
+    </div>
+</section>
+
+<%- include("../../views/partials/user/footer") %>

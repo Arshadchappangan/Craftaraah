@@ -10,6 +10,7 @@ const { name } = require('ejs');
 const category = require('../../models/categorySchema');
 const { reviewSubmission } = require('./productController');
 const { use } = require('passport');
+const Order = require('../../models/orderSchema');
 
 
 const generateOtp = () => {
@@ -422,6 +423,27 @@ const deleteAddress = async (req,res) => {
     }
 }
 
+const myOrders = async (req,res) => {
+    try {
+        const user = req.session.user;
+        const orders = await Order.find({userId:user._id}).sort({createdAt:-1}).populate('orderedItems.product');
+        if(orders){
+            res.render('myOrders',{
+                user : user,
+                orders : orders
+            })
+        }else{
+            res.render('myOrders',{
+                user:user
+            })
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound')
+    }
+}
+
 module.exports = {
     loadForgotPassword,
     forgotEmailVerify,
@@ -440,5 +462,6 @@ module.exports = {
     addAddress,
     loadEditAddress,
     editAddress,
-    deleteAddress
+    deleteAddress,
+    myOrders
 }
