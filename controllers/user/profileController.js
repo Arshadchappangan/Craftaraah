@@ -369,6 +369,10 @@ const editAddress = async (req,res) => {
            return res.redirect('/pageNotFound')
         }
 
+        if(findAddress && data.isDefault){
+            await Address.updateOne({userId:user._id},{$set : {"address.$[].isDefault" : false}})
+        }
+
         await Address.updateOne({
             "address._id" : data.id},
             {$set : {

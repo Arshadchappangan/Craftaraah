@@ -43,7 +43,7 @@
                         <h2>Product Details</h2>
                         <div class="breadcrumb__option">
                             <a href="/">Home</a>
-                            <a href="/Sho">Shop</a>
+                            <a href="/Shop">Shop</a>
                             <span>Product Details</span>
                         </div>
                     </div>
@@ -168,7 +168,12 @@
                                             <div class="review-box">
                                               
                                               <div class="review-author">
-                                                <p><strong><%=review[i].userId.name%></strong> - 
+                                                <% if (review[i].userId) { %>
+                                                    <p><strong><%= review[i].userId.name %></strong> -
+                                                  <% } else { %>
+                                                    <p><strong>Unknown User</strong> -
+                                                  <% } %>
+                                                   
                                                     <%for (let j=1;j<=5;j++){%>
                                                         <%if(j <= review[i].rating){%>
                                                             <i style="color:#FFD700;" class="fa fa-star" aria-hidden="true"></i>

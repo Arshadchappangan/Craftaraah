@@ -250,11 +250,13 @@ const loadShopPage = async (req,res) => {
         const limit = 9;
         const skip = (page-1) * limit;
         const products = await Product.find({
+            isDeleted:false,
             isBlocked:false,
             category:{$in:categoryIds}
         }).sort({createdAt:-1}).skip(skip).limit(limit);
 
         const countProducts = await Product.countDocuments({
+            isDeleted:false,
             isBlocked:false,
             category:{$in:categoryIds}
         })

@@ -15,7 +15,8 @@ function generateOrderId() {
   }
   
 
-const loadProductDetails = async(req,res) => {
+const 
+loadProductDetails = async(req,res) => {
     try {
 
         const userId = req.session.user;
@@ -465,8 +466,37 @@ const orderDetails = async(req,res) => {
         const id = req.query.id;
         const order = await Order.findById(id).populate('orderedItems.product').populate('address');
         res.render('orderDetails',{
+            user : user,
             order:order
         })
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound')
+    }
+}
+
+const cancelOrder = async (req,res) => {
+    try {
+        const user = req.session.user;
+        const id = req.query.id;
+        const order = await Order.findById(id);
+
+        const orderedItems = order.orderedItems.map(item => ({
+            product: item._id,
+            quantity : item.quantity
+          }));
+
+
+        for (const item of orderedItems) {
+            await Product.findByIdAndUpdate(
+                item.product,
+                { $inc: { quantity: item.quantity } },
+                { new: true }
+            );
+        }
+
+        res.send('cancelled')
+
     } catch (error) {
         console.error(error);
         res.redirect('/pageNotFound')
@@ -487,5 +517,6 @@ module.exports = {
     checkout,
     placeOrder,
     orderPlaced,
-    orderDetails
+    orderDetails,
+    cancelOrder
 }

@@ -1,96 +1,128 @@
 <%- include("../../views/partials/user/header") %>
 
-<section class="breadcrumb-section set-bg" data-setbg="/user/img/image.png">
-    <div class="container text-center">
-        <div class="breadcrumb__text">
-            <h2>Order Details</h2>
-            <div class="breadcrumb__option">
-                <a href="/">Home</a>
-                <a href="/my-orders">My Orders</a>
-                <span>Order #<%= order.orderId %></span>
-            </div>
-        </div>
+<!-- Breadcrumb Section -->
+<section class="breadcrumb-section set-bg container" data-setbg="/user/img/image.png">
+  <div class="container text-center">
+    <div class="breadcrumb__text">
+      <h2>Order Details</h2>
+      <div class="breadcrumb__option">
+        <a href="/">Home</a>
+        <a href="/my-orders">My Orders</a>
+        <span><%= order.orderId %></span>
+      </div>
     </div>
+  </div>
 </section>
 
+<!-- Order Details Section -->
 <section class="order-details spad">
-    <div class="container">
-        <div class="card shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5>Order ID: <%= order.orderId %></h5>
-                <span class="badge bg-info text-dark"><%= order.status %></span>
-            </div>
-            <div class="card-body">
-                <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
-                <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
-                <p><strong>Total Price:</strong> ₹<%= order.totalPrice %></p>
-                <p><strong>Discount:</strong> ₹<%= order.discount %></p>
-                <p><strong>Final Amount:</strong> ₹<%= order.finalAmount %></p>
+  <div class="container">
+    <div class="card shadow-sm">
+      <!-- Card Header -->
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Order ID: <%= order.orderId %></h5>
+        <span class="badge bg-info text-dark"><%= order.status %></span>
+      </div>
 
-                <hr>
-
-                <h5 class="mb-2">Shipping Address :</h5>
-                <p class="mx-5">
-                    <%= order.address.name %><br>
-                    <%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %><br>
-                    Landmark: <%= order.address.landMark %><br>
-                    Phone: <%= order.address.phone %><br>
-                    Alt Phone: <%= order.address.altPhone %>
-                </p>
-
-                <hr>
-
-                <h5>Ordered Products (<%=order.orderedItems.length%>)</h5>
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col">Image</th>
-                            <th scope="col">Product</th>
-                            <th scope="col">Quantity</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% order.orderedItems.forEach(item => { %>
-                            <tr>
-                                <td class="align-middle"><img src="<%= item.product.productImage[0] %>" width="80" alt="<%= item.product.productName %>"></td>
-                                <td class="align-middle"><%= item.product.productName %></td>
-                                <td class="align-middle"><%= item.quantity %></td>
-                                <td class="align-middle">₹<%= item.price %></td>
-                                <td class="align-middle">₹<%= item.quantity * item.price %></td>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-
-                <div class="text-center mt-4 d-flex justify-content-center gap-3 flex-wrap">
-                    <!-- Download Invoice -->
-                    <a href="/invoice/<%= order._id %>" class="btn btn-outline-primary">
-                        <i class="bi bi-download"></i> Download Invoice
-                    </a>
-
-                    <!-- Request Return -->
-                    <% if (order.status === 'Delivered') { %>
-                        <form action="/return-request/<%= order._id %>" method="POST" onsubmit="return confirm('Are you sure you want to request a return?')">
-                            <button type="submit" class="btn btn-outline-warning">
-                                <i class="bi bi-arrow-counterclockwise"></i> Request Return
-                            </button>
-                        </form>
-                    <% } %>
-
-                    <!-- Cancel Order -->
-                    <% if (order.status === 'Ordered' || order.status === 'Processing') { %>
-                        <form action="/cancel-order/<%= order._id %>" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?')">
-                            <button type="submit" class="btn btn-outline-danger">
-                                <i class="bi bi-x-circle"></i> Cancel Order
-                            </button>
-                        </form>
-                    <% } %>
-                </div>
-            </div>
+      <!-- Card Body -->
+      <div class="card-body">
+        <!-- Order Summary -->
+        <div class="mb-3">
+          <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
+          <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+          <p><strong>Total Price:</strong> ₹<%= order.totalPrice %></p>
+          <p><strong>Discount:</strong> ₹<%= order.discount %></p>
+          <p><strong>Final Amount:</strong> ₹<%= order.finalAmount %></p>
         </div>
+
+        <hr>
+
+        <!-- Shipping Address -->
+        <div class="mb-3">
+          <h5>Shipping Address</h5>
+          <p class="mx-4">
+            <%= order.address.name %><br>
+            <%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %><br>
+            Landmark: <%= order.address.landMark %><br>
+            Phone: <%= order.address.phone %><br>
+            Alt Phone: <%= order.address.altPhone %>
+          </p>
+        </div>
+
+        <hr>
+
+        <!-- Ordered Products -->
+        <h5>Ordered Products (<%= order.orderedItems.length %>)</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">Image</th>
+                <th scope="col">Product</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Price</th>
+                <th scope="col">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% order.orderedItems.forEach(item => { %>
+                <tr>
+                  <td class="align-middle"><img src="<%= item.product.productImage[0] %>" width="80" alt="<%= item.product.productName %>"></td>
+                  <td class="align-middle"><%= item.product.productName %></td>
+                  <td class="align-middle"><%= item.quantity %></td>
+                  <td class="align-middle">₹<%= item.price %></td>
+                  <td class="align-middle">₹<%= item.quantity * item.price %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center mt-4 d-flex justify-content-center gap-3 flex-wrap">
+          <!-- Download Invoice -->
+          <a href="/invoice/<%= order._id %>" class="btn btn-outline-primary">
+            <i class="bi bi-download"></i> Download Invoice
+          </a>
+
+          <!-- Request Return -->
+          <% if (order.status === 'Delivered') { %>
+            <form action="/return-request?id=<%= order._id %>" method="POST" onsubmit="return confirm('Are you sure you want to request a return?')">
+              <button type="submit" class="btn btn-outline-warning">
+                <i class="bi bi-arrow-counterclockwise"></i> Request Return
+              </button>
+            </form>
+          <% } %>
+
+          <!-- Cancel Order -->
+          <% if (order.status === 'Ordered' || order.status === 'Processing') { %>
+              <a onclick="confirmCancel('<%= order._id %>')" class="btn btn-outline-danger">
+                <i class="bi bi-x-circle"></i> Cancel Order
+              </a>
+          <% } %>
+        </div>
+      </div>
     </div>
+  </div>
 </section>
 
 <%- include("../../views/partials/user/footer") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function confirmCancel(id) {
+        Swal.fire({
+        title: 'Are you sure?',
+        text: "This order will be cancelled!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel!'
+        }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `/cancelOrder?id=${id}`;
+        }
+        });
+}
+</script>

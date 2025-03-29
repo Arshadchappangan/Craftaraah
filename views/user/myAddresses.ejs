@@ -74,7 +74,10 @@
                             </a>
                         </div>
                         <div class="hero__categories__all" >
-                            <span>My Orders</span>
+                            <a href="/myOrders">
+                                <span>My Orders</span>
+                            </a>
+
                         </div>
                         <div class="hero__categories__all" >
                             <span>Wallet</span>
@@ -167,14 +170,8 @@
                             <% }) %>
                         <% }) %>
                     <% } else { %>
-                        <div class="main col-lg-6">
-                            <div class="card d-flex flex-row">
-                                <div class="">
-                                    <div class="card-body">
-                                        <h3>No Addresses found</h3>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="text-center mt-4 mx-auto">
+                            <h4>No Addresses added yet</h4>
                         </div>
                     <% } %>
                     

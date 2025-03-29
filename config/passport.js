@@ -12,6 +12,7 @@ passport.use(new googleStrategy({
 
     async (req,accessToken, refrechToken, profile, done) => {
         try {
+            console.log('client Id : ',process.env.GOOGLE_CLIENT_ID)
             let user = await User.findOne({ googleId: profile.id })
             if (user) {
                 return done(null, user)
