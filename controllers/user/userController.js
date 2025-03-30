@@ -240,50 +240,56 @@ const logout = async (req, res) => {
 }
 
 
-const loadShopPage = async (req,res) => {
+const loadShopPage = async (req, res) => {
     try {
         const user = req.session.user;
-        const userData = await User.findOne({_id:user})
-        const categories = await Category.find({isListed:true});
-        const categoryIds = categories.map(category => category._id.toString())
+        const userData = await User.findOne({ _id: user });
+        const categories = await Category.find({ isListed: true });
+        const categoryIds = categories.map(cat => cat._id);
+
+        let filteredProducts = await Product.find({
+            isDeleted: false,
+            isBlocked: false,
+            category: { $in: categoryIds }
+        });
+
+        const productIds = filteredProducts.map(p => p._id);
+        userData.savedFilteredProducts = productIds;
+        await userData.save();
+
         const page = parseInt(req.query.page) || 1;
         const limit = 9;
-        const skip = (page-1) * limit;
-        const products = await Product.find({
-            isDeleted:false,
-            isBlocked:false,
-            category:{$in:categoryIds}
-        }).sort({createdAt:-1}).skip(skip).limit(limit);
+        const totalPages = Math.ceil(filteredProducts.length / limit);
+        const skip = (page - 1) * limit;
+        filteredProducts = filteredProducts.slice(skip, skip + limit);
 
-        const countProducts = await Product.countDocuments({
-            isDeleted:false,
-            isBlocked:false,
-            category:{$in:categoryIds}
-        })
+        res.render('shop-grid', {
+            user: userData,
+            products: filteredProducts,
+            category: categories,
+            totalPages,
+            currentPage: page
+        });
 
-        const totalPages = Math.ceil(countProducts/limit);
-
-        const categoryWithIds = categories.map(category => ({_id:category.id,name:category.name})); 
-
-        res.render('shop-grid',{
-            user:userData,
-            products : products,
-            category : categoryWithIds,
-            totalProducts : countProducts,
-            currentPage : page,
-            totalPages : totalPages
-        })
     } catch (error) {
-        res.redirect('pageNotFound')
+        console.log(error.message);
+        res.redirect('/pageNotFound');
     }
-}
+};
+
 
 const filterProducts = async (req,res) => {
     try {
         const user = req.session.user;
-        const category = req.query.category
+        const category = req.query.category;
+        const search = req.session.searchKeyword || '';
         const findCategory = category ? await Category.findOne({_id:category}) : null; 
+
+
+
         let findProducts = await Product.find({
+            productName: { $regex: '.*' + search + '.*', $options: "i" },
+            isDeleted : false,
             isBlocked : false,
             category : findCategory._id
         }).lean();
@@ -308,11 +314,14 @@ const filterProducts = async (req,res) => {
                     searchedOn : new Date()
                 }
                 userData.searchHistory.push(searchEntry)
+
+                const filteredProductIds = currentProduct.map(p => p._id);
+                userData.savedFilteredProducts = filteredProductIds;
+
                 await userData.save();
             }
         }
 
-        req.session.filteredProducts = currentProduct
 
         res.render('shop-grid',{
             user : userData,
@@ -333,12 +342,15 @@ const filterProducts = async (req,res) => {
 const filterPrice = async (req,res) => {
     try {
         const user = req.session.user;
+        const search = req.session.searchKeyword || '';
         const userData = await User.findOne({_id:user});
         const categories = await Category.find({isListed:true}).lean();
         const {gt,lt} = req.query
         let findProducts = await Product.find({
+            productName: { $regex: '.*' + search + '.*', $options: "i" },
             salePrice: {$gt:gt,$lt:lt},
-            isBlocked:false
+            isBlocked:false,
+            isDeleted:false
         }).lean()
 
         findProducts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -350,7 +362,10 @@ const filterPrice = async (req,res) => {
         let totalPages = Math.ceil(findProducts.length/itemsPerPage);
         let currentProduct = findProducts.slice(startIndex,endIndex)
 
-        req.session.filteredProducts = currentProduct;
+        const filteredProductIds = currentProduct.map(p => p._id);
+        userData.savedFilteredProducts = filteredProductIds;
+
+        await userData.save();
 
         res.render('shop-grid',{
             user : userData,
@@ -370,20 +385,22 @@ const filterPrice = async (req,res) => {
 const searchProducts = async (req, res) => {
     try {
         const user = req.session.user;
-        const userData = await User.findOne({ _id: user });
+        const userData = await User.findOne({ _id: user }).populate('savedFilteredProducts');
         const search = req.body.query;
+        req.session.searchKeyword = search;
         const categories = await Category.find({ isListed: true }).lean();
         const categoryIds = categories.map(category => category._id.toString());
 
-        if (search === '') { 
-            req.session.filteredProducts = null;
-            return res.redirect('/shop'); 
+        if (search === '') {
+            userData.savedFilteredProducts = [];
+            await userData.save();
+            return res.redirect('/shop');
         }
 
         let searchResult = [];
 
-        if (req.session.filteredProducts && req.session.filteredProducts.length > 0) {
-            searchResult = req.session.filteredProducts.filter(product => 
+        if (userData.savedFilteredProducts && userData.savedFilteredProducts.length > 0) {
+            searchResult = userData.savedFilteredProducts.filter(product =>
                 product.productName.toLowerCase().includes(search.toLowerCase())
             );
         } else {
@@ -416,50 +433,48 @@ const searchProducts = async (req, res) => {
 };
 
 
-const sortProducts = async (req,res) => {
+const sortProducts = async (req, res) => {
     try {
         const user = req.session.user;
         const sortBy = req.query.by || 'createdAt';
         const type = parseInt(req.query.type) || -1;
-        const userData = await User.findOne({_id:user});
-        const categories = await Category.find({isListed:true});
-        const categoryIds = categories.map(category => category._id.toString())
+        const userData = await User.findOne({ _id: user }).populate('savedFilteredProducts');
+        const categories = await Category.find({ isListed: true });
+        const categoryIds = categories.map(category => category._id.toString());
+
         const page = parseInt(req.query.page) || 1;
         const limit = 9;
-        const skip = (page-1) * limit;
-        let products;
-        let sortedProducts = req.session.filteredProducts ? [...req.session.filteredProducts] : [];
-        
-        if(req.session.filteredProducts && req.session.filteredProducts.length > 0){
-            type===1 ? sortedProducts.sort((a,b) => a[sortBy] - b[sortBy]) : sortedProducts.sort((a,b) => b[sortBy] - a[sortBy])
-        }else{
-            products = await Product.find({
-                isBlocked : false,
-                category:{$in:categoryIds}
-            }).sort({[sortBy]:type}).lean()
+        const skip = (page - 1) * limit;
+
+        let sortedProducts;
+
+        if (userData.savedFilteredProducts && userData.savedFilteredProducts.length > 0) {
+            sortedProducts = [...userData.savedFilteredProducts];
+            sortedProducts.sort((a, b) =>
+                type === 1 ? a[sortBy] - b[sortBy] : b[sortBy] - a[sortBy]
+            );
+        } else {
+            sortedProducts = await Product.find({
+                isBlocked: false,
+                category: { $in: categoryIds }
+            }).sort({ [sortBy]: type }).lean();
         }
 
-        sortedProducts = sortedProducts.length > 0 ? sortedProducts : products;
-        
-
-        let itemsPerPage = 9
-        let currentPage = parseInt(req.query.page) || 1;
-        let totalPages = Math.ceil(sortedProducts.length/itemsPerPage);
-
+        const totalPages = Math.ceil(sortedProducts.length / limit);
         sortedProducts = sortedProducts.slice(skip, skip + limit);
 
-        res.render('shop-grid',{
-            user : userData,
-            products : sortedProducts,
-            category : categories,
+        res.render('shop-grid', {
+            user: userData,
+            products: sortedProducts,
+            category: categories,
             totalPages,
-            currentPage,
-        })
+            currentPage: page
+        });
     } catch (error) {
-        console.log(error)
-        res.redirect('pageNotFound')
+        console.log(error);
+        res.redirect('/pageNotFound');
     }
-}
+};
 
 
 
