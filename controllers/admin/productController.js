@@ -66,9 +66,6 @@ const addProducts = async (req, res) => {
 
         if (!productExists) {
             const images = []
-            if (!req.files || req.files.length === 0) {
-                return res.status(400).json({ error: "No image uploaded!" });
-            }
 
             if (req.files && req.files.length > 0) {
                 for (let file of req.files) {
@@ -125,56 +122,55 @@ const loadEditProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
     try {
+        console.log("Received files:", req.files);
+        console.log("Received body:", req.body);
+
         const productId = req.params.id;
-        const updatedData = req.body;
 
-        let product = await Product.findById(productId);
-        let category = await Category.findOne({name:updatedData.category})
-
-        if (!product) {
-            return res.status(404).json({ error: "Product not found!" });
+        // 🟢 Ensure existingImages is always an array
+        let existingImages = req.body['existingImages[]'];
+        if (!Array.isArray(existingImages)) {
+            existingImages = existingImages ? [existingImages] : []; // Convert string to array
         }
 
-        const productExists = await Product.findOne({
-            productName: product.productName,
-            _id: { $ne: productId }
-        })
-
-        if (productExists) {
-            return res.status(400).json({ error: "Product with this name already exists, please try another name" })
-        }
-
-        let images = []
+        // 🟢 Process new images (resize and store paths)
+        const newImages = [];
         if (req.files && req.files.length > 0) {
             for (let file of req.files) {
                 const originalImagePath = file.path;
-                const extension = path.extname(file.filename);
-                const timestamp = Date.now()
+                const extension = path.extname(file.originalname);
+                const timestamp = Date.now();
                 const resizedImagePath = path.join('public', 'uploads', 'product-images', `resized-${timestamp}${extension}`);
 
                 await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
-                images.push(`/uploads/product-images/resized-${timestamp}${extension}`);
+
+                newImages.push(`/uploads/product-images/resized-${timestamp}${extension}`);
             }
         }
 
+        // 🟢 Update product details in database
+        const updatedProduct = await Product.findByIdAndUpdate(
+            productId,
+            {
+                $set: { ...req.body },
+                $push: { productImage: { $each: [...newImages] } }, // ✅ Adds new images instead of replacing all
+            },
+            { new: true }
+        );
+        
 
-        await Product.findByIdAndUpdate(productId, {
-            productName: updatedData.productName,
-            description: updatedData.description,
-            category: category._id,
-            regularPrice: updatedData.regularPrice,
-            salePrice: updatedData.salePrice,
-            quantity: updatedData.quantity,
-            productImage: images,
-            updatedAt: new Date(),
-        });
-
-        res.redirect('/admin/products');
+        if (updatedProduct) {
+            return res.json({ status: true, message: "Product updated successfully!" });
+        } else {
+            return res.status(404).json({ status: false, message: "Product not found!" });
+        }
     } catch (error) {
         console.error("Error updating product:", error);
-        res.redirect('/admin/pageError');
+        return res.status(500).json({ status: false, message: "Internal Server Error" });
     }
 };
+
+
 
 
 const deleteImage = async (req, res) => {

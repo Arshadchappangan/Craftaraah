@@ -40,9 +40,12 @@ router.get('/restoreCategory',adminAuth,categoryController.restoreCategory)
 
 router.get('/products',adminAuth,productController.productInfo);
 router.get('/addProducts',adminAuth,productController.loadAddProducts);
-router.post('/addProducts',adminAuth,multer.array('images',4),productController.addProducts);
+router.post('/addProducts',adminAuth,multer.array('croppedImages',10),productController.addProducts);
 router.get('/editProduct',adminAuth,productController.loadEditProduct)
-router.post('/editProduct/:id',adminAuth,multer.array('images',4),productController.editProduct);
+router.post('/editProduct/:id',adminAuth,multer.array([
+    { name: 'newImages', maxCount: 5 },
+    { name: 'croppedImages', maxCount: 5 }
+]),productController.editProduct);
 router.post('/deleteImage',adminAuth,productController.deleteImage)
 router.get('/archivedProducts',adminAuth,productController.archivedProductInfo);
 router.get('/archiveProduct',adminAuth,productController.archiveProduct);

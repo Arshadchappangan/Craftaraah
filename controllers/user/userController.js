@@ -244,7 +244,7 @@ const loadShopPage = async (req, res) => {
     try {
         const user = req.session.user;
         const userData = await User.findOne({ _id: user });
-        const categories = await Category.find({ isListed: true });
+        const categories = await Category.find({ isListed: true,isDeleted:false });
         const categoryIds = categories.map(cat => cat._id);
 
         let filteredProducts = await Product.find({

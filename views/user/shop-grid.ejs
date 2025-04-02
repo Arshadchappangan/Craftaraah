@@ -144,10 +144,22 @@
                         </div>
                     </div>
                     <div class="row" id="productsContainer">
-                        <%for(let i=0;i<products.length;i++){%>
+                        <% for(let i = 0; i < products.length; i++) { 
+                            let discount = Math.round(((products[i].regularPrice - products[i].salePrice) / products[i].regularPrice) * 100);
+                        %>
+                        <div class="col-lg-4 col-md-6 col-sm-6 product-item" 
+                             data-createdAt="<%= products[i].createdAt %>" 
+                             data-price="<%= products[i].salePrice %>" 
+                             data-name="<%= products[i].productName %>">
+                             
+                            <div class="product__item position-relative">
+                                <!-- ✅ Discount badge -->
+                                <% if (discount > 0) { %>
+                                <div style="position: absolute; top: 10px; left: 10px; background-color: red; color: white; font-size: 13px; padding: 2px 6px; border-radius: 5px; z-index: 10;">
+                                    -<%= discount %>%
+                                </div>
+                                <% } %>
                         
-                        <div class="col-lg-4 col-md-6 col-sm-6 product-item" data-createdAt="<%= products[i].createdAt %>" data-price="<%= products[i].salePrice %>" data-name="<%= products[i].productName %>">
-                            <div class="product__item">
                                 <div class="product__item__pic set-bg" data-setbg="<%=products[i].productImage[0]%>">
                                     <ul class="product__item__pic__hover">
                                         <li onclick="addToWishlist('<%=products[i]._id%>')"><a><i class="fa fa-heart"></i></a></li>
@@ -156,11 +168,14 @@
                                 </div>
                                 <div class="product__item__text">
                                     <h6><a href="/productDetails?id=<%=products[i]._id%>"><%=products[i].productName%></a></h6>
-                                    <p class="d-flex justify-content-between"><span style="color: black;"><b>₹<%=products[i].salePrice%></b></span><span class="text-muted"><strike>₹<%=products[i].regularPrice%></strike></span></p>
+                                    <p class="d-flex justify-content-between">
+                                        <span style="color: black;"><b>₹<%=products[i].salePrice%></b></span>
+                                        <span class="text-muted"><strike>₹<%=products[i].regularPrice%></strike></span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
-                        <%}%>
+                        <% } %>                        
 
                     </div>
 

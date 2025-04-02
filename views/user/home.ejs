@@ -99,24 +99,38 @@
                 </div>
             </div>
             <div class="row" id="productsContainer">
-                <%for(let i=product.length-1;i>product.length-9;i--){%>
-                
-                <div class="col-lg-3 col-md-6 col-sm-6 product-item" data-createdAt="<%= product[i].createdAt %>" data-price="<%= product[i].salePrice %>" data-name="<%= product[i].productName %>">
-                    <div class="product__item">
-                        <div class="product__item__pic set-bg" data-setbg="<%=product[i].productImage[0]%>">
+                <% for (let i = product.length - 1; i > product.length - 9; i--) {
+                    let discount = Math.round(((product[i].regularPrice - product[i].salePrice) / product[i].regularPrice) * 100);
+                %>
+                <div class="col-lg-3 col-md-6 col-sm-6 product-item"
+                     data-createdAt="<%= product[i].createdAt %>"
+                     data-price="<%= product[i].salePrice %>"
+                     data-name="<%= product[i].productName %>">
+                     
+                    <div class="product__item position-relative">
+                        <% if (discount > 0) { %>
+                        <div style="position: absolute; top: 10px; left: 10px; background-color: red; color: white; font-size: 13px; padding: 2px 6px; border-radius: 5px; z-index: 10;">
+                            <%= discount %>% OFF
+                        </div>
+                        <% } %>
+                        
+                        <div class="product__item__pic set-bg" data-setbg="<%= product[i].productImage[0] %>">
                             <ul class="product__item__pic__hover">
                                 <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                 <li><a href="#"><i class="fa fa-shopping-cart"></i></a></li>
                             </ul>
                         </div>
                         <div class="product__item__text">
-                            <h6><a href="/productDetails?id=<%=product[i]._id%>"><%=product[i].productName%></a></h6>
-                            <p class="d-flex justify-content-between"><span style="color: black;"><b>₹<%=product[i].salePrice%></b></span><span class="text-muted"><strike>₹<%=product[i].regularPrice%></strike></span></p>
+                            <h6><a href="/productDetails?id=<%= product[i]._id %>"><%= product[i].productName %></a></h6>
+                            <p class="d-flex justify-content-between">
+                                <span style="color: black;"><b>₹<%= product[i].salePrice %></b></span>
+                                <span class="text-muted"><strike>₹<%= product[i].regularPrice %></strike></span>
+                            </p>
                         </div>
                     </div>
                 </div>
-                <%}%>
-
+                <% } %>
+                
             </div>
         </div>
         
