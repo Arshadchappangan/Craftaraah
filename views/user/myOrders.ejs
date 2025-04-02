@@ -60,7 +60,21 @@
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <span><strong>Order ID:</strong> <%= order.orderId %></span>
                             <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-success text-light"><%= order.status %></span>
+
+                                <%if(order.status === "Ordered"){%>
+                                    <span class="badge bg-secondary text-light"><%= order.status %></span>
+                                  <%}else if(order.status === "Cancelled"){%>
+                                    <span class="badge bg-danger text-light"><%= order.status %></span>
+                                  <%}else if(order.status === "Shipped"){%>
+                                    <span class="badge bg-info text-dark"><%= order.status %></span>
+                                  <%}else if(order.status === "Delivered"){%>
+                                    <span class="badge bg-success text-light"><%= order.status %></span>
+                                  <%}else if(order.status === "Return Requested"){%>
+                                    <span class="badge bg-warning text-dark"><%= order.status %></span>
+                                  <%}else{%>
+                                    <span class="badge bg-dark text-light"><%= order.status %></span>
+                                    <%}%>
+
                                 <a href="/orderDetails?id=<%=order._id%>" class="btn btn-sm btn-outline-primary mx-3">View Details</a>
                             </div>
                         </div>

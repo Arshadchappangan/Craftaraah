@@ -120,31 +120,34 @@
                                 <div>
                                     <h6>Shipping Address</h6>
                                     <div class="row">
-                                        <% for(let i = 0; i < address.address.length; i++) { %>
-                                            <div class="col-md-6 mb-3">
-                                                <input type="radio" name="selectedAddress" value="<%= i %>" id="addr<%= i %>" class="d-none" <%= address.address[i].isDefault ? 'checked' : '' %> />
-                                                
-                                                <label for="addr<%= i %>" class="selectable-card w-100 h-100 p-3 border rounded d-block">
-                                                    <address>
-                                                        <strong><%= address.address[i].addressType %></strong><br>
-                                                        <%= address.address[i].name %><br>
-                                                        <%= address.address[i].landMark %>, <%= address.address[i].city %><br>
-                                                        <%= address.address[i].state %> - <%= address.address[i].pincode %><br>
-                                                        <%= address.address[i].phone %>, <%= address.address[i].altPhone %><br>
-                                                    </address>
-                                                    <a href="/editAddress?id=<%= address.address[i]._id %>&source=checkout" class="text-decoration-none">
-                                                        Edit
-                                                    </a>
-                                                </label>
-                                                
-                                            </div>
+                                        <% if (address && address.address && address.address.length > 0) { %>
+                                            <% for(let i = 0; i < address.address.length; i++) { %>
+                                                <div class="col-md-6 mb-3">
+                                                    <input type="radio" name="selectedAddress" value="<%= i %>" id="addr<%= i %>" class="d-none" <%= address.address[i].isDefault ? 'checked' : '' %> />
+                                                    <label for="addr<%= i %>" class="selectable-card w-100 h-100 p-3 border rounded d-block">
+                                                        <address>
+                                                            <strong><%= address.address[i].addressType %></strong><br>
+                                                            <%= address.address[i].name %><br>
+                                                            <%= address.address[i].landMark %>, <%= address.address[i].city %><br>
+                                                            <%= address.address[i].state %> - <%= address.address[i].pincode %><br>
+                                                            <%= address.address[i].phone %>, <%= address.address[i].altPhone %><br>
+                                                        </address>
+                                                        <a href="/editAddress?id=<%= address.address[i]._id %>&source=checkout" class="text-decoration-none">
+                                                            Edit
+                                                        </a>
+                                                    </label>
+                                                </div>
+                                            <% } %>
+                                        <% } else { %>
+                                            <h7 class="mx-auto">No address found. Please add an address.</h7>
                                         <% } %>
+                                        
                                     </div>
                                     
                                 </div>
                             </div>
                             <div class="checkout__input__checkbox">
-                                Ship to a different address ?
+                                Add a new address ?
                                 <a href="/addAddress?source=checkout" class="text-decoration-none">
                                      Add
                                 </a>

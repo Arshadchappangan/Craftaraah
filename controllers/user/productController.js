@@ -487,7 +487,7 @@ const cancelOrder = async (req,res) => {
           }));
 
 
-        for (const item of orderedItems) {
+        for (const item of order.orderedItems) {
             await Product.findByIdAndUpdate(
                 item.product,
                 { $inc: { quantity: item.quantity } },
@@ -495,11 +495,13 @@ const cancelOrder = async (req,res) => {
             );
         }
 
-        res.send('cancelled')
+        order.status = "Cancelled"
+        await order.save();
+        return res.json({ success: true, message: "Order cancelled successfully!" });
 
     } catch (error) {
         console.error(error);
-        res.redirect('/pageNotFound')
+        return res.status(500).json({ success: false, message: "Something went wrong" });
     }
 }
 
