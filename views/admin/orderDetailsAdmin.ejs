@@ -1,0 +1,143 @@
+<%- include("../../views/partials/admin/header") %>
+
+<div class="container">
+    <div class="page-inner">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+            <div class="container d-flex justify-content-between">
+                <h3 class="fw-bold mb-3">Order Details</h3>
+                <a href="/admin/orders" class="btn btn-secondary">Back to Orders</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-10">
+                <div class="card card-round">
+                    <div class="card-header d-flex justify-content-between">
+                        <h4 class="card-title">#<%= order.orderId %></h4>
+                        <div>
+                            <select id="orderStatus" class="form-select">
+                                <option value="Ordered" <%= order.status === "Ordered" ? "selected" : "" %>>Ordered</option>
+                                <option value="Processing" <%= order.status === "Processing" ? "selected" : "" %>>Processing</option>
+                                <option value="Shipped" <%= order.status === "Shipped" ? "selected" : "" %>>Shipped</option>
+                                <option value="Delivered" <%= order.status === "Delivered" ? "selected" : "" %>>Delivered</option>
+                                <option value="Cancelled" <%= order.status === "Cancelled" ? "selected" : "" %>>Cancelled</option>
+                                <option value="Return Requested" <%= order.status === "Return Requested" ? "selected" : "" %>>Return Requested</option>
+                                <option value="Returned" <%= order.status === "Returned" ? "selected" : "" %>>Returned</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5>Customer</h5>
+                        <p><strong>Full name:</strong> <%= order.userId.name %></p>
+                        <p><strong>Email:</strong> <%= order.userId.email %></p>
+                        <p><strong>Phone Number:</strong> <%= order.userId.phone %></p>
+                        <p><strong>Shipping Address:</strong></p> <p><%= order.address.landMark %> <br> <%= order.address.city %> <br> <%= order.address.state %> <br> <%= order.address.pincode %> </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+
+        
+
+        <div class="row mt-4">
+            <div class="col-md-1"></div>
+            <div class="col-md-10">
+                <div class="card card-round">
+                    <div class="card-header">
+                        <h4 class="card-title">Items</h4>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th scope="col" class="text-start"></th>
+                                    <th scope="col" class="text-start">Product</th>
+                                    <th scope="col" class="text-center">Unit Price</th>
+                                    <th scope="col" class="text-center">Quantity</th>
+                                    <th scope="col" class="text-center">Total Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% order.orderedItems.forEach(item => { %>
+                                    <tr>
+                                        <td class="text-start"><img style="height: 80px;" src="<%= item.product.productImage[0]%>" alt=""></td>
+                                        <td class="text-start"><%= item.product.productName %></td>
+                                        <td class="text-center">₹ <%= item.product.salePrice%></td>
+                                        <td class="text-center"><%= item.quantity %></td>
+                                        <td class="text-center">₹ <%= item.price %></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-1"></div>
+            <div class="col-md-10 text-center">
+                <button class="btn btn-primary">Invoice</button>
+                <button class="btn btn-danger">Refund</button>
+                <button class="btn btn-warning">Edit</button>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container-fluid d-flex justify-content-between">
+        <div class="copyright">
+            2024, made with <i class="fa fa-heart heart text-danger"></i> by ThemeKita
+        </div>
+    </div>
+</footer>
+
+<script src="/assets/js/core/jquery-3.7.1.min.js"></script>
+<script src="/assets/js/core/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.getElementById("orderStatus").addEventListener("change", function() {
+        console.log('inside');
+        const newStatus = this.value;
+        const orderId = "<%= order._id %>";
+
+        fetch(`/admin/updateOrderStatus/${orderId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: "Success!",
+                    text: "Order status updated successfully!",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                });
+            } else {
+                Swal.fire({
+                    title: "Error!",
+                    text: "Failed to update order status.",
+                    icon: "error",
+                    confirmButtonText: "Try Again"
+                });
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            Swal.fire({
+                title: "Error!",
+                text: "Something went wrong. Please try again.",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+        });
+    });
+</script>

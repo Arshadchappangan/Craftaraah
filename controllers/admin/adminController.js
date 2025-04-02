@@ -3,6 +3,7 @@ const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema')
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const Order = require('../../models/orderSchema')
 
 
 const loadLogin = (req, res) => {
@@ -38,6 +39,7 @@ const loadDashboard = async (req, res) => {
         const users = await User.find({});
         const products = await Product.find({});
         const categories = await Category.find({isDeleted:false})
+        const orders = await Order.find({});
 
 
         if (!req.session.admin) {
@@ -46,7 +48,8 @@ const loadDashboard = async (req, res) => {
         res.render('dashboard',{
             customers : users,
             products:products,
-            categories:categories
+            categories:categories,
+            orders:orders
         })
     } catch (error) {
         res.redirect('/pageError')

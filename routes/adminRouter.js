@@ -3,7 +3,8 @@ const router = express.Router();
 const adminController = require('../controllers/admin/adminController');
 const customerController = require('../controllers/admin/customerController');
 const categoryController = require('../controllers/admin/categoryController');
-const productController = require('../controllers/admin/productController')
+const productController = require('../controllers/admin/productController');
+const orderController = require('../controllers/admin/orderController')
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const multer = require('../middlewares/multer')
 
@@ -51,5 +52,11 @@ router.get('/archivedProducts',adminAuth,productController.archivedProductInfo);
 router.get('/archiveProduct',adminAuth,productController.archiveProduct);
 router.get('/restoreProduct',adminAuth,productController.restoreProduct);
 router.get('/deleteProduct',adminAuth,productController.deleteProduct);
+
+//order management
+
+router.get('/orders',adminAuth,orderController.viewOrders);
+router.get('/orderDetails',adminAuth,orderController.viewDetails);
+router.put('/updateOrderStatus/:id',adminAuth,orderController.updateOrderStatus);
 
 module.exports = router
