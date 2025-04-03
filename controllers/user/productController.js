@@ -6,7 +6,9 @@ const Cart = require('../../models/cartSchema');
 const Wishlist = require('../../models/wishlistSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
-
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const path = require('path');
 
 function generateOrderId() {
     const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
@@ -527,6 +529,122 @@ const returnOrder = async (req,res) => {
     }
 }
 
+
+const downloadInvoice = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const order = await Order.findById(id).populate("orderedItems.product");
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        // Ensure the invoices directory exists
+        const invoicesDir = path.join(__dirname, "../../public/invoices");
+        if (!fs.existsSync(invoicesDir)) {
+            fs.mkdirSync(invoicesDir, { recursive: true });
+        }
+
+        // Define the PDF path
+        const pdfPath = path.join(invoicesDir, `invoice_${order.orderId}.pdf`);
+        const doc = new PDFDocument({ margin: 50 });
+
+        // Stream the PDF to a file
+        const stream = fs.createWriteStream(pdfPath);
+        doc.pipe(stream);
+
+        // Colors
+        const primaryColor = "#000000"; // Black
+        const secondaryColor = "#555555"; // Dark Gray
+        const accentColor = "#007BFF"; // Blue
+
+        // Header - Company Info and Logo
+        const logoPath = path.join(__dirname, "../../public/logo.png");
+        if (fs.existsSync(logoPath)) {
+            doc.image(logoPath, 50, 30, { width: 60 });
+        }
+
+        doc.fillColor(primaryColor)
+            .fontSize(20)
+            .text("Craftaraah", 130, 40)
+            .fontSize(10)
+            .text("Irumbuchola Subway", 130, 60)
+            .text("AR Nagar, Malappuram", 130, 75)
+            .text("Kerala, India", 130, 90)
+            .moveDown();
+
+        // Add a horizontal line separator
+        doc.moveTo(50, 110).lineTo(550, 110).stroke();
+
+        // Invoice Title
+        doc.fillColor(accentColor).fontSize(25).text("INVOICE", 400, 130);
+
+        // Invoice Details
+        doc.fillColor(primaryColor)
+            .fontSize(10)
+            .text(`Invoice No: ${order.orderId}`, 400, 160)
+            .text(`Date: ${new Date().toDateString()}`, 400, 175)
+            .moveDown();
+
+        // Bill To
+        doc.fontSize(12).fillColor(accentColor).text("Bill To:", 50, 160);
+        doc.fillColor(primaryColor).font("Helvetica-Bold").text(order.address.name, 50, 175);
+        doc.font("Helvetica").text(`${order.address.city}, ${order.address.state}`, 50, 190);
+        doc.text(`Phone: ${order.address.phone}`, 50, 205);
+
+        doc.moveDown();
+
+        // Table Header
+        doc.fillColor("white")
+            .rect(50, 230, 500, 25)
+            .fill()
+            .fillColor("black")
+            .font("Helvetica-Bold")
+            .text("Item", 55, 235)
+            .text("Qty", 250, 235)
+            .text("Price", 320, 235)
+            .text("Total", 400, 235);
+
+        // Table Rows
+        let y = 260;
+        doc.fillColor(primaryColor).font("Helvetica");
+        order.orderedItems.forEach((item, index) => {
+            if (index % 2 === 0) {
+                doc.fillColor("#F0F0F0").rect(50, y - 5, 500, 20).fill().fillColor(primaryColor);
+            }
+            doc.text(item.product.productName, 55, y);
+            doc.text(item.quantity.toString(), 250, y);
+            doc.text(`${item.price.toFixed(2)}`, 320, y);
+            doc.text(`${(item.quantity * item.price).toFixed(2)}`, 400, y);
+            y += 25;
+        });
+
+        // Line Separator
+        doc.moveTo(50, y + 5).lineTo(550, y + 5).stroke();
+
+        // Total Amount
+        doc.fillColor(primaryColor).font("Helvetica-Bold");
+        doc.text(`Subtotal: ${order.totalPrice.toFixed(2)}`, 400, y + 20);
+        doc.text(`Discount: ${order.discount.toFixed(2)}`, 400, y + 40);
+        doc.text(`Total: ${order.finalAmount.toFixed(2)}`, 400, y + 60);
+
+        // Footer
+        doc.moveDown().fontSize(10).fillColor(secondaryColor).text("Thank you for your purchase!", 50, y + 100);
+
+        // Finalize PDF file
+        doc.end();
+
+        // Wait for the file to be written before sending response
+        stream.on("finish", () => {
+            res.download(pdfPath, `invoice_${order.orderId}.pdf`);
+        });
+
+    } catch (error) {
+        console.error("Error generating invoice:", error);
+        res.status(500).json({ success: false, message: "Error generating invoice" });
+    }
+};
+
 module.exports = {
     loadProductDetails,
     reviewSubmission,
@@ -543,5 +661,6 @@ module.exports = {
     orderPlaced,
     orderDetails,
     cancelOrder,
-    returnOrder
+    returnOrder,
+    downloadInvoice
 }

@@ -85,6 +85,7 @@ router.get('/orderPlaced',userAuth,productController.orderPlaced);
 router.get('/orderDetails',userAuth,productController.orderDetails);
 router.post('/cancelOrder',userAuth,productController.cancelOrder);
 router.post('/returnOrder',userAuth,productController.returnOrder);
+router.get('/invoice/:id',userAuth,productController.downloadInvoice);
 
 
 module.exports = router;
