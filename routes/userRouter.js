@@ -83,7 +83,8 @@ router.get('/checkout',userAuth,productController.checkout);
 router.post('/placeOrder',userAuth,productController.placeOrder);
 router.get('/orderPlaced',userAuth,productController.orderPlaced);
 router.get('/orderDetails',userAuth,productController.orderDetails);
-router.post('/cancelOrder',userAuth,productController.cancelOrder)
+router.post('/cancelOrder',userAuth,productController.cancelOrder);
+router.post('/returnOrder',userAuth,productController.returnOrder);
 
 
 module.exports = router;

@@ -60,6 +60,22 @@ const orderSchema = new Schema({
         enum : ['Ordered','Processing','Shipped','Delivered','Cancelled','Return Requested','Returned'],
         default : 'Ordered'
     },
+    returnRequest : {
+        status : {
+            type : String,
+            enum : ['Requested','Approved','Rejected','Completed'],
+            default : null
+        },
+        reason : {
+            type : String,
+            required : true,
+        },
+        requestedAt : {
+            type : Date,
+            default : Date.now()
+        }
+
+    },
     createdAt : {
         type : Date,
         default : Date.now()

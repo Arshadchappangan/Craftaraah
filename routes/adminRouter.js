@@ -58,5 +58,8 @@ router.get('/deleteProduct',adminAuth,productController.deleteProduct);
 router.get('/orders',adminAuth,orderController.viewOrders);
 router.get('/orderDetails',adminAuth,orderController.viewDetails);
 router.put('/updateOrderStatus/:id',adminAuth,orderController.updateOrderStatus);
+router.get('/returns',adminAuth,orderController.viewReturns);
+router.post('/approveReturn',adminAuth,orderController.approveReturn);
+router.post('/rejectReturn',adminAuth,orderController.rejectReturn);
 
 module.exports = router

@@ -1,4 +1,5 @@
 const Order = require('../../models/orderSchema');
+const { removeFromWishlist } = require('../user/productController');
 
 
 const viewOrders = async(req,res) => {
@@ -44,8 +45,56 @@ const updateOrderStatus = async (req,res) => {
     }
 }
 
+const viewReturns = async (req,res) => {
+    try {
+        const returns = await Order.find({status:{$in:['Return Requested','Returned']}})
+        .sort({'returnRequest.requestedAt':-1})
+        .populate('userId');
+
+        res.render('returns',{
+            returns : returns
+        })
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound');
+    }
+}
+
+const approveReturn = async(req,res) => {
+    try {
+        const id = req.query.id;
+        const order = await Order.findById(id);
+
+        order.returnRequest.status = "Approved";
+        await order.save();
+
+        res.json({success:true,message:"Return request is approved"})
+    } catch (error) {
+        console.error(error);
+        res.json({success:false,message:"Something went wrong!"})
+    }
+}
+
+const rejectReturn = async(req,res) => {
+    try {
+        const id = req.query.id;
+        const order = await Order.findById(id);
+
+        order.returnRequest.status = "Rejected";
+        await order.save();
+
+        res.json({success:true,message:"Return request is rejected"});
+    } catch (error) {
+        console.error(error);
+        res.json({success:false,message:"Something went wrong!"})
+    }
+}
+
 module.exports = {
     viewOrders,
     viewDetails,
-    updateOrderStatus
+    updateOrderStatus,
+    viewReturns,
+    approveReturn,
+    rejectReturn
 }

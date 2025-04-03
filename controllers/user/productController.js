@@ -505,6 +505,28 @@ const cancelOrder = async (req,res) => {
     }
 }
 
+
+const returnOrder = async (req,res) => {
+    try {
+        const id = req.query.id;
+        const reason = req.body.reason;
+        const order = await Order.findById(id);
+
+        order.returnRequest = {
+            status : "Requested",
+            reason : reason,
+            requestedAt : Date.now()
+        }
+        order.status = "Return Requested"
+
+        await order.save()
+        res.json({success:true,message:"Return request submitted successfully !"})
+    } catch (error) {
+        console.error(error);
+        res.json({success:false,message:"Something went wrong"})
+    }
+}
+
 module.exports = {
     loadProductDetails,
     reviewSubmission,
@@ -520,5 +542,6 @@ module.exports = {
     placeOrder,
     orderPlaced,
     orderDetails,
-    cancelOrder
+    cancelOrder,
+    returnOrder
 }

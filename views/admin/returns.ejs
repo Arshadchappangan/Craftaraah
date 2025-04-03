@@ -1,0 +1,219 @@
+<%- include("../../views/partials/admin/header") %>
+
+<div class="container">
+  <div class="page-inner">
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+      <div class="container d-flex justify-content-between">
+        <h3 class="fw-bold mb-3" style="display: inline-block;">Return Requests</h3>
+        <div style="width: 500px; margin-bottom: 30px; display: inline-block;">
+          <nav class="nav-search p-0 d-none d-lg-flex">
+            <form class="input-group" action="/admin/returns" method="get" id="searchForm" onsubmit="searchSubmit(event)">
+              <div class="input-group-prepend">
+                <button type="submit" class="btn btn-search pe-1">
+                  <i class="fa fa-search search-icon"></i>
+                </button>
+              </div>
+              <input id="searchInput" name="search" type="text" placeholder="Search ..." class="form-control" />
+            </form>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-1"></div>
+
+      <div class="col-md-10">
+        <div class="card card-round">
+          <div class="card-header">
+            <div class="card-head-row card-tools-still-right">
+              <div class="card-title">Return Requests Details</div>
+              <div class="card-tools">
+                <button class="btn btn-primary" id="clear-btn">Clear search</button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table align-items-center mb-0">
+                <thead class="thead-light">
+                  <tr>
+                    <th scope="col" class="text-start">Order ID</th>
+                    <th scope="col" class="text-center">Order Details</th>
+                    <th scope="col" class="text-center">Return Reason</th>
+                    <th scope="col" class="text-center">Status</th>
+                    <th scope="col" class="text-center">Requested Date</th>
+                    <th scope="col" class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for (let i = 0; i < returns.length; i++) { %>
+                  <tr>
+                    <td class="text-start"><%= returns[i].orderId %></td>
+                        <td class="text-center">
+                            <a href="/admin/orderDetails?id=<%= returns[i]._id %>">
+                              <button class="btn btn-primary"><i class="fas fa-info-circle"></i>  Details</button>
+                            </a>
+                          </td>
+                    <td class="text-center"><%= returns[i].returnRequest.reason %></td>
+                    <td class="text-center"><%= returns[i].returnRequest.status %></td>
+                    <td class="text-center"><%= new Date(returns[i].createdAt).toLocaleDateString() %></td>
+                    <td class="text-center">
+                        <%if(returns[i].returnRequest.status === 'Requested'){%>
+                            <button class="btn btn-success approve-btn" onclick="confirmApprove('<%= returns[i]._id %>')">
+                                <i class="fas fa-check"></i> Approve
+                              </button>
+                            <button class="btn btn-danger reject-btn" onclick="confirmReject('<%= returns[i]._id %>')">
+                                <i class="fas fa-times"></i> Reject
+                              </button>
+                        <%}else if(returns[i].returnRequest.status === 'Approved'){%>
+                            <a href="/admin/refund?id=<%= returns[i]._id %>">
+                                <button class="btn btn-warning">
+                                    <i class="fas fa-undo-alt"></i> Refund
+                                  </button>
+                            </a>
+                            <%}%>
+                    </td>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-1"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container-fluid d-flex justify-content-between">
+    <nav class="pull-left">
+      <ul class="nav">
+        <li class="nav-item"><a class="nav-link" href="#">Help</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Licenses</a></li>
+      </ul>
+    </nav>
+    <div class="copyright">2024, made with <i class="fa fa-heart heart text-danger"></i> by Your Company</div>
+  </div>
+</footer>
+
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+  function searchSubmit(event) {
+    event.preventDefault();
+    let searchValue = document.getElementById('searchInput').value.trim();
+    if (searchValue !== "") {
+      localStorage.setItem("showClearBtnReturns", "true");
+    } else {
+      localStorage.removeItem("showClearBtnReturns");
+    }
+    document.getElementById('searchForm').submit();
+  }
+
+  document.getElementById('clear-btn').addEventListener('click', function() {
+    document.getElementById('searchInput').value = '';
+    localStorage.removeItem("showClearBtnReturns");
+    document.getElementById('searchForm').submit();
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem("showClearBtnReturns") === "true") {
+      document.getElementById('clear-btn').style.display = 'block';
+    } else {
+      document.getElementById('clear-btn').style.display = 'none';
+    }
+  });
+
+
+  function confirmApprove(id) {
+    Swal.fire({
+        title: "Approve Return?",
+        text: "Are you sure you want to approve this return request?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Approve"
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/admin/approveReturn?id=${id}`, { method: "POST" });
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        title: "Approved!",
+                        text: data.message,
+                        icon: "success",
+                        confirmButtonColor: "#28a745"
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire({
+                        title: "Error!",
+                        text: data.message,
+                        icon: "error",
+                        confirmButtonColor: "#d33"
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: "Error!",
+                    text: "Failed to approve return request. Please try again later.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+            }
+        }
+    });
+}
+
+
+function confirmReject(id) {
+    Swal.fire({
+        title: "Reject Return?",
+        text: "Are you sure you want to reject this return request?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Reject"
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/admin/rejectReturn?id=${id}`, { method: "POST" });
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        title: "Rejected!",
+                        text: data.message,
+                        icon: "success",
+                        confirmButtonColor: "#28a745"
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire({
+                        title: "Error!",
+                        text: data.message,
+                        icon: "error",
+                        confirmButtonColor: "#d33"
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: "Error!",
+                    text: "Failed to reject return request. Please try again later.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+            }
+        }
+    });
+}
+
+</script>
