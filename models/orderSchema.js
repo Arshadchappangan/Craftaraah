@@ -68,7 +68,6 @@ const orderSchema = new Schema({
         },
         reason : {
             type : String,
-            required : true,
         },
         requestedAt : {
             type : Date,

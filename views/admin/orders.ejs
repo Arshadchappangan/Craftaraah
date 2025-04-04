@@ -1,209 +1,175 @@
-<%-include("../../views/partials/admin/header")%>
+<%- include("../../views/partials/admin/header") %>
 
-
-        <div class="container">
-          <div class="page-inner">
-            <div
-              class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
-            >
-              <div class="container d-flex justify-content-between">
-                <h3 class="fw-bold mb-3" style="display: inline-block;">Orders</h3>
-                <div style="width: 500px; margin-bottom: 30px; display: inline-block;">
-                  <nav
-                  class="nav-search p-0 d-none d-lg-flex"
-                >
-                  <form class="input-group" action="/admin/orders" method="get" id="searchForm" onsubmit="searchSubmit(event)">
-                    <div class="input-group-prepend">
-                      <button type="submit" class="btn btn-search pe-1">
-                        <i class="fa fa-search search-icon"></i>
-                      </button>
-                    </div>
-                    <input
-                      id="searchInput"
-                      name="search"
-                      type="text"
-                      placeholder="Search ..."
-                      class="form-control"
-                    />
-                  </form>
-                </nav>
+<div class="container">
+  <div class="page-inner">
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+      <div class="container d-flex justify-content-between">
+        <h3 class="fw-bold mb-3" style="display: inline-block;">Orders</h3>
+        <div style="width: 500px; margin-bottom: 30px; display: inline-block;">
+          <nav class="nav-search p-0 d-none d-lg-flex">
+            <form class="input-group" action="/admin/searchOrders" method="post" id="searchForm" onsubmit="searchSubmit(event)">
+              <div class="input-group-prepend">
+                <button type="submit" class="btn btn-search pe-1">
+                  <i class="fa fa-search search-icon"></i>
+                </button>
               </div>
-              </div>
-            </div>
-
-            
-        <div class="row">
-          <div class="col-md-1"></div>
-
-          <div class="col-md-10">
-            <div class="card card-round">
-              <div class="card-header">
-                <div class="card-head-row card-tools-still-right">
-                  <div class="card-title">Orders Details</div>
-                  <div class="card-tools">
-                    <div class="dropdown">
-                      <button class="btn btn-primary" id="clear-btn">
-                        Clear search
-                      </button>
-                      <div
-                        class="dropdown-menu"
-                        aria-labelledby="dropdownMenuButton"
-                      >
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <a class="dropdown-item" href="#"
-                          >Something else here</a
-                        >
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="card-body p-0">
-                <div class="table-responsive">
-                  <!-- Projects table -->
-                  <table class="table align-items-center mb-0">
-                    <thead class="thead-light">
-                      <tr>
-                        <th scope="col" class="text-start">Order ID</th>
-                        <th scope="col" class="text-start">Customer Name</th>
-                        <th scope="col" class="text-center">Order Date</th>
-                        <th scope="col" class="text-center">No of items</th>
-                        <th scope="col" class="text-center">Total Amount</th>
-                        <th scope="col" class="text-center">Order Status</th>
-                        <th scope="col" class="text-center">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        <%for(let i=0;i<orders.length;i++){%>
-                      <tr>
-                        <td scope="col" class="text-start"><%=orders[i].orderId%></td>
-                        <td scope="col" class="text-start"><%=orders[i].userId.name%></td>
-                        <td scope="col" class="text-center"><%= new Date(orders[i].createdAt).toLocaleDateString() %></td>
-                        <td scope="col" class="text-center"><%=orders[i].orderedItems.length%></td>
-                        <td scope="col" class="text-center">₹ <%=orders[i].finalAmount%></td>
-                        <td scope="col" class="text-center"><%=orders[i].status%></td>
-                        <td scope="col" class="text-center">
-                          <a href="/admin/orderDetails?id=<%= orders[i]._id %>">
-                            <button class="btn btn-primary"><i class="fas fa-info-circle"></i>  Details</button>
-                          </a>
-                        </td>
-                      </tr>
-                      <%}%>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-1"></div>
+              <input id="searchInput" name="search" type="text" placeholder="Search ..." class="form-control" />
+            </form>
+          </nav>
         </div>
-              
-              
-            </div>
-            
-          </div>
-          
-        
+      </div>
+    </div>
 
+              <!-- Filters and Sorting -->
+          <div class="container mb-3">
+            <form action="/admin/orders" method="get" id="filterForm">
+              <div class="row  mx-auto">
+                <!-- Order Status Filter -->
+                <div class="col" style="flex: 0 0 20%;">
+                  <label for="status">Order Status:</label>
+                  <select class="form-control" name="status" id="status">
+                    <option value="" <%= !status ? 'selected' : '' %>>All</option>
+                    <option value="Ordered" <%= status === 'Ordered' ? 'selected' : '' %>>Ordered</option>
+                    <option value="Processing" <%= status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                    <option value="Shipped" <%= status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                    <option value="Delivered" <%= status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                    <option value="Canceled" <%= status === 'Canceled' ? 'selected' : '' %>>Cancelled</option>
+                    <option value="Return Requested" <%= status === 'Return Requested' ? 'selected' : '' %>>Return Requested</option>
+                    <option value="Returned" <%= status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                  </select>
+                </div>
 
-        <footer class="footer">
-          <div class="container-fluid d-flex justify-content-between">
-            <nav class="pull-left">
-              <ul class="nav">
-                <li class="nav-item">
-                  <a class="nav-link" href="http://www.themekita.com">
-                    ThemeKita
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#"> Help </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#"> Licenses </a>
-                </li>
-              </ul>
-            </nav>
-            <div class="copyright">
-              2024, made with <i class="fa fa-heart heart text-danger"></i> by
-              <a href="http://www.themekita.com">ThemeKita</a>
-            </div>
-            <div>
-              Distributed by
-              <a target="_blank" href="https://themewagon.com/">ThemeWagon</a>.
+                <!-- Date Range Filter -->
+                <div class="col" style="flex: 0 0 20%;">
+                  <label for="startDate">From:</label>
+                  <input type="date" class="form-control" name="startDate" id="startDate" value="<%= startDate || '' %>">
+                </div>
+                <div class="col" style="flex: 0 0 20%;">
+                  <label for="endDate">To:</label>
+                  <input type="date" class="form-control" name="endDate" id="endDate" value="<%= endDate || '' %>">
+                </div>
+
+                <!-- Sorting Options -->
+                <div class="col" style="flex: 0 0 20%;">
+                  <label for="sort">Sort By:</label>
+                  <select class="form-control" name="sort" id="sort">
+                    <option value="date_desc" <%= sort === 'date_desc' ? 'selected' : '' %>>Date (Newest First)</option>
+                    <option value="date_asc" <%= sort === 'date_asc' ? 'selected' : '' %>>Date (Oldest First)</option>
+                    <option value="amount_desc" <%= sort === 'amount_desc' ? 'selected' : '' %>>Amount (Highest First)</option>
+                    <option value="amount_asc" <%= sort === 'amount_asc' ? 'selected' : '' %>>Amount (Lowest First)</option>
+                    <option value="items_desc" <%= sort === 'items_desc' ? 'selected' : '' %>>No. of Items (Highest First)</option>
+                    <option value="items_asc" <%= sort === 'items_asc' ? 'selected' : '' %>>No. of Items (Lowest First)</option>
+                  </select>
+                </div>
+                <div class="col mt-4" style="flex: 0 0 10%;">
+                  <button type="button" class="btn btn-secondary w-100" onclick="clearFilters()"><i class="fas fa-times-circle"></i> Clear</button>
+                </div>
+              </div>
+            </form>
+          </div>
+      </form>
+    </div>
+
+    
+
+    <div class="row">
+      <div class="col-md-1"></div>
+
+      <div class="col-md-10">
+        <div class="card card-round">
+          <div class="card-header">
+            <div class="card-head-row card-tools-still-right">
+              <div class="card-title">Orders Details</div>
             </div>
           </div>
-        </footer>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <!-- Orders Table -->
+              <table class="table align-items-center mb-0">
+                <thead class="thead-light">
+                  <tr>
+                    <th scope="col" class="text-start">Order ID</th>
+                    <th scope="col" class="text-start">Customer Name</th>
+                    <th scope="col" class="text-center">Order Date</th>
+                    <th scope="col" class="text-center">No of items</th>
+                    <th scope="col" class="text-center">Total Amount</th>
+                    <th scope="col" class="text-center">Order Status</th>
+                    <th scope="col" class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for(let i=0; i < orders.length; i++) { %>
+                  <tr>
+                    <td class="text-start"><%= orders[i].orderId %></td>
+                    <td class="text-start"><%= orders[i].userId.name %></td>
+                    <td class="text-center"><%= new Date(orders[i].createdAt).toLocaleDateString() %></td>
+                    <td class="text-center"><%= orders[i].orderedItems.length %></td>
+                    <td class="text-center">₹ <%= orders[i].finalAmount %></td>
+                    <td class="text-center"><%= orders[i].status %></td>
+                    <td class="text-center">
+                      <a href="/admin/orderDetails?id=<%= orders[i]._id %>">
+                        <button class="btn btn-primary"><i class="fas fa-info-circle"></i> Details</button>
+                      </a>
+                    </td>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
-    <!--   Core JS Files   -->
-    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
-    <script src="assets/js/core/popper.min.js"></script>
-    <script src="assets/js/core/bootstrap.min.js"></script>
+      <div class="col-md-1"></div>
+    </div>
 
-    <!-- jQuery Scrollbar -->
-    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <!-- Pagination -->
+    <div class="container mt-3">
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+          <% for (let i = 1; i <= totalPages; i++) { %> 
+          <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+          </li>
+          <% } %>                
+        </ul>
+      </nav>
+    </div>
 
-    <!-- Chart JS -->
-    <script src="assets/js/plugin/chart.js/chart.min.js"></script>
+  </div>
+</div>
 
-    <!-- jQuery Sparkline -->
-    <script src="assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
+<!-- JS Scripts -->
+<script>
+  function searchSubmit(event) {
+      event.preventDefault();  
+      let searchValue = document.getElementById('searchInput').value.trim();
+      if (searchValue !== "") {
+          localStorage.setItem("showClearBtnCustomers", "true");
+      } else {
+          localStorage.removeItem("showClearBtnCustomers");
+      }
+      document.getElementById('searchForm').submit(); 
+  }
 
-    <!-- Chart Circle -->
-    <script src="assets/js/plugin/chart-circle/circles.min.js"></script>
-
-    <!-- Datatables -->
-    <script src="assets/js/plugin/datatables/datatables.min.js"></script>
-
-    <!-- Bootstrap Notify -->
-    <script src="assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
-
-    <!-- jQuery Vector Maps -->
-    <script src="assets/js/plugin/jsvectormap/jsvectormap.min.js"></script>
-    <script src="assets/js/plugin/jsvectormap/world.js"></script>
-
-    <!-- Sweet Alert -->
-    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
-
-    <!-- Kaiadmin JS -->
-    <script src="assets/js/kaiadmin.min.js"></script>
-
-    <!-- Kaiadmin DEMO methods, don't include it in your project! -->
-    <script src="assets/js/setting-demo.js"></script>
-    <script src="assets/js/demo.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
+  document.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem("showClearBtnCustomers") === "true") {
+          document.getElementById('clear-btn').style.display = 'block';
+      } else {
+          document.getElementById('clear-btn').style.display = 'none';
+      }
+  });
 
 
-    function searchSubmit(event) {
-        event.preventDefault();  
-        let searchValue = document.getElementById('searchInput').value.trim();
-        if (searchValue !== "") {
-            localStorage.setItem("showClearBtnCustomers", "true");
-        } else {
-            localStorage.removeItem("showClearBtnCustomers");
-        }
-        document.getElementById('searchForm').submit(); 
-    }
+  document.addEventListener("DOMContentLoaded", function () {
+    const filterForm = document.getElementById("filterForm");
 
-    document.getElementById('clear-btn').addEventListener('click', function() {
-        document.getElementById('searchInput').value = '';
-        localStorage.removeItem("showClearBtnCustomers");
-        document.getElementById('searchForm').submit();
+    // Auto-submit form when any filter or sorting changes
+    document.querySelectorAll("#filterForm select, #filterForm input").forEach(element => {
+      element.addEventListener("change", function () {
+        filterForm.submit();
+      });
     });
+  });
 
-    document.addEventListener('DOMContentLoaded',() => {
-        if (localStorage.getItem("showClearBtnCustomers") === "true") {
-            document.getElementById('clear-btn').style.display = 'block';
-        } else {
-            document.getElementById('clear-btn').style.display = 'none';
-        }
-    }
-  )
-     
-    </script>
-  </body>
-</html>
+</script>

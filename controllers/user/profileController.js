@@ -11,6 +11,7 @@ const category = require('../../models/categorySchema');
 const { reviewSubmission } = require('./productController');
 const { use } = require('passport');
 const Order = require('../../models/orderSchema');
+const Wallet = require('../../models/walletSchema');
 
 
 const generateOtp = () => {
@@ -448,6 +449,46 @@ const myOrders = async (req,res) => {
     }
 }
 
+const loadWallet = async (req, res) => {
+    try {
+        const user = req.session.user;
+        let wallet = await Wallet.findOne({ userId: user._id });
+
+        // Create wallet if not found
+        if (!wallet) {
+            let walletId = '';
+            const p1 = Math.floor(1000 + Math.random() * 9000);
+            const p2 = Math.floor(1000 + Math.random() * 9000);
+            const p3 = Math.floor(1000 + Math.random() * 9000);
+            const p4 = Math.floor(1000 + Math.random() * 9000);
+
+            wallet = new Wallet({ 
+                walletId: `${p1} ${p2} ${p3} ${p4}`,
+                userId: user._id, 
+                balance: 0, 
+                transactions: [] 
+            });
+
+            await wallet.save();
+        }
+
+        if (wallet && wallet.transactions.length > 0) {
+            wallet.transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
+
+        res.render('wallet', {
+            user: user,
+            wallet: wallet
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound');
+    }
+};
+
+
 module.exports = {
     loadForgotPassword,
     forgotEmailVerify,
@@ -467,5 +508,6 @@ module.exports = {
     loadEditAddress,
     editAddress,
     deleteAddress,
-    myOrders
+    myOrders,
+    loadWallet
 }

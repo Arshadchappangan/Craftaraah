@@ -20,7 +20,13 @@ const login = async (req, res) => {
         if (admin) {
             const passwordMatch = await bcrypt.compare(password, admin.password);
             if (passwordMatch) {
-                req.session.admin = true;
+
+                req.session.admin = {
+                    _id: admin._id,
+                    name: admin.name,
+                    email: admin.email
+                };
+                
                 return res.redirect('/admin')
             } else {
                 return res.render('adminLogin', { message: "Invalid password" })
@@ -62,13 +68,10 @@ const pageError = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        req.session.destroy(error => {
-            if (error) {
-                console.log("Error in Destroying admin session : ", error);
-                return res.redirect('/pageError')
-            }
-            res.redirect("/admin/login")
-        })
+
+        req.session.admin = null;
+        res.redirect("/admin/login")
+
     } catch (error) {
         console.log("Unexpected error during logout : ",error)
         res.redirect('/pageError')

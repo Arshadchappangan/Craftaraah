@@ -629,7 +629,7 @@ const downloadInvoice = async (req, res) => {
         doc.text(`Total: ${order.finalAmount.toFixed(2)}`, 400, y + 60);
 
         // Footer
-        doc.moveDown().fontSize(10).fillColor(secondaryColor).text("Thank you for your purchase!", 50, y + 100);
+        doc.moveDown().fontSize(10).fillColor(secondaryColor).text("Thank you for your purchase !", 50, y + 100);
 
         // Finalize PDF file
         doc.end();

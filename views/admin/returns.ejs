@@ -67,11 +67,9 @@
                                 <i class="fas fa-times"></i> Reject
                               </button>
                         <%}else if(returns[i].returnRequest.status === 'Approved'){%>
-                            <a href="/admin/refund?id=<%= returns[i]._id %>">
-                                <button class="btn btn-warning">
+                                <button class="btn btn-warning" onclick="confirmRefund('<%= returns[i]._id %>')">
                                     <i class="fas fa-undo-alt"></i> Refund
                                   </button>
-                            </a>
                             <%}%>
                     </td>
                   </tr>
@@ -198,6 +196,49 @@ function confirmReject(id) {
                 Swal.fire({
                     title: "Error!",
                     text: "Failed to reject return request. Please try again later.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+            }
+        }
+    });
+}
+
+
+function confirmRefund(id) {
+      Swal.fire({
+        title: "Confirm Refund?",
+        text: "Are you sure you want to proceed with this refund?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Refund"
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/admin/refund?id=${id}`, { method: "POST" });
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        title: "Refunded!",
+                        text: data.message,
+                        icon: "success",
+                        confirmButtonColor: "#28a745"
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire({
+                        title: "Error!",
+                        text: data.message,
+                        icon: "error",
+                        confirmButtonColor: "#d33"
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: "Error!",
+                    text: "Failed to refund the amount. Please try again later.",
                     icon: "error",
                     confirmButtonColor: "#d33"
                 });

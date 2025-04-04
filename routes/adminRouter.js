@@ -61,5 +61,6 @@ router.put('/updateOrderStatus/:id',adminAuth,orderController.updateOrderStatus)
 router.get('/returns',adminAuth,orderController.viewReturns);
 router.post('/approveReturn',adminAuth,orderController.approveReturn);
 router.post('/rejectReturn',adminAuth,orderController.rejectReturn);
+router.post('/refund',adminAuth,orderController.refund);
 
 module.exports = router

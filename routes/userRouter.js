@@ -53,6 +53,7 @@ router.post('/updateEmail',userAuth,profileController.updateEmail);
 router.get('/changePassword',userAuth,profileController.changePassword);
 router.get('/myAddresses',userAuth,profileController.myAddresses);
 router.get('/myOrders',userAuth,profileController.myOrders);
+router.get('/wallet',userAuth,profileController.loadWallet);
 
 
 //address management

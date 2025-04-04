@@ -38,7 +38,7 @@ const userSchema = new Schema({
         type : Schema.Types.ObjectId,
         ref : "cart"
     }],
-    wallet : [{
+    walletId : [{
         type : Schema.Types.ObjectId,
         ref : "wallet"
     }],
