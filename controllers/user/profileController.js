@@ -428,26 +428,40 @@ const deleteAddress = async (req,res) => {
     }
 }
 
-const myOrders = async (req,res) => {
+const myOrders = async (req, res) => {
     try {
         const user = req.session.user;
-        const orders = await Order.find({userId:user._id}).sort({createdAt:-1}).populate('orderedItems.product');
-        if(orders){
-            res.render('myOrders',{
-                user : user,
-                orders : orders
-            })
-        }else{
-            res.render('myOrders',{
-                user:user
-            })
-        }
+
+        let searchQuery = req.query.search?.trim().toLowerCase() || "";
+
+        const query = { userId: user._id };
+
+        let orders = await Order.find(query)
+            .sort({ createdAt: -1 })
+            .populate('orderedItems.product');
+
+            if (searchQuery) {
+                orders = orders.filter(order =>
+                    order.orderedItems.some(item =>
+                        item.product?.productName?.toLowerCase().includes(searchQuery)
+                    ) ||
+                    order.orderId?.toLowerCase().includes(searchQuery) ||
+                    order.status?.toLowerCase().includes(searchQuery)
+                );
+            }
+
+        res.render('myOrders', {
+            user,
+            orders,
+            searchQuery
+        });
 
     } catch (error) {
-        console.error(error);
-        res.redirect('/pageNotFound')
+        console.error("Error fetching orders:", error);
+        res.redirect('/pageNotFound');
     }
-}
+};
+
 
 const loadWallet = async (req, res) => {
     try {
