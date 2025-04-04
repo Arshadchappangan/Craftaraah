@@ -55,7 +55,8 @@ router.get('/changePassword',userAuth,profileController.changePassword);
 router.get('/myAddresses',userAuth,profileController.myAddresses);
 router.get('/myOrders',userAuth,profileController.myOrders);
 router.get('/wallet',userAuth,profileController.loadWallet);
-router.post('/uploadProfilePhoto',userAuth,multer.dpUpload.single('profilePhoto'),profileController.uploadProfilePhoto)
+router.post('/uploadProfilePhoto',userAuth,multer.dpUpload.single('profilePhoto'),profileController.uploadProfilePhoto);
+router.post('/updateProfileInfo',userAuth,profileController.updateProfileInfo)
 
 
 //address management

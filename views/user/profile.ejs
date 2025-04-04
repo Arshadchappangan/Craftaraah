@@ -120,7 +120,8 @@
                         <div class="col-lg-9">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
-                                    <h2><%=user.name%></h2>
+                                    <h2><%= user.name %></h2>
+                                    <i class="fas fa-edit text-dark" style="cursor: pointer; font-size: medium;" onclick="editProfileInfo('<%= user.name %>', '<%= user.phone %>')"></i>
                                 </div>
                                 
                                 <table>
@@ -192,5 +193,48 @@
             }, 500);
           }
         }
-      </script>
-      
+
+        function editProfileInfo(currentName, currentPhone) {
+            Swal.fire({
+                title: 'Edit Profile Info',
+                html:
+                    `<label>Name:</label><input type="text" id="newName" class="swal2-input" placeholder="Enter new name" value="${currentName}"><br>
+                     <label>Phone:</label><input type="text" id="newPhone" class="swal2-input" placeholder="Enter new phone" value="${currentPhone}">`,
+                showCancelButton: true,
+                confirmButtonText: 'Save',
+                cancelButtonText: 'Cancel',
+                preConfirm: () => {
+                    const newName = document.getElementById('newName').value;
+                    const newPhone = document.getElementById('newPhone').value;
+    
+                    if (!newName.trim() || !newPhone.trim()) {
+                        Swal.showValidationMessage('Both fields are required');
+                        return false;
+                    }
+    
+                    return { name: newName, phone: newPhone };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/updateProfileInfo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(result.value)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Updated!', 'Your profile has been updated.', 'success')
+                            .then(() => location.reload()); 
+                        } else {
+                            Swal.fire('Error!','Failed to update profile.', 'error');
+                        }
+                    })
+                    .catch(error => Swal.fire('Error!', 'Something went wrong.', 'error'));
+                }
+            });
+        }
+    </script>
+    

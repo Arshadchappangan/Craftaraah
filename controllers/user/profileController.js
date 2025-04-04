@@ -514,6 +514,18 @@ const uploadProfilePhoto = async(req,res) => {
     }
 }
 
+const updateProfileInfo = async (req,res) => {
+    try {
+        const user = req.session.user;
+        const {name,phone} = req.body
+        await User.updateOne({_id:user._id},{$set:{name:name,phone:phone}});
+        res.json({success:true})
+    } catch (error) {
+        console.error(error)
+        res.json({success:false})
+    }
+}
+
 module.exports = {
     loadForgotPassword,
     forgotEmailVerify,
@@ -535,5 +547,6 @@ module.exports = {
     deleteAddress,
     myOrders,
     loadWallet,
-    uploadProfilePhoto
+    uploadProfilePhoto,
+    updateProfileInfo
 }
