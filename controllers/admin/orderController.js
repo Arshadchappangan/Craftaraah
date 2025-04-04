@@ -6,68 +6,100 @@ const { removeFromWishlist } = require('../user/productController');
 
 const viewOrders = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = 8;
-        const skip = (page - 1) * limit;
-
-        // Extract filters and sorting options from the query parameters
-        const { status, startDate, endDate, sort } = req.query;
-
-        let filter = {};
-        
-        // Filter by Order Status
-        if (status && status !== 'All') {
-            filter.status = status;
-        }
-
-        // Filter by Date Range
-        if (startDate && endDate) {
-            filter.createdAt = { 
-                $gte: new Date(startDate), 
-                $lte: new Date(endDate) 
-            };
-        } else if (startDate) {
-            filter.createdAt = { $gte: new Date(startDate) };
-        } else if (endDate) {
-            filter.createdAt = { $lte: new Date(endDate) };
-        }
-
-        // Sorting options
-        let sortOption = {};
-        if (sort === 'date_asc') sortOption.createdAt = 1;
-        else if (sort === 'date_desc') sortOption.createdAt = -1;
-        else if (sort === 'amount_asc') sortOption.finalAmount = 1;
-        else if (sort === 'amount_desc') sortOption.finalAmount = -1;
-        else if (sort === 'items_asc') sortOption.orderedItems = 1;
-        else if (sort === 'items_desc') sortOption.orderedItems = -1;
-        else sortOption.createdAt = -1;  // Default: Newest first
-
-        // Fetch orders with filters, sorting, and pagination
-        const totalOrders = await Order.countDocuments(filter);
-        const orders = await Order.find(filter)
-            .populate('userId')
-            .sort(sortOption)
-            .skip(skip)
-            .limit(limit);
-
-        const totalPages = Math.ceil(totalOrders / limit);
-
-        res.render('orders', {
-            orders,
-            currentPage: page,
-            totalPages,
-            searchKeyword: '',
-            status,
-            startDate,
-            endDate,
-            sort
+      const page = parseInt(req.query.page) || 1;
+      const limit = 8;
+      const skip = (page - 1) * limit;
+  
+      const { status, startDate, endDate, sort, search } = req.query;
+  
+      // 1️⃣ Create match filter
+      const matchStage = {};
+  
+      if (status && status !== 'All') {
+        matchStage.status = status;
+      }
+  
+      if (startDate || endDate) {
+        matchStage.createdAt = {};
+        if (startDate) matchStage.createdAt.$gte = new Date(startDate);
+        if (endDate) matchStage.createdAt.$lte = new Date(endDate);
+      }
+  
+      // Apply after $lookup, so we can search user.name
+      const searchStage = [];
+      if (typeof search === 'string' && search.trim() !== '') {
+        const searchRegex = new RegExp(search.trim(), 'i');
+        searchStage.push({
+          $match: {
+            $or: [
+              { orderId: searchRegex },
+              { 'user.name': searchRegex }
+            ]
+          }
         });
-
+      }
+  
+      // 2️⃣ Sorting
+      const sortStage = {};
+      if (sort === 'date_asc') sortStage.createdAt = 1;
+      else if (sort === 'date_desc') sortStage.createdAt = -1;
+      else if (sort === 'amount_asc') sortStage.finalAmount = 1;
+      else if (sort === 'amount_desc') sortStage.finalAmount = -1;
+      else if (sort === 'items_asc') sortStage['orderedItems.length'] = 1;
+      else if (sort === 'items_desc') sortStage['orderedItems.length'] = -1;
+      else sortStage.createdAt = -1;
+  
+      // 3️⃣ Aggregation Pipeline
+      const pipeline = [
+        { $match: matchStage },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'user'
+          }
+        },
+        { $unwind: '$user' },
+        ...searchStage,
+        {
+          $addFields: {
+            'orderedItems.length': { $size: '$orderedItems' } // for sorting by number of items
+          }
+        },
+        { $sort: sortStage },
+        {
+          $facet: {
+            metadata: [{ $count: 'total' }],
+            data: [{ $skip: skip }, { $limit: limit }]
+          }
+        }
+      ];
+  
+      const result = await Order.aggregate(pipeline);
+  
+      const orders = result[0].data;
+      const totalOrders = result[0].metadata[0]?.total || 0;
+      const totalPages = Math.ceil(totalOrders / limit);
+  
+      res.render('orders', {
+        orders,
+        currentPage: page,
+        totalPages,
+        searchKeyword: search || '',
+        status,
+        startDate,
+        endDate,
+        sort
+      });
+  
     } catch (error) {
-        console.log(error);
-        res.redirect('/pageNotFound');
+      console.log(error);
+      res.redirect('/pageNotFound');
     }
-};
+  };
+  
+  
 
 
 

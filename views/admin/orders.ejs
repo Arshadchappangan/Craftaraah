@@ -7,13 +7,17 @@
         <h3 class="fw-bold mb-3" style="display: inline-block;">Orders</h3>
         <div style="width: 500px; margin-bottom: 30px; display: inline-block;">
           <nav class="nav-search p-0 d-none d-lg-flex">
-            <form class="input-group" action="/admin/searchOrders" method="post" id="searchForm" onsubmit="searchSubmit(event)">
+            <form class="input-group" action="/admin/orders" method="get" id="searchForm" onsubmit="searchSubmit(event)">
               <div class="input-group-prepend">
                 <button type="submit" class="btn btn-search pe-1">
+                  <%if(searchKeyword && searchKeyword.length > 0){%>
+                  <i class="fa fa-times search-icon"></i>
+                  <%}else{%>
                   <i class="fa fa-search search-icon"></i>
+                  <%}%>
                 </button>
               </div>
-              <input id="searchInput" name="search" type="text" placeholder="Search ..." class="form-control" />
+              <input id="searchInput" name="search" type="text" placeholder="<%= searchKeyword ? searchKeyword : 'Search...' %>" class="form-control"/>
             </form>
           </nav>
         </div>
@@ -23,6 +27,7 @@
               <!-- Filters and Sorting -->
           <div class="container mb-3">
             <form action="/admin/orders" method="get" id="filterForm">
+              <input type="hidden" name="search" id="searchHidden" value="<%= searchKeyword || '' %>">
               <div class="row  mx-auto">
                 <!-- Order Status Filter -->
                 <div class="col" style="flex: 0 0 20%;">
@@ -101,7 +106,7 @@
                   <% for(let i=0; i < orders.length; i++) { %>
                   <tr>
                     <td class="text-start"><%= orders[i].orderId %></td>
-                    <td class="text-start"><%= orders[i].userId.name %></td>
+                    <td class="text-start"><%= orders[i].user.name %></td>
                     <td class="text-center"><%= new Date(orders[i].createdAt).toLocaleDateString() %></td>
                     <td class="text-center"><%= orders[i].orderedItems.length %></td>
                     <td class="text-center">₹ <%= orders[i].finalAmount %></td>
@@ -127,9 +132,19 @@
     <div class="container mt-3">
       <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+
+          <%
+            let queryParams = '';
+            if (searchKeyword) queryParams += `&search=${searchKeyword}`;
+            if (status) queryParams += `&status=${status}`;
+            if (startDate) queryParams += `&startDate=${startDate}`;
+            if (endDate) queryParams += `&endDate=${endDate}`;
+            if (sort) queryParams += `&sort=${sort}`;
+          %>
+
           <% for (let i = 1; i <= totalPages; i++) { %> 
           <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
-            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+            <a class="page-link" href="?page=<%= i %><%= queryParams %>"><%= i %></a>
           </li>
           <% } %>                
         </ul>
@@ -139,7 +154,7 @@
   </div>
 </div>
 
-<!-- JS Scripts -->
+
 <script>
   function searchSubmit(event) {
       event.preventDefault();  
@@ -151,6 +166,24 @@
       }
       document.getElementById('searchForm').submit(); 
   }
+
+  function clearFilters() {
+  document.getElementById("status").value = "";
+  document.getElementById("startDate").value = "";
+  document.getElementById("endDate").value = "";
+  document.getElementById("sort").value = "date_desc";
+
+  // Clear search input
+  document.getElementById("searchInput").value = "";
+
+  // Clear localStorage if you're using it for any logic
+  localStorage.removeItem("showClearBtnCustomers");
+
+  // Submit the form
+  document.getElementById("filterForm").submit();
+}
+
+
 
   document.addEventListener('DOMContentLoaded', () => {
       if (localStorage.getItem("showClearBtnCustomers") === "true") {
