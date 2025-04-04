@@ -502,6 +502,17 @@ const loadWallet = async (req, res) => {
     }
 };
 
+const uploadProfilePhoto = async(req,res) => {
+    try {
+        const user = req.session.user;
+        const photoPath = "/uploads/user-images/"+req.file.filename;
+        await User.updateOne({_id:user._id},{$set:{photo:photoPath}});
+        res.redirect('/userProfile')
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageNotFound')
+    }
+}
 
 module.exports = {
     loadForgotPassword,
@@ -523,5 +534,6 @@ module.exports = {
     editAddress,
     deleteAddress,
     myOrders,
-    loadWallet
+    loadWallet,
+    uploadProfilePhoto
 }

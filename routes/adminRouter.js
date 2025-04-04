@@ -41,9 +41,9 @@ router.get('/restoreCategory',adminAuth,categoryController.restoreCategory)
 
 router.get('/products',adminAuth,productController.productInfo);
 router.get('/addProducts',adminAuth,productController.loadAddProducts);
-router.post('/addProducts',adminAuth,multer.array('croppedImages',10),productController.addProducts);
+router.post('/addProducts',adminAuth,multer.upload.array('croppedImages',10),productController.addProducts);
 router.get('/editProduct',adminAuth,productController.loadEditProduct)
-router.post('/editProduct/:id',adminAuth,multer.array([
+router.post('/editProduct/:id',adminAuth,multer.upload.array([
     { name: 'newImages', maxCount: 5 },
     { name: 'croppedImages', maxCount: 5 }
 ]),productController.editProduct);

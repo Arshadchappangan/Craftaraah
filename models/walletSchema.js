@@ -8,6 +8,7 @@ const walletSchema = new Schema({
     },
     walletId: {
         type : String,
+        unique : true
     },
     balance: { 
         type: Number, 

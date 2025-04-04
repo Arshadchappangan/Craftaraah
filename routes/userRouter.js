@@ -5,6 +5,7 @@ const productController = require('../controllers/user/productController');
 const profileController = require('../controllers/user/profileController')
 const passport = require('passport');
 const {userAuth,adminAuth} = require('../middlewares/auth')
+const multer = require('../middlewares/multer');
 
 router.get('/pageNotFound',userController.pageNotFound)
 
@@ -54,6 +55,7 @@ router.get('/changePassword',userAuth,profileController.changePassword);
 router.get('/myAddresses',userAuth,profileController.myAddresses);
 router.get('/myOrders',userAuth,profileController.myOrders);
 router.get('/wallet',userAuth,profileController.loadWallet);
+router.post('/uploadProfilePhoto',userAuth,multer.dpUpload.single('profilePhoto'),profileController.uploadProfilePhoto)
 
 
 //address management

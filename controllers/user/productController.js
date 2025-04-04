@@ -289,7 +289,7 @@ const addToWishlist = async (req, res) => {
   const loadWishlist = async (req, res) => {
     try {
         const user = req.session.user;
-        const wishlist = await Wishlist.findOne({userId:user._id}).populate('products.productId');
+        let wishlist = await Wishlist.findOne({userId:user._id}).populate('products.productId');
         if(!wishlist){
             wishlist = {products:[]}
             res.render('wishlist',{

@@ -1,4 +1,6 @@
-const multer = require('multer')
+const multer = require('multer');
+const { file } = require('pdfkit');
+const path = require('path');
 
 
 const storage = multer.diskStorage({
@@ -10,6 +12,20 @@ const storage = multer.diskStorage({
     }
 });
 
+const profileStorage = multer.diskStorage({
+    destination: (req,file,cb) => {
+        cb(null,"public/uploads/user-images/")
+    },
+    filename:(req,file,cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `DP-${Date.now()}${ext}`)
+    }
+})
+
 
 const upload = multer({ storage: storage });
-module.exports = upload;
+const dpUpload = multer({ storage:profileStorage})
+module.exports = {
+    upload,
+    dpUpload
+}

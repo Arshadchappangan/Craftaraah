@@ -18,6 +18,10 @@ const userSchema = new Schema({
         sparse : true,
         default : null
     },
+    photo : {
+        type : String,
+        default : '/uploads/user-images/profile_img.png'
+    },
     googleId : {
         type : String,
         unique : true
