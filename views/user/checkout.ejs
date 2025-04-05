@@ -87,31 +87,35 @@
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th class="shoping__product">Products</th>
-                                            <th class="shoping__cart__price">Price</th>
-                                            <th>Quantity</th>
+                                            <th style="width: 40%;" class="shoping__product">Products</th>
+                                            <th class="shoping__cart__price">Original Price</th>
+                                            <th class="shoping__cart__price">Offer Price</th>
+                                            <th style="width: 10%;">Quantity</th>
                                             <th class="shoping__cart__total">Total</th>
-                                            <th></th>
                                         </tr>
-                                    </thead>
+                                    </thead>                                    
                                     <tbody>
                                         <%for(let i=0;i<cart.items.length;i++){%>
-                                        <tr>
-                                            <td class="shoping__cart__item">
-                                                <img style="height: 60px;" src="<%=cart.items[i].productId.productImage[0]%>" alt="">
-                                                <h5><%=cart.items[i].productId.productName%></h5>
-                                            </td>
-                                            <td>
-                                                ₹<%=cart.items[i].productId.salePrice%>
-                                            </td>
-                                            <td class="shoping__cart__quantity">
-                                                <%=cart.items[i].quantity%>
-                                            </td>
-                                            <td>
-                                                ₹<%=cart.items[i].totalPrice%>
-                                            </td>
-                                        <tr>
-                                        <%}%>
+                                            <tr>
+                                                <td style="width: 250px;" class="shoping__cart__item">
+                                                    <img style="height: 60px;" src="<%=cart.items[i].productId.productImage[0]%>" alt="">
+                                                    <h5><%=cart.items[i].productId.productName%></h5>
+                                                </td>
+                                                <td>
+                                                    ₹<%=cart.items[i].productId.regularPrice%>
+                                                </td>
+                                                <td>
+                                                    ₹<%=cart.items[i].productId.salePrice%>
+                                                </td>
+                                                <td class="shoping__cart__quantity">
+                                                    <%=cart.items[i].quantity%>
+                                                </td>
+                                                <td>
+                                                    ₹<%=cart.items[i].totalPrice%>
+                                                </td>
+                                            </tr>
+                                            <%}%>
+                                            
                                     </tbody>
                                 </table>
                             </div>
@@ -156,14 +160,9 @@
                         <div class="col-lg-4 col-md-6">
                             <div class="checkout__order">
                                 <h4>Your Order</h4>
-                                <div class="checkout__order__products">Products (<%=cart.items.length%>)<span>Total</span></div>
-                                <ul>
-                                    <%for(let i=0;i<cart.items.length;i++){%>
-                                    <li><%=cart.items[i].productId.productName%> <span>₹<%=cart.items[i].totalPrice%></span></li>
-                                    <%}%>
-                                </ul>
                                 <div class="checkout__order__subtotal">Subtotal <span>₹<%=subtotal%></span>
                                     <ul>
+                                            <li>Discount <span>-₹<%=discount%></span></li>
                                         <%if(shippingCharge){%>
                                             <li>Shipping Charge <span>₹<%=shippingCharge%></span></li>
                                         <%}else{%>

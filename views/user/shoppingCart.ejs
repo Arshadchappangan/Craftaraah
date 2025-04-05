@@ -82,6 +82,7 @@
                                 <tr>
                                     <th class="shoping__product">Products</th>
                                     <th>Price</th>
+                                    <th>Offer Price</th>
                                     <th>Quantity</th>
                                     <th>Total</th>
                                     <th></th>
@@ -97,6 +98,9 @@
                                     </td>
                                     <td class="shoping__cart__price">
                                         ₹<%=cart.items[i].price%>
+                                    </td>
+                                    <td class="shoping__cart__price">
+                                        ₹<%=cart.items[i].offerPrice%>
                                     </td>
                                     <td class="shoping__cart__quantity">
                                         <div class="quantity">
@@ -156,6 +160,7 @@
                         <h5>Cart Total</h5>
                         <ul>
                             <li>Subtotal <span>₹<%=subtotal%></span></li>
+                            <li>Discount <span>-₹<%=discount%></span></li>
                             <li>Shipping Charge <span>₹<%=shippingCharge%></span></li>
                             <li>Tax (12%) <span>₹<%=tax%></span></li>
                             <li><h5>Total <span>₹<%=total%></span></h5></li>

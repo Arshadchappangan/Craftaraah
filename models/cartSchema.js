@@ -21,6 +21,10 @@ const cartSchema = new Schema({
             type : Number,
             required : true
         },
+        offerPrice : {
+            type : Number,
+            required : true
+        },
         totalPrice : {
             type : Number,
             required : true

@@ -69,21 +69,21 @@
           <table class="table table-hover align-middle">
             <thead class="table-light">
               <tr>
-                <th scope="col">Image</th>
+                <th scope="col" style="width: 120px;">Image</th>
                 <th scope="col">Product</th>
-                <th scope="col">Quantity</th>
-                <th scope="col">Price</th>
-                <th scope="col">Subtotal</th>
+                <th scope="col" class="text-center">Quantity</th>
+                <th scope="col" class="text-center">Price</th>
+                <th scope="col" class="text-center">Subtotal</th>
               </tr>
             </thead>
             <tbody>
               <% order.orderedItems.forEach(item => { %>
                 <tr>
-                  <td class="align-middle"><img src="<%= item.product.productImage[0] %>" width="80" alt="<%= item.product.productName %>"></td>
+                  <td class="align-middle" style="width: 120px;"><img src="<%= item.product.productImage[0] %>" width="80" alt="<%= item.product.productName %>"></td>
                   <td class="align-middle"><%= item.product.productName %></td>
-                  <td class="align-middle"><%= item.quantity %></td>
-                  <td class="align-middle">₹<%= item.price %></td>
-                  <td class="align-middle">₹<%= item.quantity * item.price %></td>
+                  <td class="align-middle text-center"><%= item.quantity %></td>
+                  <td class="align-middle text-center">₹<%= item.price %></td>
+                  <td class="align-middle text-center">₹<%= item.quantity * item.price %></td>
                 </tr>
               <% }) %>
             </tbody>

@@ -36,6 +36,10 @@ const orderSchema = new Schema({
         type : Number,
         default : 0
     },
+    shippingCharge :{
+        type : Number,
+        default : 0
+    },
     finalAmount : {
         type : Number,
         required : true

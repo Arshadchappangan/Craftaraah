@@ -147,6 +147,7 @@ const resetPassword = async (req, res) => {
         const userId = req.session.user._id;
         const passwordHashed = await securePassword(password);
         await User.findByIdAndUpdate(userId, { $set: { password: passwordHashed } })
+        req.session.user = null;
         res.redirect('/login')
     } catch (error) {
         console.error(error)
@@ -171,7 +172,7 @@ const userProfile = async (req, res) => {
 
 const changeEmail = async (req, res) => {
     try {
-        const email = req.query.email;
+        const email = req.session.user.email
 
         if (!req.session.email || req.session.email !== email || !req.session.otpSent) {
             const otp = generateOtp();

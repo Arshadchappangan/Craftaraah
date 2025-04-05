@@ -44,7 +44,7 @@
             <div class="order-details mt-5">
                 <h5>Order Summary</h5>
                 <p><strong>Order ID:</strong> <%= order.orderId %></p>
-                <p><strong>Total Amount:</strong> ₹<%= order.finalAmount %></p>
+                <p><strong>Total Amount:</strong> ₹<%= total %></p>
                 <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
                 <div class="col-md-6 mb-3 mx-auto">
                     <% if (order.address) { %>

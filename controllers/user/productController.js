@@ -85,6 +85,7 @@ const loadShoppingCart = async (req,res) => {
                 user : user,
                 cart : findCart,
                 subtotal : 0,
+                discount : 0,
                 shippingCharge : 0,
                 tax : 0,
                 total : 0
@@ -93,8 +94,13 @@ const loadShoppingCart = async (req,res) => {
 
         let subtotal = 0;
         findCart.items.forEach(item => {
-            subtotal += item.totalPrice;
+            subtotal += item.price * item.quantity;
         });
+
+        let discount = 0;
+        findCart.items.forEach(item => {
+            discount += subtotal - (item.offerPrice * item.quantity)
+        })
 
         let shippingCharge = 0;
         if(subtotal < 1000){
@@ -106,12 +112,13 @@ const loadShoppingCart = async (req,res) => {
             tax = Math.floor(subtotal * 0.12);
         }
 
-       let total = subtotal + shippingCharge + tax;
+       let total = subtotal - discount + shippingCharge + tax;
 
         res.render('shoppingCart',{
             user : user,
             cart : findCart,
             subtotal : subtotal,
+            discount : discount,
             shippingCharge : shippingCharge,
             tax : tax,
             total : total
@@ -155,7 +162,8 @@ const addToCart = async (req, res) => {
                 items: [{
                     productId,
                     quantity: quantityToAdd,
-                    price: productData.salePrice,
+                    price: productData.regularPrice,
+                    offerPrice:productData.salePrice,
                     totalPrice: productData.salePrice * quantityToAdd
                 }]
             });
@@ -184,6 +192,7 @@ const addToCart = async (req, res) => {
 
             cart.items[productIndex].quantity = newQty;
             cart.items[productIndex].totalPrice = productData.salePrice * newQty;
+
         } else {
             if (quantityToAdd > productData.quantity) {
                 return res.status(200).json({ success: false, message: "Product out of stock" });
@@ -192,7 +201,8 @@ const addToCart = async (req, res) => {
             cart.items.push({
                 productId,
                 quantity: quantityToAdd,
-                price: productData.salePrice,
+                price: productData.regularPrice,
+                offerPrice:productData.salePrice,
                 totalPrice: productData.salePrice * quantityToAdd
             });
         }
@@ -231,10 +241,10 @@ const updateCart = async(req,res) => {
         const findProduct = cartExist.items.findIndex((item) => item.productId == productId);
         if(quantity == 1 && cartExist.items[findProduct].quantity < 5){
             cartExist.items[findProduct].quantity += 1;
-            cartExist.items[findProduct].totalPrice += cartExist.items[findProduct].price;
+            cartExist.items[findProduct].totalPrice += cartExist.items[findProduct].offerPrice;
         }else if(cartExist.items[findProduct].quantity > 1){
             cartExist.items[findProduct].quantity -= 1;
-            cartExist.items[findProduct].totalPrice -= cartExist.items[findProduct].price;
+            cartExist.items[findProduct].totalPrice -= cartExist.items[findProduct].offerPrice;
         }
         await cartExist.save();
         res.redirect('/shoppingCart');
@@ -350,8 +360,13 @@ const addToWishlist = async (req, res) => {
 
         let subtotal = 0;
         cart.items.forEach(item => {
-            subtotal += item.totalPrice;
+            subtotal += item.price * item.quantity;
         });
+
+        let discount = 0;
+        cart.items.forEach(item => {
+            discount += subtotal - (item.offerPrice * item.quantity)
+        })
 
         let shippingCharge = 0;
         if(subtotal < 1000){
@@ -363,7 +378,7 @@ const addToWishlist = async (req, res) => {
             tax = Math.floor(subtotal * 0.12);
         }
         
-        let total = subtotal + shippingCharge + tax;
+        let total = subtotal - discount + shippingCharge + tax;
 
         const address = await Address.findOne({userId:user._id});
 
@@ -372,6 +387,7 @@ const addToWishlist = async (req, res) => {
             user : user,
             cart : cart,
             subtotal : subtotal,
+            discount : discount,
             shippingCharge : shippingCharge,
             tax : tax,
             total : total,
@@ -395,7 +411,12 @@ const placeOrder = async (req, res) => {
 
         let subtotal = 0;
         cart.items.forEach(item => {
-            subtotal += item.totalPrice;
+            subtotal += item.price * item.quantity;
+        })
+
+        let discount = 0;
+        cart.items.forEach(item => {
+            discount += subtotal - (item.offerPrice * item.quantity)
         })
 
         let shippingCharge = 0;
@@ -403,13 +424,17 @@ const placeOrder = async (req, res) => {
             shippingCharge = 50;
         }
 
-        let total = subtotal + shippingCharge;
+        let tax = 0;
+        if(subtotal > 3000){
+            tax = Math.floor(subtotal * 0.12);
+        } 
 
+        let total = subtotal - discount + shippingCharge + tax;
 
         const orderedItems = cart.items.map(item => ({
             product: item.productId._id,
             quantity: item.quantity,
-            price: item.price
+            price: item.offerPrice
           }));
 
           let selectedAddressDetails = address.address[selectedAddress];
@@ -419,6 +444,8 @@ const placeOrder = async (req, res) => {
             userId : user._id,
             orderedItems : orderedItems,
             totalPrice : subtotal,
+            discount : discount,
+            shippingCharge : shippingCharge,
             finalAmount : total,
             address : selectedAddressDetails,
             paymentMethod : paymentMethod
@@ -450,9 +477,17 @@ const orderPlaced = async (req,res) => {
         .sort({createdAt:-1})
         .populate('orderedItems.product');
 
+        let total = 0;
+        order.orderedItems.forEach(item => {
+            total += item.product.salePrice * item.quantity;
+        });
+
+        console.log('total : ',total)
+
         res.render('orderPlaced',{
             user : user,
-            order : order
+            order : order,
+            total : total
         })
 
         return 
@@ -539,26 +574,21 @@ const downloadInvoice = async (req, res) => {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
 
-        // Ensure the invoices directory exists
         const invoicesDir = path.join(__dirname, "../../public/invoices");
         if (!fs.existsSync(invoicesDir)) {
             fs.mkdirSync(invoicesDir, { recursive: true });
         }
 
-        // Define the PDF path
         const pdfPath = path.join(invoicesDir, `invoice_${order.orderId}.pdf`);
         const doc = new PDFDocument({ margin: 50 });
-
-        // Stream the PDF to a file
         const stream = fs.createWriteStream(pdfPath);
         doc.pipe(stream);
 
-        // Colors
-        const primaryColor = "#000000"; // Black
-        const secondaryColor = "#555555"; // Dark Gray
-        const accentColor = "#007BFF"; // Blue
+        const primaryColor = "#000000";
+        const secondaryColor = "#555555";
+        const accentColor = "#007BFF";
 
-        // Header - Company Info and Logo
+        // Header
         const logoPath = path.join(__dirname, "../../public/logo.png");
         if (fs.existsSync(logoPath)) {
             doc.image(logoPath, 50, 30, { width: 60 });
@@ -573,26 +603,21 @@ const downloadInvoice = async (req, res) => {
             .text("Kerala, India", 130, 90)
             .moveDown();
 
-        // Add a horizontal line separator
         doc.moveTo(50, 110).lineTo(550, 110).stroke();
 
-        // Invoice Title
         doc.fillColor(accentColor).fontSize(25).text("INVOICE", 400, 130);
 
-        // Invoice Details
         doc.fillColor(primaryColor)
             .fontSize(10)
             .text(`Invoice No: ${order.orderId}`, 400, 160)
             .text(`Date: ${new Date().toDateString()}`, 400, 175)
             .moveDown();
 
-        // Bill To
+        // Billing Address
         doc.fontSize(12).fillColor(accentColor).text("Bill To:", 50, 160);
         doc.fillColor(primaryColor).font("Helvetica-Bold").text(order.address.name, 50, 175);
         doc.font("Helvetica").text(`${order.address.city}, ${order.address.state}`, 50, 190);
         doc.text(`Phone: ${order.address.phone}`, 50, 205);
-
-        doc.moveDown();
 
         // Table Header
         doc.fillColor("white")
@@ -601,9 +626,10 @@ const downloadInvoice = async (req, res) => {
             .fillColor("black")
             .font("Helvetica-Bold")
             .text("Item", 55, 235)
-            .text("Qty", 250, 235)
-            .text("Price", 320, 235)
-            .text("Total", 400, 235);
+            .text("Qty", 200, 235)
+            .text("Price", 250, 235)         
+            .text("Offer Price", 320, 235)  
+            .text("Total", 420, 235);        
 
         // Table Rows
         let y = 260;
@@ -612,29 +638,42 @@ const downloadInvoice = async (req, res) => {
             if (index % 2 === 0) {
                 doc.fillColor("#F0F0F0").rect(50, y - 5, 500, 20).fill().fillColor(primaryColor);
             }
+
+            const regularPrice = item.product.price;
+            const offerPrice = item.price;
+            const total = offerPrice * item.quantity;
+
             doc.text(item.product.productName, 55, y);
-            doc.text(item.quantity.toString(), 250, y);
+            doc.text(item.quantity.toString(), 200, y);
+            doc.text(`${item.product.regularPrice.toFixed(2)}`, 250, y);
             doc.text(`${item.price.toFixed(2)}`, 320, y);
-            doc.text(`${(item.quantity * item.price).toFixed(2)}`, 400, y);
+            doc.text(`${total.toFixed(2)}`, 420, y);
+
             y += 25;
         });
 
-        // Line Separator
         doc.moveTo(50, y + 5).lineTo(550, y + 5).stroke();
 
-        // Total Amount
+        // Summary (with shipping and tax)
+        const shipping = order.shipping || 0;
+        const tax = order.tax || 0;
+
+        const subtotal = order.totalPrice;
+        const discount = order.discount;
+        const finalAmount = order.finalAmount;
+
         doc.fillColor(primaryColor).font("Helvetica-Bold");
-        doc.text(`Subtotal: ${order.totalPrice.toFixed(2)}`, 400, y + 20);
-        doc.text(`Discount: ${order.discount.toFixed(2)}`, 400, y + 40);
-        doc.text(`Total: ${order.finalAmount.toFixed(2)}`, 400, y + 60);
+        doc.text(`Subtotal: ${subtotal.toFixed(2)}`, 400, y + 20);
+        doc.text(`Shipping: ${shipping.toFixed(2)}`, 400, y + 35);
+        doc.text(`Tax     : ${tax.toFixed(2)}`, 400, y + 50);
+        doc.text(`Discount: ${discount.toFixed(2)}`, 400, y + 65);
+        doc.text(`Total   : ${finalAmount.toFixed(2)}`, 400, y + 85);
 
         // Footer
-        doc.moveDown().fontSize(10).fillColor(secondaryColor).text("Thank you for your purchase !", 50, y + 100);
+        doc.moveDown().fontSize(10).fillColor(secondaryColor).text("Thank you for your purchase!", 50, y + 120);
 
-        // Finalize PDF file
         doc.end();
 
-        // Wait for the file to be written before sending response
         stream.on("finish", () => {
             res.download(pdfPath, `invoice_${order.orderId}.pdf`);
         });
@@ -644,6 +683,7 @@ const downloadInvoice = async (req, res) => {
         res.status(500).json({ success: false, message: "Error generating invoice" });
     }
 };
+
 
 module.exports = {
     loadProductDetails,

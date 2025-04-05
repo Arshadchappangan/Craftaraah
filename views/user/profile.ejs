@@ -140,8 +140,8 @@
                                 </table>
                             </div>
                             <div class="d-flex">
-                                <a href="javascript:void(0)" onclick="confirmEmailChange('<%= encodeURIComponent(user.email) %>')" style="margin-right: 20px;" class="btn btn-primary"><i class="fas fa-envelope"></i> Change Email</a>
-                                <a href="/changePassword" class="btn btn-primary"><i class="fas fa-lock"></i> Change Password</a>
+                                <a onclick="confirmEmailChange()" style="margin-right: 20px;" class="btn btn-primary text-light"><i class="fas fa-envelope"></i> Change Email</a>
+                                <a onclick="confirmChangePassword()" class="btn btn-primary text-light"><i class="fas fa-lock"></i> Change Password</a>
                             </div>
                         </div>
                     </div>
@@ -160,7 +160,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        function confirmEmailChange(email) {
+        function confirmEmailChange() {
           Swal.fire({
             title: 'Are you sure?',
             text: "Do you want to change your email?",
@@ -170,10 +170,24 @@
             cancelButtonText: 'Cancel'
           }).then((result) => {
             if (result.isConfirmed) {
-              // Navigate to the route
-              window.location.href = `/changeEmail?email=${email}`;
+              window.location.href = `/changeEmail`;
             }
           });
+        }
+
+        function confirmChangePassword() {
+          Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to change your password?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, change it!',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = `/changePassword`;
+            }
+          })
         }
   
         function submitPhotoForm() {
