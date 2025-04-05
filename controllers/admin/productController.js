@@ -90,7 +90,6 @@ const addProducts = async (req, res) => {
                 regularPrice: products.regularPrice,
                 salePrice: products.salePrice,
                 createdAt: new Date(),
-                quantity: products.quantity,
                 productImage: images,
                 status: 'Available'
             })

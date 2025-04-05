@@ -101,12 +101,6 @@
                             </div>
                             <div class="row">
                                 <div class="col-lg-6 mb-4">
-                                    <label for="product_name" class="form-label">Quantity</label>
-                                    <input type="text" placeholder="" name="quantity" class="form-control border"
-                                        id="quantity">
-                                    <div id="quantity-error" class="error-message"></div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
                                     <label for="product_name" class="form-label">Category</label>
                                     <select class="form-select border" name="category" id="category">
                                         <option value="" disabled selected>Choose one</option>
@@ -269,7 +263,6 @@ function displayCroppedImages() {
             const specification = document.getElementById('specification').value.trim();
             const regularPrice = document.getElementById('regular-price').value;
             const salePrice = document.getElementById('sale-price').value;
-            const quantity = document.getElementById('quantity').value;
             const category = document.getElementById('category').value;
             const imageInput = document.getElementById('imageInput');
             let isValid = true;
@@ -304,14 +297,6 @@ function displayCroppedImages() {
 
             if (parseFloat(regularPrice) <= parseFloat(salePrice)) {
                 displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-                isValid = false;
-            }
-
-            if (quantity === "") {
-                displayErrorMessage('quantity-error', 'Please enter quantity.');
-                isValid = false;
-            } else if (parseInt(quantity) < 0) {
-                displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
                 isValid = false;
             }
 

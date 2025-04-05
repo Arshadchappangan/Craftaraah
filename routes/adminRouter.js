@@ -4,7 +4,8 @@ const adminController = require('../controllers/admin/adminController');
 const customerController = require('../controllers/admin/customerController');
 const categoryController = require('../controllers/admin/categoryController');
 const productController = require('../controllers/admin/productController');
-const orderController = require('../controllers/admin/orderController')
+const orderController = require('../controllers/admin/orderController');
+const inventoryController = require('../controllers/admin/inventoryController');
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const multer = require('../middlewares/multer')
 
@@ -62,5 +63,10 @@ router.get('/returns',adminAuth,orderController.viewReturns);
 router.post('/approveReturn',adminAuth,orderController.approveReturn);
 router.post('/rejectReturn',adminAuth,orderController.rejectReturn);
 router.post('/refund',adminAuth,orderController.refund);
+
+//inventory management
+
+router.get('/inventory',adminAuth,inventoryController.loadInventory);
+router.post('/updateStock/:id',adminAuth,inventoryController.updateStock)
 
 module.exports = router

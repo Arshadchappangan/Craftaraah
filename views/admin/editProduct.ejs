@@ -99,11 +99,6 @@
 
             <div class="row">
               <div class="col-lg-6 mb-4">
-                <label class="form-label">Quantity</label>
-                <input type="text" name="quantity" id="quantity" class="form-control" value="<%= product.quantity %>">
-                <div id="quantity-error" class="error-message"></div>
-              </div>
-              <div class="col-lg-6 mb-4">
                 <label class="form-label">Category</label>
                 <select name="category" id="category" class="form-select">
                   <option value="" disabled selected>Choose one</option>
@@ -283,7 +278,6 @@ function saveCroppedImage() {
     const desc = document.getElementById('description').value.trim();
     const regular = document.getElementById('regular-price').value.trim();
     const sale = document.getElementById('sale-price').value.trim();
-    const qty = document.getElementById('quantity').value.trim();
     const category = document.getElementById('category').value;
 
     if (!name || !/^[a-zA-Z\s]+$/.test(name)) {
@@ -300,10 +294,6 @@ function saveCroppedImage() {
     }
     if (!sale || isNaN(sale) || parseFloat(sale) < 0) {
       showError("salePrice-error", "Invalid sale price");
-      isValid = false;
-    }
-    if (!qty || isNaN(qty) || parseInt(qty) < 0) {
-      showError("quantity-error", "Invalid quantity");
       isValid = false;
     }
     if (!category) {

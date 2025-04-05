@@ -1,0 +1,276 @@
+<%-include("../../views/partials/admin/header")%>
+
+<div class="content">
+  <div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+      <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+        <div>
+          <h2 class="text-white pb-2 fw-bold">Inventory Dashboard</h2>
+          <h5 class="text-white op-7 mb-2">Manage stock levels and product inventory</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-inner mt--5">
+    <div class="row mt--2">
+      
+      <!-- Total Stock -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-primary bubble-shadow-small">
+                  <i class="fas fa-boxes"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Total Stock</p>
+                  <h4 class="card-title"><%= totalStock %> items</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Low Stock -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-warning bubble-shadow-small">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Low Stock</p>
+                  <h4 class="card-title"><%= lowStockItems.length %></h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Out of Stock -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-danger bubble-shadow-small">
+                  <i class="fas fa-times-circle"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Out of Stock</p>
+                  <h4 class="card-title"><%= outOfStockItems.length %></h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Products -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-info bubble-shadow-small">
+                  <i class="fas fa-tags"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Total Products</p>
+                  <h4 class="card-title"><%= productCount %></h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <form action="/admin/inventory" method="GET" class="mb-3 row">
+        <div class="col-md-3">
+          <select name="filter" class="form-select" onchange="this.form.submit()">
+            <option value="">All</option>
+            <option value="in" <%= filter === 'in' ? 'selected' : '' %>>In Stock</option>
+            <option value="low" <%= filter === 'low' ? 'selected' : '' %>>Low Stock</option>
+            <option value="out" <%= filter === 'out' ? 'selected' : '' %>>Out of Stock</option>
+          </select>
+        </div>
+        
+        <div class="col-md-4">
+          <input
+            type="text"
+            name="search"
+            placeholder="<%= search ? search : 'Search products...'%>"
+            class="form-control"
+          />
+        </div>
+      
+
+        <div class="col-md-2">
+            <%if(!search){%>
+          <button type="submit" class="btn btn-primary w-100">Search</button>
+          <%}else{%>
+            <button type="submit" class="btn btn-danger w-100">Clear</button>
+            <%}%>
+        </div>
+      </form>
+      
+      
+      
+
+    <!-- Inventory Stock Table -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-round">
+          <div class="card-header">
+            <div class="card-title">Inventory Stock Table</div>
+          </div>
+          <div class="card-body table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <!-- <th>SKU</th> -->
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% products.forEach(product => { %>
+                <tr data-status="<%= product.quantity === 0 ? 'out' : product.quantity < 10 ? 'low' : 'in' %>">
+                    <td><%= product.productName %></td>
+                    <td><%= product.quantity %></td>
+                    <td>₹<%= product.salePrice %></td>
+                    <td>
+                      <% if (product.quantity === 0) { %>
+                        <span class="badge badge-danger">Out of Stock</span>
+                      <% } else if (product.quantity < 10) { %>
+                        <span class="badge badge-warning">Low</span>
+                      <% } else { %>
+                        <span class="badge badge-success">In Stock</span>
+                      <% } %>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary update-stock-btn" data-id="<%= product._id %>" data-name="<%= product.productName %>" data-qty="<%= product.quantity %>">Update Stock</button>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container mt-3">
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+            <% for (let i = 1; i <= totalPages; i++) { %>
+              <li class="page-item <%=(i === currentPage) ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>&search=<%= search %>&filter=<%= filter %>"><%= i %></a>
+              </li>
+            <% } %>
+          </ul>
+        </nav>
+      </div>      
+
+    <!-- Stock Level Bar Chart -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-round">
+          <div class="card-header">
+            <div class="card-title">Stock Level Overview</div>
+          </div>
+          <div class="card-body">
+            <canvas id="stockLevelChart" height="120"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Chart Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  const ctx = document.getElementById("stockLevelChart").getContext("2d");
+
+  const productNames = <%- JSON.stringify(productNames) %>;
+  const productStocks = <%- JSON.stringify(productStocks) %>; 
+
+  const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels:  productNames,
+      datasets: [{
+        label: 'Stock Quantity',
+        data: productStocks,
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+    document.querySelectorAll(".update-stock-btn").forEach(button => {
+      button.addEventListener("click", async () => {
+        const id = button.getAttribute("data-id");
+        const productName = button.getAttribute("data-name");
+        const currentQty = button.getAttribute("data-qty");
+  
+        const { value: newQty } = await Swal.fire({
+          title: `Update Stock - ${productName}`,
+          input: 'number',
+          inputLabel: 'Enter new stock quantity',
+          inputValue: currentQty,
+          showCancelButton: true,
+          confirmButtonText: 'Update',
+          inputAttributes: {
+            min: 0
+          }
+        });
+  
+        if (newQty !== undefined) {
+
+          fetch(`/admin/updateStock/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quantity: newQty })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Updated!', 'Stock quantity has been updated.', 'success')
+                .then(() => window.location.reload());
+            } else {
+              Swal.fire('Error!', 'Could not update stock.', 'error');
+            }
+          });
+        }
+      });
+    });
+  </script>
+  
