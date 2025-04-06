@@ -12,7 +12,6 @@ const loadInventory = async (req, res) => {
       let allProducts = await Product.find(query);
 
   
-      // Apply filter
       if (filter === 'in') {
         query.quantity = { $gte: 10 };
       } else if (filter === 'low') {
@@ -21,7 +20,6 @@ const loadInventory = async (req, res) => {
         query.quantity = 0;
       }
   
-      // Apply search
       if (search) {
         const escapeRegex = (text) =>
           text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
@@ -29,22 +27,20 @@ const loadInventory = async (req, res) => {
         query.productName = { $regex: safeSearch, $options: 'i' };
       }
   
-      // Get total count for pagination (based on filtered query)
       const count = await Product.countDocuments(query);
   
-      // Fetch products for current page
       const products = await Product.find(query)
         .skip(skip)
         .limit(limit);
   
-      // Total stock (all non-deleted, non-blocked products)
+
       const totalStockAgg = await Product.aggregate([
         { $match: { isBlocked: false, isDeleted: false } },
         { $group: { _id: null, total: { $sum: '$quantity' } } }
       ]);
       const totalStock = totalStockAgg[0]?.total || 0;
   
-      // Stock status categories
+
       const lowStockItems = await Product.find({
         quantity: { $gt: 0, $lt: 10 },
         isBlocked: false,
@@ -57,7 +53,7 @@ const loadInventory = async (req, res) => {
         isDeleted: false
       });
   
-      // Prepare chart data
+
       const productNames = allProducts.map(p => p.productName);
       const productStocks = allProducts.map(p => p.quantity);
   

@@ -477,12 +477,31 @@ const orderPlaced = async (req,res) => {
         .sort({createdAt:-1})
         .populate('orderedItems.product');
 
+        let subtotal = 0;
+        order.orderedItems.forEach(item => {
+            subtotal += item.product.regularPrice * item.quantity;
+        })
+
+        let discount = 0;
+        order.orderedItems.forEach(item => {
+            discount += subtotal - (item.product.salePrice * item.quantity)
+        })
+
+        let shippingCharge = 0;
+        if(subtotal < 1000){
+            shippingCharge = 50;
+        }
+
+        let tax = 0;
+        if(subtotal > 3000){
+            tax = Math.floor(subtotal * 0.12);
+        } 
+
         let total = 0;
         order.orderedItems.forEach(item => {
-            total += item.product.salePrice * item.quantity;
+            total += (item.product.salePrice * item.quantity) + shippingCharge + tax 
         });
 
-        console.log('total : ',total)
 
         res.render('orderPlaced',{
             user : user,

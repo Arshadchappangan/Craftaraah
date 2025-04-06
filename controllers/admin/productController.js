@@ -106,33 +106,31 @@ const addProducts = async (req, res) => {
 
 const loadEditProduct = async (req, res) => {
     try {
-        const id = req.query.id;
-        const product = await Product.findOne({ _id: id });
-        const category = await Category.find({isDeleted:false,isListed:true});
-        res.render('editProduct', {
-            product: product,
-            category: category
-        })
+      const id = req.query.id;
+      const product = await Product.findOne({ _id: id });
+      const category = await Category.find({ isDeleted: false, isListed: true });
+  
+      res.render('editProduct', {
+        product,
+        category
+      });
     } catch (error) {
-        res.redirect('pageError')
+      res.redirect('pageError');
     }
-}
+  };
+  
 
 
 const editProduct = async (req, res) => {
     try {
-        console.log("Received files:", req.files);
-        console.log("Received body:", req.body);
-
         const productId = req.params.id;
 
-        // 🟢 Ensure existingImages is always an array
         let existingImages = req.body['existingImages[]'];
         if (!Array.isArray(existingImages)) {
-            existingImages = existingImages ? [existingImages] : []; // Convert string to array
+            existingImages = existingImages ? [existingImages] : []; 
         }
 
-        // 🟢 Process new images (resize and store paths)
+        // Process new images (resize and store paths)
         const newImages = [];
         if (req.files && req.files.length > 0) {
             for (let file of req.files) {
@@ -147,12 +145,11 @@ const editProduct = async (req, res) => {
             }
         }
 
-        // 🟢 Update product details in database
         const updatedProduct = await Product.findByIdAndUpdate(
             productId,
             {
                 $set: { ...req.body },
-                $push: { productImage: { $each: [...newImages] } }, // ✅ Adds new images instead of replacing all
+                $push: { productImage: { $each: [...newImages] } }, 
             },
             { new: true }
         );
@@ -161,7 +158,7 @@ const editProduct = async (req, res) => {
         if (updatedProduct) {
             return res.json({ status: true, message: "Product updated successfully!" });
         } else {
-            return res.status(404).json({ status: false, message: "Product not found!" });
+            return res.status(404).json({ status: false, message: "Product not updated!" });
         }
     } catch (error) {
         console.error("Error updating product:", error);

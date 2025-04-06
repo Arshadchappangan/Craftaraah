@@ -1,6 +1,7 @@
 <%-include("../../views/partials/user/header")%>
 <link rel="stylesheet" href="user/css/profile.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+
 
 
 
@@ -103,12 +104,12 @@
                                     position: absolute;
                                     bottom: 0;
                                     right: 0;
-                                    background-color: rgba(0,0,0,0.6);
+                                    /* background-color: rgba(0,0,0,0.6); */
                                     padding: 5px;
                                     border-radius: 50%;
                                     cursor: pointer;
                                     ">
-                                    <i class="fas fa-pencil-alt text-white"></i>
+                                    <i class="fa fa-pencil text-dark"></i>
                                     </label>
 
                                     <!-- Hidden File Input -->
@@ -121,7 +122,7 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <h2><%= user.name %></h2>
-                                    <i class="fas fa-edit text-dark" style="cursor: pointer; font-size: medium;" onclick="editProfileInfo('<%= user.name %>', '<%= user.phone %>')"></i>
+                                    <i class="fa fa-pencil text-dark" style="cursor: pointer; font-size: medium;" onclick="editProfileInfo('<%= user.name %>', '<%= user.phone %>')"></i>
                                 </div>
                                 
                                 <table>
@@ -140,8 +141,8 @@
                                 </table>
                             </div>
                             <div class="d-flex">
-                                <a onclick="confirmEmailChange()" style="margin-right: 20px;" class="btn btn-primary text-light"><i class="fas fa-envelope"></i> Change Email</a>
-                                <a onclick="confirmChangePassword()" class="btn btn-primary text-light"><i class="fas fa-lock"></i> Change Password</a>
+                                <a onclick="confirmEmailChange()" style="margin-right: 20px;" class="btn btn-primary text-light"><i class="fa fa-envelope"></i> Change Email</a>
+                                <a onclick="confirmChangePassword()" class="btn btn-primary text-light"><i class="fa fa-lock"></i> Change Password</a>
                             </div>
                         </div>
                     </div>

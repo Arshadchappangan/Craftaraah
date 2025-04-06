@@ -16,14 +16,14 @@
                     <div class="card-header d-flex justify-content-between">
                         <h4 class="card-title">#<%= order.orderId %></h4>
                         <div>
-                            <select id="orderStatus" class="form-select">
-                                <option value="Ordered" <%= order.status === "Ordered" ? "selected" : "" %>>Ordered</option>
+                            <select id="orderStatus" class="form-select" <%= order.status === "Returned" ? "disabled" : "" %>>
+                                <option disabled value="Ordered" <%= order.status === "Ordered" ? "selected" : "" %>> Ordered</option>
                                 <option value="Processing" <%= order.status === "Processing" ? "selected" : "" %>>Processing</option>
                                 <option value="Shipped" <%= order.status === "Shipped" ? "selected" : "" %>>Shipped</option>
                                 <option value="Delivered" <%= order.status === "Delivered" ? "selected" : "" %>>Delivered</option>
-                                <option value="Cancelled" <%= order.status === "Cancelled" ? "selected" : "" %>>Cancelled</option>
-                                <option value="Return Requested" <%= order.status === "Return Requested" ? "selected" : "" %>>Return Requested</option>
-                                <option value="Returned" <%= order.status === "Returned" ? "selected" : "" %>>Returned</option>
+                                <option disabled value="Cancelled" <%= order.status === "Cancelled" ? "selected" : "" %>>Cancelled</option>
+                                <option disabled value="Return Requested" <%= order.status === "Return Requested" ? "selected" : "" %>>Return Requested</option>
+                                <option disabled value="Returned" <%= order.status === "Returned" ? "selected" : "" %>>Returned</option>
                             </select>
                         </div>
                     </div>

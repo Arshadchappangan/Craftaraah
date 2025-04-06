@@ -194,6 +194,7 @@
                                     </label>
                                 </div>
                                 <button type="submit" class="site-btn">PLACE ORDER</button>
+                                <button type="button" class="site-btn" onclick="payNow(100)">Pay Now</button>
                             </div>
                         </div>
                     </div>
@@ -204,6 +205,58 @@
 
     <%-include("../../views/partials/user/footer")%>
 
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script>
+        async function payNow(amount) {
+            const res = await fetch('/razorpayOrder', {
+                method : 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ amount })
+            });
+            const data = await res.json();
+
+            const options = {
+                key : data.key,
+                amount : data.amount,
+                currency : "INR",
+                name : "Craftaraah Ecommerce",
+                description : "Order Payment",
+                order_id : data.orderId,
+                handler : function(response){
+                    fetch('/verifyPayment', {
+                        method : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(response)
+                    }).then(res => {
+                        return res.json()
+                    })
+                    .then(data => {
+                        if(data.status){
+                            alert('Payment verification Successful');
+                            window.location.href = '/orderSuccess';
+                        } else {
+                            alert('Payment verification Failed');
+                            window.location.href = '/orderFailure';
+                        }
+                    }).catch(err => {
+                        console.error("Error verifying payment:", err);
+                        window.location.href = "/order-failure";
+                    });
+                },
+                theme : {
+                    color : "#F37254"
+                }
+            }
+            const razor = new Razorpay(options);
+            razor.open();
+        }
+    </script>
  
 
 </body>

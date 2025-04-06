@@ -1,7 +1,9 @@
 <%- include("../../views/partials/admin/header") %>
 
 <head>
+  <!-- Cropper.js CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+
 </head>
 
 <style>
@@ -103,7 +105,7 @@
                 <select name="category" id="category" class="form-select">
                   <option value="" disabled selected>Choose one</option>
                   <% category.forEach(cat => { %>
-                    <option value="<%= cat.name %>"><%= cat.name %></option>
+                    <option value="<%= cat._id %>" <%= product.category.toString() === cat._id.toString() ? "selected" : "" %>><%= cat.name %></option>
                   <% }) %>
                 </select>
                 <div id="category-error" class="error-message"></div>
@@ -142,22 +144,20 @@
 <div id="overlay"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
 
 <script>
   let cropper;
-  let newImages = []; // Store new cropped images
-  let existingImages = [];
-  let croppedImages = [];
+  let newImages = []; // Cropped new files
+  let currentFile = null;
 
+  function previewImages(event) {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-
-
-function previewImages(event) {
-  const files = event.target.files;
-  if (!files || files.length === 0) return;
-
-  [...files].forEach(file => {
+    // Process only one image at a time
+    currentFile = files[0];
     const reader = new FileReader();
     reader.onload = (e) => {
       document.getElementById('cropImage').src = e.target.result;
@@ -169,52 +169,47 @@ function previewImages(event) {
         viewMode: 1,
       });
     };
-    reader.readAsDataURL(file);
-  });
+    reader.readAsDataURL(currentFile);
 
-  event.target.value = "";
-}
-
-
-function saveCroppedImage() {
-  if (!cropper) {
-    alert("No image selected for cropping!");
-    return;
+    event.target.value = ""; // Reset input
   }
 
-  cropper.getCroppedCanvas().toBlob(blob => {
-    if (!blob) {
-      alert("Failed to crop image. Try again.");
+  function saveCroppedImage() {
+    if (!cropper || !currentFile) {
+      alert("No image to crop");
       return;
     }
 
-    let file = new File([blob], `cropped_${Date.now()}.jpg`, { type: "image/jpeg" });
-    newImages.push(file); // ✅ Store new image properly
+    cropper.getCroppedCanvas().toBlob(blob => {
+      if (!blob) {
+        alert("Failed to crop image");
+        return;
+      }
 
-    // ✅ Display preview of cropped image
-    const previewContainer = document.getElementById('previewContainer');
-    const div = document.createElement("div");
-    div.className = "img-container";
+      let file = new File([blob], `cropped_${Date.now()}.jpg`, { type: "image/jpeg" });
+      newImages.push(file);
 
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(file);
+      const previewContainer = document.getElementById('previewContainer');
+      const div = document.createElement("div");
+      div.className = "img-container";
 
-    const i = document.createElement("i");
-    i.className = "fas fa-times";
-    i.onclick = () => {
-      newImages = newImages.filter(f => f !== file);
-      div.remove();
-    };
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
 
-    div.appendChild(img);
-    div.appendChild(i);
-    previewContainer.appendChild(div);
+      const i = document.createElement("i");
+      i.className = "fas fa-times";
+      i.onclick = () => {
+        newImages = newImages.filter(f => f !== file);
+        div.remove();
+      };
 
-    closeCropModal();
-  }, "image/jpeg"); // ✅ Ensure correct format
-}
+      div.appendChild(img);
+      div.appendChild(i);
+      previewContainer.appendChild(div);
 
-
+      closeCropModal();
+    }, "image/jpeg");
+  }
 
   function closeCropModal() {
     document.getElementById('cropModal').style.display = "none";
@@ -223,6 +218,7 @@ function saveCroppedImage() {
       cropper.destroy();
       cropper = null;
     }
+    currentFile = null;
   }
 
   function deleteImage(imageName, productId) {
@@ -239,35 +235,67 @@ function saveCroppedImage() {
   }
 
   function validateAndSubmit(event, productId) {
-  event.preventDefault();
-  if (!validateForm()) return;
+    event.preventDefault();
+    if (!validateForm()) return;
 
-  const form = document.getElementById('productForm');
-  const formData = new FormData(form);
+    const form = document.getElementById('productForm');
+    const formData = new FormData(form);
 
-  // Append existing images so they are not lost
-  existingImages.forEach((image) => {
-    formData.append('existingImages[]', image);
-  });
+    // Include existing image URLs
+    document.querySelectorAll('#previewContainer img').forEach(img => {
+      const src = img.src;
+      if (!src.startsWith('blob:')) {
+        formData.append('existingImages[]', src);
+      }
+    });
 
-  // Append new cropped images (as files)
-  newImages.forEach((file) => {
-    formData.append('newImages', file);
-  });
+    // Append new cropped images
+    newImages.forEach((file) => {
+      formData.append('newImages', file);
+    });
 
-  console.log('submittng data..')
-
-  fetch(`/editProduct/${productId}`, { 
+    fetch(`/admin/editProduct/${productId}`, {
     method: 'POST',
     body: formData
-})
-.then(response => response.text()) // Change from .json() to .text()
-.then(text => {
+    })
+    .then(response => response.text())
+    .then(text => {
     console.log("Server response:", text);
-    return JSON.parse(text); // Manually parse JSON if needed
+    try {
+      const json = JSON.parse(text);
+      if (json.status) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Updated!',
+        text: 'Product has been updated successfully.',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        window.location.href = "/admin/products";
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Update Failed',
+        text: 'There was a problem updating the product.'
+      });
+    }
+  } catch (e) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Unexpected Response',
+      text: 'Something went wrong while processing the server response.'
+    });
+  }
 })
-.catch(error => console.error("Error:", error));
-}
+.catch(error => {
+  console.error("Error:", error);
+  Swal.fire({
+    icon: 'error',
+    title: 'Network Error',
+    text: 'Failed to send request. Please try again later.'
+  });
+});
+  }
 
 
   function validateForm() {
@@ -280,7 +308,7 @@ function saveCroppedImage() {
     const sale = document.getElementById('sale-price').value.trim();
     const category = document.getElementById('category').value;
 
-    if (!name || !/^[a-zA-Z\s]+$/.test(name)) {
+    if (!name || !/^[a-zA-Z0-9\s\-_,\.;:()]+$/.test(name)) {
       showError("productName-error", "Enter a valid name");
       isValid = false;
     }
@@ -312,4 +340,3 @@ function saveCroppedImage() {
     document.querySelectorAll('.error-message').forEach(el => el.innerText = '');
   }
 </script>
-

@@ -6,6 +6,7 @@ const profileController = require('../controllers/user/profileController')
 const passport = require('passport');
 const {userAuth,adminAuth} = require('../middlewares/auth')
 const multer = require('../middlewares/multer');
+const paymentController = require('../controllers/user/paymentController')
 
 router.get('/pageNotFound',userController.pageNotFound)
 
@@ -90,6 +91,12 @@ router.get('/orderDetails',userAuth,productController.orderDetails);
 router.post('/cancelOrder',userAuth,productController.cancelOrder);
 router.post('/returnOrder',userAuth,productController.returnOrder);
 router.get('/invoice/:id',userAuth,productController.downloadInvoice);
+
+//razorpay payment
+router.post('/razorpayOrder',userAuth,paymentController.createRazorpayOrder);
+router.post('/verifyPayment',userAuth,paymentController.verifyPayment);
+router.get('/orderSuccess',userAuth,paymentController.orderSuccess);
+router.get('/orderFailure',userAuth,paymentController.orderFailed);
 
 
 module.exports = router;
