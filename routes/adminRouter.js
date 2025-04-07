@@ -6,6 +6,7 @@ const categoryController = require('../controllers/admin/categoryController');
 const productController = require('../controllers/admin/productController');
 const orderController = require('../controllers/admin/orderController');
 const inventoryController = require('../controllers/admin/inventoryController');
+const couponController = require('../controllers/admin/couponController');
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const multer = require('../middlewares/multer')
 
@@ -67,6 +68,10 @@ router.post('/refund',adminAuth,orderController.refund);
 //inventory management
 
 router.get('/inventory',adminAuth,inventoryController.loadInventory);
-router.post('/updateStock/:id',adminAuth,inventoryController.updateStock)
+router.post('/updateStock/:id',adminAuth,inventoryController.updateStock);
+
+// coupon management
+router.get('/coupons',adminAuth,couponController.loadCoupons);
+router.post('/addCoupon',adminAuth,couponController.addCoupon);
 
 module.exports = router
