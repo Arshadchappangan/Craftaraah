@@ -63,6 +63,22 @@ const orderSchema = new Schema({
         enum : ['COD','Card','Net Banking','UPI','Razorpay'],
         required : true
     },
+    paymentDetails : {
+        orderId : {
+            type : String
+        },
+        paymentId : {
+            type : String
+        },
+        signature : {
+            type : String
+        },
+        status : {
+            type : String,
+            enum : ['Pending','Paid','Refunded'],
+            default : 'Pending'
+        }
+    },
     status : {
         type : String,
         enum : ['Ordered','Processing','Shipped','Delivered','Cancelled','Return Requested','Returned'],

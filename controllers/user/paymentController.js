@@ -23,44 +23,31 @@ const createRazorpayOrder = async (req,res) => {
 
 
 const verifyPayment = (req,res) => {
+    try {
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const { razorOrderId, paymentId, signature } = req.body;
 
     const secret = process.env.RAZORPAY_KEY_SECRET;
     const hash = crypto.createHmac('sha256', secret)
-        .update(razorpay_order_id + "|" + razorpay_payment_id)
+        .update(razorOrderId + "|" + paymentId)
         .digest('hex');
 
-
-        if (hash === razorpay_signature) {
+        if (hash === signature) {
             return res.status(200).json({status: true});
         }else {
-            return res.status(400).json({status: false});
+            console.log('Payment verification failed');
+            return res.redirect('/orderFailure');
         }
+
+}catch (error) {
+        console.error('Payment verification failed : ',error);
+        res.redirect('/orderFailure');
+    }
 }
 
-const orderSuccess = (req,res) => {
-    try {
-        res.render('orderSuccess');
-    } catch (error) {
-        console.error('Order success failed : ',error);
-        res.status(500).send('Something went wrong');
-        
-    }
-}
-const orderFailed = (req,res) => {
-    try {
-        res.render('orderFailed');
-    } catch (error) {
-        console.error('Order failed : ',error);
-        res.status(500).send('Something went wrong');
-        
-    }
-}
+
 
 module.exports = {
     createRazorpayOrder,
-    verifyPayment,
-    orderSuccess,
-    orderFailed
+    verifyPayment
 }

@@ -91,12 +91,12 @@ router.get('/orderDetails',userAuth,productController.orderDetails);
 router.post('/cancelOrder',userAuth,productController.cancelOrder);
 router.post('/returnOrder',userAuth,productController.returnOrder);
 router.get('/invoice/:id',userAuth,productController.downloadInvoice);
+router.get('/orderFailure',userAuth,productController.orderFailed);
 
 //razorpay payment
 router.post('/razorpayOrder',userAuth,paymentController.createRazorpayOrder);
 router.post('/verifyPayment',userAuth,paymentController.verifyPayment);
-router.get('/orderSuccess',userAuth,paymentController.orderSuccess);
-router.get('/orderFailure',userAuth,paymentController.orderFailed);
+
 
 
 module.exports = router;

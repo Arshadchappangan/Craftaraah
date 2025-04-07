@@ -318,12 +318,17 @@
                 description : "Order Payment",
                 order_id : data.orderId,
                 handler : function(response){
+                    console.log("Payment response:", response);
                     fetch('/verifyPayment', {
                         method : 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(response)
+                        body: JSON.stringify({
+                            paymentId: response.razorpay_payment_id,
+                            razorOrderId: response.razorpay_order_id,
+                            signature: response.razorpay_signature
+                        })
                     }).then(res => {
                         return res.json()
                     })
@@ -335,9 +340,9 @@
                                     'Content-Type': 'application/json'
                                 },
                                 body: JSON.stringify({
-                                    orderId : data.orderId,
-                                    paymentId : data.paymentId,
-                                    signature : data.signature,
+                                    razorOrderId : response.razorpay_order_id,
+                                    paymentId : response.razorpay_payment_id,
+                                    signature : response.razorpay_signature,
                                     paymentMethod : 'Razorpay',
                                     selectedAddress : document.querySelector('input[name="selectedAddress"]:checked').value
                                 })
@@ -363,7 +368,7 @@
                         }
                     }).catch(err => {
                         console.error("Error verifying payment:", err);
-                        window.location.href = "/order-failure";
+                        window.location.href = "/orderFailure";
                     });
                 },
                 theme : {

@@ -112,12 +112,11 @@
                         <a onclick="addToWishlist('<%=product._id%>')" class="heart-icon"><span class="icon_heart_alt"></span></a>
                         <ul>
                             <%if(product.stock > 0){%>
-                            <li><b>Availability</b> <span>Only <%=product.quantity%> left in stock!</span></li>
+                            <li><b>Availability</b> <span>Only <%=product.stock%> left in stock!</span></li>
                             <%}else{%>
                             <li><b>Availability</b> <span>Out of stocks</span></li>
                             <%}%>
                             <li><b>Shipping</b> <span>01 day shipping. <samp>Free pickup today</samp></span></li>
-
                         </ul>
                     </div>
                 </div>

@@ -421,7 +421,11 @@ const placeOrder = async (req, res) => {
         const cart = await Cart.findOne({userId:user._id}).populate('items.productId');
         const address = await Address.findOne({userId:user._id});
         const orderId = generateOrderId();
-        const { paymentMethod,selectedAddress } = req.body;
+        const { razorOrderId, paymentId, signature, paymentMethod,selectedAddress } = req.body;
+
+        console.log('razorOrderId:', razorOrderId);
+        console.log('paymentId:', paymentId);
+        console.log('signature:', signature);
         
 
         let subtotal = 0;
@@ -465,7 +469,13 @@ const placeOrder = async (req, res) => {
             tax : tax,
             finalAmount : total,
             address : selectedAddressDetails,
-            paymentMethod : paymentMethod
+            paymentMethod : paymentMethod,
+            paymentDetails : {
+                orderId : razorOrderId,
+                paymentId : paymentId,
+                signature : signature,
+                status : "Paid"
+            }
         })
 
         req.session.orderId = placeOrder._id;
@@ -485,7 +495,7 @@ const placeOrder = async (req, res) => {
 
     } catch (error) {
         console.error("Error in placeOrder:", error);
-        res.redirect("/pageNotFound");
+        res.redirect("/orderFailure");
     }
 }
 
@@ -495,6 +505,10 @@ const orderPlaced = async (req,res) => {
         const order = await Order.findById(req.session.orderId)
         .sort({createdAt:-1})
         .populate('orderedItems.product');
+
+        if (!order) {
+            return res.redirect('/pageNotFound');
+        }
 
         req.session.orderId = null;
 
@@ -519,16 +533,13 @@ const orderPlaced = async (req,res) => {
             tax = Math.floor(subtotal * 0.12);
         } 
 
-        let total = 0;
-        order.orderedItems.forEach(item => {
-            total += subtotal - discount + shippingCharge + tax 
-        });
+        let total = order.finalAmount;
 
 
         return res.render('orderPlaced',{
             user : user,
             order : order,
-            total : total
+            total : total,
         })
 
     } catch (error) {
@@ -554,6 +565,7 @@ const orderDetails = async(req,res) => {
 
 const cancelOrder = async (req,res) => {
     try {
+        const user = req.session.user;
         const id = req.query.id;
         const order = await Order.findById(id);
 
@@ -717,6 +729,21 @@ const downloadInvoice = async (req, res) => {
     }
 };
 
+const orderFailed = (req,res) => {
+    try {
+        let user = req.session.user;
+        res.render('orderFailed',{
+            user,
+            order : null
+        });
+
+    } catch (error) {
+        console.error('Order failed : ',error);
+        res.status(500).send('Something went wrong');
+        
+    }
+}
+
 
 module.exports = {
     loadProductDetails,
@@ -735,5 +762,6 @@ module.exports = {
     orderDetails,
     cancelOrder,
     returnOrder,
-    downloadInvoice
+    downloadInvoice,
+    orderFailed
 }
