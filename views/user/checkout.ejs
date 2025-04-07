@@ -78,7 +78,7 @@
     <!-- Checkout Section Begin -->
     <section class="checkout spad">
         <div class="container">
-            <form class="checkout__form" action="/placeOrder" method="POST">
+            <form class="checkout__form" id="checkoutForm" action="/placeOrder" method="POST">
                 <h4>Order Details</h4>
                     <div class="row">
                         <div class="col-lg-8 col-md-6">
@@ -192,9 +192,8 @@
                                         Cash on delivery
                                         <span class="checkmark"></span>
                                     </label>
-                                </div>
-                                <button type="submit" class="site-btn">PLACE ORDER</button>
-                                <button type="button" class="site-btn" onclick="payNow(100)">Pay Now</button>
+                                </div> 
+                                <button type="submit" id="placeOrderBtn" class="site-btn">PLACE ORDER</button>
                             </div>
                         </div>
                     </div>
@@ -205,10 +204,102 @@
 
     <%-include("../../views/partials/user/footer")%>
 
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('checkoutForm');
+            form.addEventListener('submit', placeOrder);
+        });
+
+        function placeOrder(event) {
+            console.log('inside place order'); 
+            event.preventDefault();
+
+            const paymentMethodInput = document.querySelector('input[name="paymentMethod"]:checked');
+            const selectedAddressInput = document.querySelector('input[name="selectedAddress"]:checked');
+
+            if (!selectedAddressInput) {
+                return Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'Please select a shipping address',
+                });
+            }
+
+            if (!paymentMethodInput) {
+                return Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'Please select a payment method',
+                });
+            }
+
+            const paymentMethod = paymentMethodInput.value;
+            const selectedAddress = selectedAddressInput.value;
+            const totalAmount = <%- JSON.stringify(total) %>; 
+
+
+            Swal.fire({
+                title: 'Confirm Order',
+                text: `Place order with ${paymentMethod === 'payment' ? 'Online Payment' : 'Cash on Delivery'}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, place order',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    if (paymentMethod === 'payment') {
+                        payNow(totalAmount);
+                    } else if (paymentMethod === 'COD') {
+                        fetch('/placeOrder', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                selectedAddress,
+                                paymentMethod
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Order Placed!',
+                                    text: 'Redirecting to success page...',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    window.location.href = '/orderPlaced';
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Failed',
+                                    text: 'Something went wrong!',
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Could not place order. Please try again later.',
+                            });
+                        });
+                    }
+                }
+            });
+        }
+
+
+
         async function payNow(amount) {
             const res = await fetch('/razorpayOrder', {
                 method : 'POST',
@@ -238,10 +329,36 @@
                     })
                     .then(data => {
                         if(data.status){
-                            alert('Payment verification Successful');
-                            window.location.href = '/orderSuccess';
+                            fetch('/placeOrder',{
+                                method : 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    orderId : data.orderId,
+                                    paymentId : data.paymentId,
+                                    signature : data.signature,
+                                    paymentMethod : 'Razorpay',
+                                    selectedAddress : document.querySelector('input[name="selectedAddress"]:checked').value
+                                })
+                            }).then(res => res.json())
+                            .then(data => {
+                                if(data.success){
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Order Placed!',
+                                        text: 'Redirecting to success page...',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        window.location.href = '/orderPlaced';
+                                    });
+                                } else {
+                                    window.location.href = '/orderFailure';
+                                }
+                            })
+                            
                         } else {
-                            alert('Payment verification Failed');
                             window.location.href = '/orderFailure';
                         }
                     }).catch(err => {
@@ -260,5 +377,4 @@
  
 
 </body>
-
 </html>

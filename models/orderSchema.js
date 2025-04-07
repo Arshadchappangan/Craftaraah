@@ -40,6 +40,10 @@ const orderSchema = new Schema({
         type : Number,
         default : 0
     },
+    tax :{
+        type : Number,
+        default : 0
+    },
     finalAmount : {
         type : Number,
         required : true
@@ -56,7 +60,7 @@ const orderSchema = new Schema({
     },
     paymentMethod : {
         type : String,
-        enum : ['COD','Card','Net Banking','UPI'],
+        enum : ['COD','Card','Net Banking','UPI','Razorpay'],
         required : true
     },
     status : {
@@ -78,12 +82,8 @@ const orderSchema = new Schema({
             default : Date.now()
         }
 
-    },
-    createdAt : {
-        type : Date,
-        default : Date.now()
     }
-})
+},{timestamps:true});
 
 const Order = mongoose.model('Order',orderSchema);
 module.exports = Order;

@@ -104,27 +104,20 @@
                                 </div>
                             </div>
                         </div>
-                        <%if(product.quantity){%>
+                        <%if(product.stock){%>
                         <a onclick="addToCart('<%=product._id%>')" class="primary-btn">ADD TO CART</a>
                         <%}else{%>
                         <a href="#" class="primary-btn" style="background-color: grey; cursor: not-allowed;">OUT OF STOCK</a>
                         <%}%>
                         <a onclick="addToWishlist('<%=product._id%>')" class="heart-icon"><span class="icon_heart_alt"></span></a>
                         <ul>
-                            <%if(product.quantity > 0){%>
+                            <%if(product.stock > 0){%>
                             <li><b>Availability</b> <span>Only <%=product.quantity%> left in stock!</span></li>
                             <%}else{%>
                             <li><b>Availability</b> <span>Out of stocks</span></li>
                             <%}%>
                             <li><b>Shipping</b> <span>01 day shipping. <samp>Free pickup today</samp></span></li>
-                            <!-- <li><b>Share on</b>
-                                <div class="share">
-                                    <a href="#"><i class="fa fa-facebook"></i></a>
-                                    <a href="#"><i class="fa fa-twitter"></i></a>
-                                    <a href="#"><i class="fa fa-instagram"></i></a>
-                                    <a href="#"><i class="fa fa-pinterest"></i></a>
-                                </div>
-                            </li> -->
+
                         </ul>
                     </div>
                 </div>

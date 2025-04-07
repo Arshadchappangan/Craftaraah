@@ -153,21 +153,21 @@
               </thead>
               <tbody>
                 <% products.forEach(product => { %>
-                <tr data-status="<%= product.quantity === 0 ? 'out' : product.quantity < 10 ? 'low' : 'in' %>">
+                <tr data-status="<%= product.stock === 0 ? 'out' : product.stock < 10 ? 'low' : 'in' %>">
                     <td><%= product.productName %></td>
-                    <td><%= product.quantity %></td>
+                    <td><%= product.stock %></td>
                     <td>₹<%= product.salePrice %></td>
                     <td>
-                      <% if (product.quantity === 0) { %>
+                      <% if (product.stock === 0) { %>
                         <span class="badge badge-danger">Out of Stock</span>
-                      <% } else if (product.quantity < 10) { %>
+                      <% } else if (product.stock < 10) { %>
                         <span class="badge badge-warning">Low Stock</span>
                       <% } else { %>
                         <span class="badge badge-success">In Stock</span>
                       <% } %>
                     </td>
                     <td>
-                        <button class="btn btn-sm btn-primary update-stock-btn" data-id="<%= product._id %>" data-name="<%= product.productName %>" data-qty="<%= product.quantity %>">Update Stock</button>
+                        <button class="btn btn-sm btn-primary update-stock-btn" data-id="<%= product._id %>" data-name="<%= product.productName %>" data-qty="<%= product.stock %>">Update Stock</button>
                     </td>
                   </tr>
                 <% }) %>

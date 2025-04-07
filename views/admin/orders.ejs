@@ -29,6 +29,7 @@
             <form action="/admin/orders" method="get" id="filterForm">
               <input type="hidden" name="search" id="searchHidden" value="<%= searchKeyword || '' %>">
               <div class="row  mx-auto">
+                
                 <!-- Order Status Filter -->
                 <div class="col" style="flex: 0 0 20%;">
                   <label for="status">Order Status:</label>
@@ -38,7 +39,7 @@
                     <option value="Processing" <%= status === 'Processing' ? 'selected' : '' %>>Processing</option>
                     <option value="Shipped" <%= status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
                     <option value="Delivered" <%= status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                    <option value="Canceled" <%= status === 'Canceled' ? 'selected' : '' %>>Cancelled</option>
+                    <option value="Cancelled" <%= status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
                     <option value="Return Requested" <%= status === 'Return Requested' ? 'selected' : '' %>>Return Requested</option>
                     <option value="Returned" <%= status === 'Returned' ? 'selected' : '' %>>Returned</option>
                   </select>

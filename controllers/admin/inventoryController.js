@@ -13,11 +13,11 @@ const loadInventory = async (req, res) => {
 
   
       if (filter === 'in') {
-        query.quantity = { $gte: 10 };
+        query.stock = { $gte: 10 };
       } else if (filter === 'low') {
-        query.quantity = { $gt: 0, $lt: 10 };
+        query.stock = { $gt: 0, $lt: 10 };
       } else if (filter === 'out') {
-        query.quantity = 0;
+        query.stock = 0;
       }
   
       if (search) {
@@ -36,26 +36,26 @@ const loadInventory = async (req, res) => {
 
       const totalStockAgg = await Product.aggregate([
         { $match: { isBlocked: false, isDeleted: false } },
-        { $group: { _id: null, total: { $sum: '$quantity' } } }
+        { $group: { _id: null, total: { $sum: '$stock' } } }
       ]);
       const totalStock = totalStockAgg[0]?.total || 0;
   
 
       const lowStockItems = await Product.find({
-        quantity: { $gt: 0, $lt: 10 },
+        stock: { $gt: 0, $lt: 10 },
         isBlocked: false,
         isDeleted: false
       });
   
       const outOfStockItems = await Product.find({
-        quantity: 0,
+        stock: 0,
         isBlocked: false,
         isDeleted: false
       });
   
 
       const productNames = allProducts.map(p => p.productName);
-      const productStocks = allProducts.map(p => p.quantity);
+      const productStocks = allProducts.map(p => p.stock);
   
       res.render('inventory', {
         productCount : allProducts.length,
@@ -81,7 +81,7 @@ const updateStock = async (req,res) => {
     try {
         const id = req.params.id
         const quantity = req.body.quantity;
-        await Product.findByIdAndUpdate(id,{quantity});
+        await Product.findByIdAndUpdate(id,{stock:quantity});
         res.json({success:true})
     } catch (error) {
         console.error(error);

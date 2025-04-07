@@ -99,8 +99,9 @@ const loadShoppingCart = async (req,res) => {
 
         let discount = 0;
         findCart.items.forEach(item => {
-            discount += subtotal - (item.offerPrice * item.quantity)
+            discount += item.offerPrice * item.quantity
         })
+        discount = subtotal - discount;
 
         let shippingCharge = 0;
         if(subtotal < 1000){
@@ -153,7 +154,7 @@ const addToCart = async (req, res) => {
         }
 
         if (!cart) {
-            if (quantityToAdd > productData.quantity) {
+            if (productData.stock < quantityToAdd) {
                 return res.status(200).json({ success: false, message: "Product out of stock" });
             }
 
@@ -163,7 +164,7 @@ const addToCart = async (req, res) => {
                     productId,
                     quantity: quantityToAdd,
                     price: productData.regularPrice,
-                    offerPrice:productData.salePrice,
+                    offerPrice: productData.salePrice,
                     totalPrice: productData.salePrice * quantityToAdd
                 }]
             });
@@ -172,29 +173,25 @@ const addToCart = async (req, res) => {
             return res.status(200).json({ success: true, message: "Added to cart" });
         }
 
-
         const productIndex = cart.items.findIndex(item => item.productId.toString() === productId);
 
         if (productIndex !== -1) {
             const currentQty = cart.items[productIndex].quantity;
             const newQty = currentQty + quantityToAdd;
 
-            if (currentQty >= 5) {
+            if (newQty > 5) {
                 return res.status(200).json({ success: false, message: "Maximum quantity reached (5)" });
             }
 
-            if (newQty > productData.quantity) {
-                return res.status(200).json({
-                    success: false,
-                    message: `Product Out of Stock`
-                });
+            if (newQty > productData.stock) {
+                return res.status(200).json({ success: false, message: "Product out of stock" });
             }
 
             cart.items[productIndex].quantity = newQty;
             cart.items[productIndex].totalPrice = productData.salePrice * newQty;
 
         } else {
-            if (quantityToAdd > productData.quantity) {
+            if (quantityToAdd > productData.stock) {
                 return res.status(200).json({ success: false, message: "Product out of stock" });
             }
 
@@ -202,7 +199,7 @@ const addToCart = async (req, res) => {
                 productId,
                 quantity: quantityToAdd,
                 price: productData.regularPrice,
-                offerPrice:productData.salePrice,
+                offerPrice: productData.salePrice,
                 totalPrice: productData.salePrice * quantityToAdd
             });
         }
@@ -215,6 +212,7 @@ const addToCart = async (req, res) => {
         res.redirect('/pageNotFound');
     }
 };
+
 
 
 
@@ -232,27 +230,43 @@ const removeFromCart = async(req,res) => {
     }
 }
 
-const updateCart = async(req,res) => {
+const updateCart = async (req, res) => {
     try {
         const user = req.session.user;
         const productId = req.query.productId;
-        const quantity = req.query.quantity;
-        cartExist = await Cart.findOne({userId:user._id});
-        const findProduct = cartExist.items.findIndex((item) => item.productId == productId);
-        if(quantity == 1 && cartExist.items[findProduct].quantity < 5){
-            cartExist.items[findProduct].quantity += 1;
-            cartExist.items[findProduct].totalPrice += cartExist.items[findProduct].offerPrice;
-        }else if(cartExist.items[findProduct].quantity > 1){
-            cartExist.items[findProduct].quantity -= 1;
-            cartExist.items[findProduct].totalPrice -= cartExist.items[findProduct].offerPrice;
+        const quantity = parseInt(req.query.quantity); // Ensure it's a number
+
+        const cartExist = await Cart.findOne({ userId: user._id });
+        if (!cartExist) {
+            return res.status(404).send("Cart not found");
         }
+
+        const findProduct = cartExist.items.findIndex(
+            (item) => item.productId.toString() === productId
+        );
+
+        if (findProduct === -1) {
+            return res.status(400).send("Product not found in cart");
+        }
+
+        const item = cartExist.items[findProduct];
+
+        if (quantity === 1 && item.quantity < 5) {
+            item.quantity += 1;
+            item.totalPrice += item.offerPrice;
+        } else if (quantity === -1 && item.quantity > 1) {
+            item.quantity -= 1;
+            item.totalPrice -= item.offerPrice;
+        }
+
         await cartExist.save();
         res.redirect('/shoppingCart');
     } catch (error) {
         console.error(error);
         res.redirect('/pageNotFound');
     }
-}
+};
+
 
 const addToWishlist = async (req, res) => {
     try {
@@ -365,8 +379,9 @@ const addToWishlist = async (req, res) => {
 
         let discount = 0;
         cart.items.forEach(item => {
-            discount += subtotal - (item.offerPrice * item.quantity)
+            discount += item.offerPrice * item.quantity
         })
+        discount = subtotal - discount;
 
         let shippingCharge = 0;
         if(subtotal < 1000){
@@ -416,8 +431,9 @@ const placeOrder = async (req, res) => {
 
         let discount = 0;
         cart.items.forEach(item => {
-            discount += subtotal - (item.offerPrice * item.quantity)
+            discount += item.offerPrice * item.quantity
         })
+        discount = subtotal - discount;
 
         let shippingCharge = 0;
         if(subtotal < 1000){
@@ -446,10 +462,13 @@ const placeOrder = async (req, res) => {
             totalPrice : subtotal,
             discount : discount,
             shippingCharge : shippingCharge,
+            tax : tax,
             finalAmount : total,
             address : selectedAddressDetails,
             paymentMethod : paymentMethod
         })
+
+        req.session.orderId = placeOrder._id;
 
         await placeOrder.save();
         await Cart.findOneAndDelete({userId:user._id}); 
@@ -462,7 +481,7 @@ const placeOrder = async (req, res) => {
             );
         }
 
-        res.redirect('/orderPlaced')
+        return res.json({success:true});
 
     } catch (error) {
         console.error("Error in placeOrder:", error);
@@ -473,9 +492,11 @@ const placeOrder = async (req, res) => {
 const orderPlaced = async (req,res) => {
     try {
         const user = req.session.user;
-        const order = await Order.findOne({userId:user._id})
+        const order = await Order.findById(req.session.orderId)
         .sort({createdAt:-1})
         .populate('orderedItems.product');
+
+        req.session.orderId = null;
 
         let subtotal = 0;
         order.orderedItems.forEach(item => {
@@ -484,8 +505,9 @@ const orderPlaced = async (req,res) => {
 
         let discount = 0;
         order.orderedItems.forEach(item => {
-            discount += subtotal - (item.product.salePrice * item.quantity)
+            discount += item.product.salePrice * item.quantity
         })
+        discount = subtotal - discount;
 
         let shippingCharge = 0;
         if(subtotal < 1000){
@@ -499,17 +521,16 @@ const orderPlaced = async (req,res) => {
 
         let total = 0;
         order.orderedItems.forEach(item => {
-            total += (item.product.salePrice * item.quantity) + shippingCharge + tax 
+            total += subtotal - discount + shippingCharge + tax 
         });
 
 
-        res.render('orderPlaced',{
+        return res.render('orderPlaced',{
             user : user,
             order : order,
             total : total
         })
 
-        return 
     } catch (error) {
         console.error("Error in orderPlaced:", error);
         res.redirect("/pageNotFound");
@@ -521,7 +542,7 @@ const orderDetails = async(req,res) => {
         const user = req.session.user;
         const id = req.query.id;
         const order = await Order.findById(id).populate('orderedItems.product').populate('address');
-        res.render('orderDetails',{
+        return res.render('orderDetails',{
             user : user,
             order:order
         })
@@ -533,20 +554,13 @@ const orderDetails = async(req,res) => {
 
 const cancelOrder = async (req,res) => {
     try {
-        const user = req.session.user;
         const id = req.query.id;
         const order = await Order.findById(id);
-
-        const orderedItems = order.orderedItems.map(item => ({
-            product: item._id,
-            quantity : item.quantity
-          }));
-
 
         for (const item of order.orderedItems) {
             await Product.findByIdAndUpdate(
                 item.product,
-                { $inc: { quantity: item.quantity } },
+                { $inc: { stock: item.quantity } },
                 { new: true }
             );
         }

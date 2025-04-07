@@ -432,36 +432,37 @@ const deleteAddress = async (req,res) => {
 const myOrders = async (req, res) => {
     try {
         const user = req.session.user;
-
         let searchQuery = req.query.search?.trim().toLowerCase() || "";
-
         const query = { userId: user._id };
 
         let orders = await Order.find(query)
-            .sort({ createdAt: -1 })
+            .sort({ createdAt: -1 }) 
             .populate('orderedItems.product');
 
-            if (searchQuery) {
-                orders = orders.filter(order =>
-                    order.orderedItems.some(item =>
-                        item.product?.productName?.toLowerCase().includes(searchQuery)
-                    ) ||
-                    order.orderId?.toLowerCase().includes(searchQuery) ||
-                    order.status?.toLowerCase().includes(searchQuery)
-                );
-            }
+        if (searchQuery.length > 0) {
+            orders = orders.filter(order =>
+                order.orderedItems.some(item =>
+                    item.product?.productName?.toLowerCase().includes(searchQuery)
+                ) ||
+                order.orderId?.toLowerCase().includes(searchQuery) ||
+                order.status?.toLowerCase().includes(searchQuery)
+            );
+
+            // Re-sort filtered results
+            orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
 
         res.render('myOrders', {
             user,
-            orders,
+            orders : orders,
             searchQuery
         });
-
-    } catch (error) {
-        console.error("Error fetching orders:", error);
-        res.redirect('/pageNotFound');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Something went wrong");
     }
 };
+
 
 
 const loadWallet = async (req, res) => {
