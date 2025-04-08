@@ -161,6 +161,9 @@
                         <ul>
                             <li>Subtotal <span>₹<%=subtotal%></span></li>
                             <li>Discount <span>-₹<%=discount%></span></li>
+                            <% if(couponDiscount){ %>
+                                <li>Special Discount (<%= coupon.couponCode%>) <span>-₹<%= couponDiscount %></span></li>
+                            <% } %>
                             <li>Shipping Charge <span>₹<%=shippingCharge%></span></li>
                             <li>Tax (12%) <span>₹<%=tax%></span></li>
                             <li><h5>Total <span>₹<%=total%></span></h5></li>
@@ -223,7 +226,7 @@
          function applyCoupon(event) {
             event.preventDefault();
 
-            const couponCode = document.getElementById('couponInput').value;
+            const couponCode = document.getElementById('couponInput').value.trim();
             if (!couponCode) {
                 Swal.fire({
                     icon: 'warning',
@@ -250,7 +253,7 @@
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
-                        location.reload(); 
+                        window.location.reload(); 
                     });
                 } else {
                     Swal.fire({

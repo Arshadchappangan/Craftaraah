@@ -163,6 +163,9 @@
                                 <div class="checkout__order__subtotal">Subtotal <span>₹<%=subtotal%></span>
                                     <ul>
                                             <li>Discount <span>-₹<%=discount%></span></li>
+                                        <%if(coupon){%>
+                                            <li>Special Offer (<%= coupon.couponCode %>) <span>-₹<%= couponDiscount %></span></li>
+                                        <%}%>
                                         <%if(shippingCharge){%>
                                             <li>Shipping Charge <span>₹<%=shippingCharge%></span></li>
                                         <%}else{%>
