@@ -6,6 +6,7 @@ const Cart = require('../../models/cartSchema');
 const Wishlist = require('../../models/wishlistSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
+const Coupon = require('../../models/couponSchema');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
@@ -745,6 +746,45 @@ const orderFailed = (req,res) => {
 }
 
 
+const applyCoupon = async (req, res) => {
+    try {
+        const user = req.session.user;
+        const couponCode = req.body.couponCode.toUpperCase();
+        req.session.couponCode = couponCode;
+
+        const coupon = await Coupon.findOne({ couponCode, isDeleted: false, isActive: true });
+        if (!coupon) {
+            return res.status(400).json({ success: false, message: 'Invalid coupon code' });
+        }
+
+        const userUsage = coupon.usedBy.find(item => item.userId.toString() === user._id.toString());
+        if (userUsage && userUsage.usedCount >= coupon.usageLimit) {
+            return res.status(400).json({ success: false, message: 'Coupon already used' });
+        }
+
+        // Update usage
+        if (userUsage) {
+            userUsage.usedCount += 1;
+        } else {
+            coupon.usedBy.push({ userId:user._id, usedCount: 1 });
+        }
+
+        await coupon.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Coupon applied successfully',
+            coupon
+        });
+
+    } catch (error) {
+        console.error('Apply coupon error:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+
+
 module.exports = {
     loadProductDetails,
     reviewSubmission,
@@ -763,5 +803,6 @@ module.exports = {
     cancelOrder,
     returnOrder,
     downloadInvoice,
-    orderFailed
+    orderFailed,
+    applyCoupon
 }

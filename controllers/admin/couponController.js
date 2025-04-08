@@ -115,6 +115,30 @@ const activateCoupon = async (req, res) => {
     }
 }
 
+const editCoupon = async (req, res) => {
+    try {
+        const couponId = req.params.id;
+        const { code, type, discount, minAmount, maxDiscount, usageLimit, expiryDate } = req.body;
+        const coupon = await Coupon.findById(couponId);
+        if (!coupon) {
+            return res.status(404).json({ error: 'Coupon not found' });
+        }
+        coupon.couponCode = code;
+        coupon.couponType = type;
+        coupon.discountAmount = discount;
+        coupon.minPurchaseAmount = minAmount;
+        coupon.maxDiscountAmount = maxDiscount || 0;
+        coupon.usageLimit = usageLimit;
+        coupon.expiryDate = expiryDate;
+        await coupon.save();
+
+        return res.status(200).json({ message: 'Coupon updated successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: 'Failed to edit coupon' });
+    }
+}
+
 module.exports = {
     loadCoupons,
     addCoupon,
@@ -123,5 +147,6 @@ module.exports = {
     restoreCoupon,
     deleteCoupon,
     deactivateCoupon,
-    activateCoupon
+    activateCoupon,
+    editCoupon
 }
