@@ -73,5 +73,9 @@ router.post('/updateStock/:id',adminAuth,inventoryController.updateStock);
 // coupon management
 router.get('/coupons',adminAuth,couponController.loadCoupons);
 router.post('/addCoupon',adminAuth,couponController.addCoupon);
+router.get('/archiveCoupon',adminAuth,couponController.archiveCoupon);
+router.get('/archivedCoupons',adminAuth,couponController.archivedCouponInfo);
+router.get('/restoreCoupon',adminAuth,couponController.restoreCoupon);
+router.get('/deleteCoupon',adminAuth,couponController.deleteCoupon);
 
 module.exports = router

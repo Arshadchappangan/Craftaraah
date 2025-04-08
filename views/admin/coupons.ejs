@@ -305,16 +305,37 @@
       function confirmArchive(id) {
         Swal.fire({
           title: "Archive coupon?",
+          text: "Are you sure you want to archive this coupon?",
           icon: "warning",
           showCancelButton: true,
           confirmButtonColor: "#d33",
-          confirmButtonText: "Archive"
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, archive it!",
+          cancelButtonText: "Cancel"
         }).then(result => {
           if (result.isConfirmed) {
-            window.location.href = `/admin/archiveCoupon?id=${id}`;
+            fetch(`/admin/archiveCoupon?id=${id}`, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json'
+              }
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire("Archived!", data.message, "success");
+                setTimeout(() => location.reload(), 1500);
+              } else {
+                Swal.fire("Failed", data.message, "error");
+              }
+            })
+            .catch(err => {
+              Swal.fire("Error", "Network error occurred.", "error");
+            });
           }
         });
       }
+
 
       function searchSubmit(event) {
         event.preventDefault();

@@ -32,6 +32,10 @@ const couponSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
     usageLimit: {
         type: Number,
         default: 1

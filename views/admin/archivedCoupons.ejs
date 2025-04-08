@@ -1,0 +1,183 @@
+<%-include("../../views/partials/admin/header")%>
+
+<style>
+  .error-message {
+    color: red;
+    text-align: center;
+  }
+</style>
+
+<div class="container">
+  <div class="page-inner">
+    <div class="d-flex justify-content-between align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+      <div>
+        <h3 class="fw-bold mb-3">Archived Coupons</h3>
+      </div>
+      <div style="width: 500px; margin-bottom: 30px;">
+        <nav class="nav-search p-0 d-none d-lg-flex">
+          <form class="input-group" action="/admin/archivedCoupons" method="get" id="searchForm" onsubmit="searchSubmit(event)">
+            <div class="input-group-prepend">
+              <button type="submit" class="btn btn-search pe-1">
+                <i class="fa fa-search search-icon"></i>
+              </button>
+            </div>
+            <input id="searchInput" name="search" type="text" placeholder="Search ..." class="form-control" />
+          </form>
+        </nav>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-9">
+        <div class="card card-round">
+          <div class="card-header d-flex justify-content-between">
+            <div class="card-head-row card-tools-still-right">
+              <div class="card-title">Coupon Details</div>
+            </div>
+            <button class="btn btn-primary" id="clear-btn">Clear search</button>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table align-items-center mb-0">
+                <thead class="thead-light">
+                  <tr>
+                    <th scope="col" class="text-start">Coupon Code</th>
+                    <th scope="col" class="text-start">Discount</th>
+                    <th scope="col" class="text-start">Expiry Date</th>
+                    <th scope="col" class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% coupons.forEach((coupon, ind) => { %>
+                  <tr>
+                    <td class="text-start"><%= coupon.couponCode %></td>
+                    <td class="text-start"><%= coupon.discountAmount %>%</td>
+                    <td class="text-start"><%= coupon.expiryDate %></td>
+                    <td class="text-end">
+                      <i class="fas fa-undo mx-2 text-dark" onclick="confirmRestore('<%= coupon._id %>')"></i>
+                      <i class="fas fa-trash-alt mx-2" onclick="confirmDelete('<%= coupon._id %>')"></i>
+                    </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- pagination -->
+
+  </div>
+</div>
+
+<!-- JS Assets -->
+<script src="assets/js/core/jquery-3.7.1.min.js"></script>
+<script src="assets/js/core/popper.min.js"></script>
+<script src="assets/js/core/bootstrap.min.js"></script>
+<script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+<script src="assets/js/plugin/chart.js/chart.min.js"></script>
+<script src="assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
+<script src="assets/js/plugin/chart-circle/circles.min.js"></script>
+<script src="assets/js/plugin/datatables/datatables.min.js"></script>
+<script src="assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
+<script src="assets/js/plugin/jsvectormap/jsvectormap.min.js"></script>
+<script src="assets/js/plugin/jsvectormap/world.js"></script>
+<script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+<script src="assets/js/kaiadmin.min.js"></script>
+<script src="assets/js/setting-demo.js"></script>
+<script src="assets/js/demo.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+  function confirmDelete(couponId){
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This coupon will be permanently deleted!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Delete"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/admin/deleteCoupon?id=${couponId}`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if(data.success){
+            Swal.fire("Deleted!", data.message, "success");
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            Swal.fire("Failed!", data.message, "error");
+          }
+        })
+        .catch(() => {
+          Swal.fire("Error", "Something went wrong.", "error");
+        });
+      }
+    });
+  }
+
+  function confirmRestore(couponId){
+    Swal.fire({
+      title: "Restore Coupon?",
+      text: "Do you want to restore this coupon?",
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Restore"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/admin/restoreCoupon?id=${couponId}`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if(data.success){
+            Swal.fire("Restored!", data.message, "success");
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            Swal.fire("Failed!", data.message, "error");
+          }
+        })
+        .catch(() => {
+          Swal.fire("Error", "Something went wrong.", "error");
+        });
+      }
+    });
+  }
+
+  function searchSubmit(event) {
+    event.preventDefault();  
+    let searchValue = document.getElementById('searchInput').value.trim();
+    if (searchValue !== "") {
+      localStorage.setItem("showClearBtnCoupons", "true");
+    } else {
+      localStorage.removeItem("showClearBtnCoupons");
+    }
+    document.getElementById('searchForm').submit(); 
+  }
+
+  document.getElementById('clear-btn').addEventListener('click', function() {
+    document.getElementById('searchInput').value = '';
+    localStorage.removeItem("showClearBtnCoupons");
+    document.getElementById('searchForm').submit();
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem("showClearBtnCoupons") === "true") {
+      document.getElementById('clear-btn').style.display = 'block';
+    } else {
+      document.getElementById('clear-btn').style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>

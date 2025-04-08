@@ -3,7 +3,7 @@ const User = require('../../models/userSchema');
 
 const loadCoupons = async (req, res) => {
     try {
-        const coupons = await Coupon.find({}).sort({ createdAt: -1 });
+        const coupons = await Coupon.find({isDeleted:false}).sort({ createdAt: -1 });
         res.render('coupons', { coupons });
     } catch (error) {
         console.error(error);
@@ -50,8 +50,54 @@ const addCoupon = async (req, res) => {
     }
 }
 
+const archiveCoupon = async (req, res) => {
+    try {
+        const couponId = req.query.id;
+        await Coupon.findByIdAndUpdate(couponId, { $set: { isDeleted: true } });
+        return res.json({ success: true, message: 'Coupon archived successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: 'Failed to archive coupon' });
+    }
+}
+
+const archivedCouponInfo = async (req,res) => {
+    try {
+        const coupons = await Coupon.find({ isDeleted: true }).sort({ createdAt: -1 });
+        res.render('archivedCoupons', { coupons });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+}
+
+const restoreCoupon = async (req, res) => {
+    try {
+        const couponId = req.query.id;
+        await Coupon.findByIdAndUpdate(couponId, { $set: { isDeleted: false } });
+        return res.json({ success: true, message: 'Coupon restored successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: 'Failed to restore coupon' });
+    }
+}
+
+const deleteCoupon = async (req, res) => {
+    try {
+        const couponId = req.query.id;
+        await Coupon.findByIdAndDelete(couponId);
+        return res.json({ success: true, message: 'Coupon deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: 'Failed to delete coupon' });
+    }
+}
 
 module.exports = {
     loadCoupons,
-    addCoupon
+    addCoupon,
+    archiveCoupon,
+    archivedCouponInfo,
+    restoreCoupon,
+    deleteCoupon
 }
