@@ -93,11 +93,35 @@ const deleteCoupon = async (req, res) => {
     }
 }
 
+const deactivateCoupon = async (req, res) => {
+    try {
+        const couponId = req.query.id;
+        await Coupon.findByIdAndUpdate(couponId, { $set: { isActive: false } });
+        return res.json({ success: true, message: 'Coupon deactivated successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: 'Failed to deactivate coupon' });
+    }
+}
+
+const activateCoupon = async (req, res) => {
+    try {
+        const couponId = req.query.id;
+        await Coupon.findByIdAndUpdate(couponId, { $set: { isActive: true } });
+        return res.json({ success: true, message: 'Coupon activated successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: 'Failed to activate coupon' });
+    }
+}
+
 module.exports = {
     loadCoupons,
     addCoupon,
     archiveCoupon,
     archivedCouponInfo,
     restoreCoupon,
-    deleteCoupon
+    deleteCoupon,
+    deactivateCoupon,
+    activateCoupon
 }

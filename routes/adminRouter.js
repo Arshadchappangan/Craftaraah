@@ -77,5 +77,6 @@ router.get('/archiveCoupon',adminAuth,couponController.archiveCoupon);
 router.get('/archivedCoupons',adminAuth,couponController.archivedCouponInfo);
 router.get('/restoreCoupon',adminAuth,couponController.restoreCoupon);
 router.get('/deleteCoupon',adminAuth,couponController.deleteCoupon);
-
+router.get('/deactivateCoupon',adminAuth,couponController.deactivateCoupon);
+router.get('/activateCoupon',adminAuth,couponController.activateCoupon);
 module.exports = router

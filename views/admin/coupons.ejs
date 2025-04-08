@@ -283,7 +283,23 @@
           confirmButtonText: "Activate"
         }).then(result => {
           if (result.isConfirmed) {
-            window.location.href = `/admin/activateCoupon?id=${id}`;
+            fetch(`/admin/activateCoupon?id=${id}`, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json'
+              }
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire("Activated!", data.message, "success");
+                setTimeout(() => location.reload(), 1500);
+              } else {
+                Swal.fire("Failed", data.message, "error");
+              }
+            }).catch(err => {
+              Swal.fire("Error", "Network error occurred.", "error");
+            });
           }
         });
       }
@@ -291,13 +307,30 @@
       function confirmDeactivate(id) {
         Swal.fire({
           title: "Deactivate coupon?",
+          text: "Are you sure you want to deactivate this coupon?",
           icon: "warning",
           showCancelButton: true,
           confirmButtonColor: "#d33",
           confirmButtonText: "Deactivate"
         }).then(result => {
           if (result.isConfirmed) {
-            window.location.href = `/admin/deactivateCoupon?id=${id}`;
+            fetch(`/admin/deactivateCoupon?id=${id}`, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json'
+              }
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire("Deactivated!", data.message, "success");
+                setTimeout(() => location.reload(), 1500);
+              } else {
+                Swal.fire("Failed", data.message, "error");
+              }
+            }).catch(err => {
+              Swal.fire("Error", "Network error occurred.", "error");
+            });
           }
         });
       }
