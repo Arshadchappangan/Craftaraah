@@ -71,6 +71,7 @@ router.get('/deleteAddress',userAuth,profileController.deleteAddress);
 
 //cart management
 router.get('/shoppingCart',userAuth,productController.loadShoppingCart);
+router.get('/coupon',userAuth,productController.loadCouponPage);
 router.get('/addToCart',userAuth,productController.addToCart);
 router.get('/removeFromCart',userAuth,productController.removeFromCart);
 router.get('/updateCart',userAuth,productController.updateCart);

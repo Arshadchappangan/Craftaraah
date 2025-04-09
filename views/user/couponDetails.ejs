@@ -1,0 +1,213 @@
+<%- include("../../views/partials/user/header") %>
+
+
+<style>
+    .coupon-card {
+        display: flex;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        color: #fff;
+        font-family: 'Segoe UI', sans-serif;
+        min-height: 160px;
+    }
+
+    .coupon-left {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .coupon-left i {
+        font-size: 24px;
+        margin-bottom: 5px;
+    }
+
+    .coupon-left h2 {
+        font-size: 28px;
+        margin: 0;
+    }
+
+    .coupon-right {
+        flex: 2;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .coupon-code {
+    position: relative;
+    padding-right: 35px; /* leave space for the icon */
+    display: inline-block;
+    font-size: 18px;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 6px 12px;
+    border-radius: 5px;
+    letter-spacing: 1px;
+    color: #fff;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 0;
+    font-size: 16px;
+}
+.copy-btn:focus {
+    outline: none;
+}
+.copy-btn:hover {
+    color: #ddd;
+}
+
+    .coupon-card {
+    position: relative;
+}
+
+.new-badge {
+    position: absolute;
+    top: 6px;
+    left: -21px;
+    background: green;
+    color: white;
+    transform: rotate(-45deg);
+    padding: 4px 25px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.inactive-badge {
+    position: absolute;
+    top: 11px;
+    right: -30px;
+    background: red;
+    color: white;
+    transform: rotate(45deg);
+    padding: 4px 30px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.inactive-coupon {
+    opacity: 0.6;
+    pointer-events: none;
+    filter: grayscale(80%);
+}
+
+
+
+    .bg-blue-left { background: #30a6f5; }
+    .bg-blue-right { background: #1e4065; }
+
+    .bg-green-left { background: #78e0d8; }
+    .bg-green-right { background: #006e6e; }
+
+    .bg-pink-left { background: #f86694; }
+    .bg-pink-right { background: #5a0029; }
+
+    @media (max-width: 768px) {
+        .coupon-card {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="container py-5">
+    <h2 class="text-center mb-5 text-dark">Available Coupons</h2>
+    <div class="row g-4 ">
+
+        <!-- Coupon -->
+         <% for(let i=0;i<coupons.length;i++){ %>
+
+            <% 
+                const createdDate = new Date(coupons[i].createdAt);
+                const today = new Date();
+                const daysSinceCreated = (today - createdDate) / (1000 * 3600 * 24);
+                const isNew = daysSinceCreated <= 3;
+                const isExpired = new Date(coupons[i].expiryDate).getTime() < Date.now();
+                const usedByEntry = coupons[i].usedBy?.find(entry => entry.userId.toString() === user._id.toString());
+                const isUsed = usedByEntry && usedByEntry.usedCount >= coupons[i].usageLimit;
+            %>
+
+            <div class="col-md-6">
+                <div class="coupon-card mb-4 <%= (!coupons[i].isActive || isExpired || isUsed) ? 'inactive-coupon' : '' %>">
+    
+                    <% if (isExpired) { %>
+                        <div class="inactive-badge">EXPIRED</div>
+                    <% } else if (!coupons[i].isActive) { %>
+                        <div class="inactive-badge">INACTIVE</div>
+                    <% } else if (isUsed) { %>
+                        <div class="inactive-badge">USED</div>
+                    <% } else if (isNew) { %>
+                        <div class="new-badge">NEW</div>
+                    <% } %>
+        
+                
+                    <div class="coupon-left text-center <%= coupons[i].couponType === 'percentage' ? 'bg-blue-left' : 'bg-pink-left' %>">
+                        <i style="font-size: larger;" class="fa fa-gift"></i>
+                        <% if(coupons[i].couponType === 'percentage') {%>
+                        <h2><%= coupons[i].discountAmount %> % OFF</h2>
+                        <% }else{ %>
+                        <h2>FLAT <br>₹ <%= coupons[i].discountAmount %> OFF</h2>
+                        <% } %>
+                        <p class="mb-0 text-dark">Valid till <%= new Date(coupons[i].expiryDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                    </div>
+                    <div class="coupon-right <%= coupons[i].couponType === 'percentage' ? 'bg-blue-right' : 'bg-pink-right' %>">
+                        <h5 class="text-light mb-2">Your Promo Code:</h5>
+                        <div class="coupon-code position-relative" id="coupon-<%= i %>">
+                            <span><%= coupons[i].couponCode %></span>
+                            <button class="copy-btn" data-target="coupon-<%= i %>">
+                                <i class="fa fa-clone"></i>
+                            </button>
+                        </div>     
+                        <p class="mb-1 text-light">Valid on orders above ₹ <%= coupons[i].minPurchaseAmount %></p>
+                        <small>Maximum offer price is ₹ <%= coupons[i].maxDiscountAmount %></small>
+                    </div>
+                </div>
+            </div>
+            
+        <% } %>
+
+    </div>
+</div>
+
+<%- include("../../views/partials/user/footer") %>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const copyButtons = document.querySelectorAll('.copy-btn');
+
+        copyButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const targetId = btn.getAttribute('data-target');
+                const code = document.querySelector(`#${targetId} span`).innerText;
+
+                navigator.clipboard.writeText(code)
+                    .then(() => {
+                        btn.innerHTML = '<i class="fa fa-check text-success"></i>';
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="fa fa-copy"></i>';
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Copy failed', err);
+                    });
+            });
+        });
+    });
+</script>
+

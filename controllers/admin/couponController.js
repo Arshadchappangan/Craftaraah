@@ -37,7 +37,7 @@ const addCoupon = async (req, res) => {
             couponType:type, 
             discountAmount:discount, 
             minPurchaseAmount:minAmount, 
-            maxDiscountAmount:maxDiscount || 0, 
+            maxDiscountAmount:maxDiscount || discount, 
             usageLimit:usageLimit, 
             expiryDate:formatted
         });

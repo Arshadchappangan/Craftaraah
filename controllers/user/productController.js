@@ -7,6 +7,8 @@ const Wishlist = require('../../models/wishlistSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
 const Coupon = require('../../models/couponSchema');
+const Wallet = require('../../models/walletSchema');
+const razorpay = require('../../config/razorpay');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
@@ -667,6 +669,7 @@ const cancelOrder = async (req,res) => {
         const user = req.session.user;
         const id = req.query.id;
         const order = await Order.findById(id);
+        const wallet = await Wallet.findOne({ userId: user._id });
 
         for (const item of order.orderedItems) {
             await Product.findByIdAndUpdate(
@@ -675,6 +678,19 @@ const cancelOrder = async (req,res) => {
                 { new: true }
             );
         }
+
+        if (order.paymentMethod === "Razorpay") {
+            const refundAmount = order.finalAmount; 
+            wallet.balance += refundAmount;
+            wallet.transactions.push({
+            transactionType: "Refund",
+            amount: refundAmount,
+            date: new Date(),
+            description: `Refund for the order with order Id : ${order.orderId}`,
+        });
+        }
+
+        await wallet.save();
 
         order.status = "Cancelled"
         await order.save();
@@ -878,6 +894,20 @@ const applyCoupon = async (req, res) => {
 };
 
 
+const loadCouponPage = async (req, res) => {
+    try {
+        const user = req.session.user;
+        const coupons = await Coupon.find({isDeleted:false})
+        .sort({isActive:-1,expiryDate:1});
+        
+        res.render('couponDetails',{user,coupons});
+    } catch (error) {
+        console.error('Load coupon page error:', error);
+        res.redirect('/pageNotFound');
+        
+    }
+}
+
 
 module.exports = {
     loadProductDetails,
@@ -898,5 +928,6 @@ module.exports = {
     returnOrder,
     downloadInvoice,
     orderFailed,
-    applyCoupon
+    applyCoupon,
+    loadCouponPage,
 }
