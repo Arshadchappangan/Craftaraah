@@ -1,0 +1,427 @@
+<%-include("../../views/partials/admin/header")%>
+
+<div class="content">
+  <div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+      <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+        <div>
+          <h2 class="text-white pb-2 fw-bold">Offer Dashboard</h2>
+          <h5 class="text-white op-7 mb-2">Track and manage your offers efficiently</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-inner mt--5">
+    <div class="row mt--2">
+      <div class="col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-primary bubble-shadow-small">
+                  <i class="fas fa-bullhorn"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Total Offers Created</p>
+                  <h4 class="card-title">120</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-danger bubble-shadow-small">
+                  <i class="fas fa-receipt"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Total Offers Redeemed</p>
+                  <h4 class="card-title">70</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-info bubble-shadow-small">
+                  <i class="fas fa-percentage"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Avg. Engagement/Offer</p>
+                  <h4 class="card-title">3.8%</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-success bubble-shadow-small">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Conversion Rate</p>
+                  <h4 class="card-title">10%</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card card-round">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-title">Offer Performance Overview</div>
+            <div>
+              <button onclick="createOffer()" class="btn btn-primary btn-sm">Create Offer</button>
+              <a href="#" class="btn btn-outline-secondary btn-sm">Export</a>
+            </div>
+          </div>
+          <div class="card-body table-responsive">
+            <input type="text" class="form-control mb-3" placeholder="Search offers by title, status, or tier..." />
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Offer title</th>
+                  <th>Status</th>
+                  <th>Offer Type</th>
+                  <th>Offer Start</th>
+                  <th>Offer End</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% offers.forEach(offer => { %>
+                  <tr>
+                    <td><%= offer.title %></td>
+                    <td>
+                      <% if (offer.isActive) { %>
+                        <span class="badge badge-success">Active</span>
+                      <% } else { %>
+                        <span class="badge badge-danger">Inactive</span>
+                      <% } %>
+                    </td>
+                    <td><%= offer.applicableTo %></td>
+                    <td><%= offer.formattedStartDate %></td>
+                    <td><%= offer.formattedEndDate %></td>
+                    <td>
+                      <a onclick='editOffer(<%- JSON.stringify(offer) %>)' class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <a onclick="confirmDelete('<%= offer._id %>')" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+           <!-- pagination -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  function createOffer() {
+    Swal.fire({
+      title: 'Create New Offer',
+      html: `
+        <style>
+          .swal2-popup .swal2-input, 
+          .swal2-popup .swal2-select {
+            width: 100% !important;
+            padding: 10px;
+            margin: 8px 0;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+          }
+            #offer-expiry {
+            width: 30% !important;
+            padding: 10px;
+            }
+
+            #date-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              gap: 10px;
+              margin: 8px 0;
+            }
+
+              #date-row input[type="date"] {
+                flex: 1;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #ccc;
+                font-size: 1rem;
+              }
+
+              #date-row span {
+                white-space: nowrap;
+                padding: 0 5px;
+                font-weight: 500;
+              }
+        </style>
+
+        <input id="offer-title" class="swal2-input" placeholder="Offer Title">
+        <input id="offer-discount" class="swal2-input" placeholder="Discount %" type="number" min="1" max="100">
+        
+        <select id="offer-type" class="swal2-select">
+          <option value="" disabled selected>Select Offer Type</option>
+          <option value="Product">Product Offer</option>
+          <option value="Category">Category Offer</option>
+          <option value="Referral">Referral Offer</option>
+        </select>
+        
+        <div id="date-row"><input id="offer-start" class="swal2-input" type="date"><span style="margin : 0px 10px">to</span><input id="offer-end" class="swal2-input" type="date"></div>
+      `,
+      confirmButtonText: 'Create Offer',
+      focusConfirm: false,
+      preConfirm: () => {
+        const title = document.getElementById('offer-title').value;
+        const discount = document.getElementById('offer-discount').value;
+        const type = document.getElementById('offer-type').value;
+        const start = document.getElementById('offer-start').value;
+        const end = document.getElementById('offer-end').value;
+
+        if (!title || !discount || !type || !start || !end) {
+          Swal.showValidationMessage('Please fill all fields');
+          return false;
+        }
+
+        if (title.length < 3 || title.length > 50) {
+          Swal.showValidationMessage('Title must be between 3 and 50 characters long');
+          return false;
+        }
+
+        if (discount < 1 || discount > 100) {
+          Swal.showValidationMessage('Discount must be between 1 and 100%');
+          return false;
+        }
+
+        if( new Date(start) >= new Date(end)) {
+          Swal.showValidationMessage('Start date must be before end date');
+          return false;
+        }
+
+        if (new Date(end) < new Date()) {
+          Swal.showValidationMessage('Expiry date must be in the future');
+          return false;
+        }
+
+        return { title, discount, type, start, end };
+      }
+      }).then((result) => {
+      if (result.isConfirmed) {
+        fetch('/admin/createOffer', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(result.value)
+        })
+        .then(response => {
+          if (response.ok) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Offer Created!',
+              text: 'Your offer has been created successfully.',
+              confirmButtonText: 'OK'
+            }).then(() => {
+              location.reload(); // Reload the page to see the new offer
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: 'There was an error creating the offer. Please try again.',
+            });
+          }
+        })
+      }
+      });
+
+  }
+
+  function editOffer(offer) {
+  Swal.fire({
+    title: 'Edit Offer',
+    html: `
+      <style>
+        .swal2-popup .swal2-input, 
+        .swal2-popup .swal2-select {
+          width: 100% !important;
+          padding: 10px;
+          margin: 8px 0;
+          font-size: 1rem;
+          border-radius: 8px;
+          border: 1px solid #ccc;
+        }
+        #date-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          margin: 8px 0;
+        }
+        #date-row input[type="date"] {
+          flex: 1;
+          padding: 10px;
+          border-radius: 8px;
+          border: 1px solid #ccc;
+          font-size: 1rem;
+        }
+        #date-row span {
+          white-space: nowrap;
+          padding: 0 5px;
+          font-weight: 500;
+        }
+      </style>
+
+      <input id="offer-title" class="swal2-input" placeholder="Offer Title" value="${offer.title}">
+      <input id="offer-discount" class="swal2-input" placeholder="Discount %" type="number" min="1" max="100" value="${offer.discountPercentage}">
+      
+      <select id="offer-type" class="swal2-select">
+        <option value="" disabled>Select Offer Type</option>
+        <option value="Product" ${offer.applicableTo === 'Product' ? 'selected' : ''}>Product Offer</option>
+        <option value="Category" ${offer.applicableTo === 'Category' ? 'selected' : ''}>Category Offer</option>
+        <option value="Referral" ${offer.applicableTo === 'Referral' ? 'selected' : ''}>Referral Offer</option>
+      </select>
+      
+      <div id="date-row">
+        <input id="offer-start" class="swal2-input" type="date" value="${offer.startDate?.split('T')[0]}">
+        <span>to</span>
+        <input id="offer-end" class="swal2-input" type="date" value="${offer.endDate?.split('T')[0]}">
+      </div>
+    `,
+    confirmButtonText: 'Update Offer',
+    focusConfirm: false,
+    preConfirm: () => {
+      const title = document.getElementById('offer-title').value;
+      const discount = document.getElementById('offer-discount').value;
+      const type = document.getElementById('offer-type').value;
+      const start = document.getElementById('offer-start').value;
+      const end = document.getElementById('offer-end').value;
+
+      if (!title || !discount || !type || !start || !end) {
+        Swal.showValidationMessage('Please fill all fields');
+        return false;
+      }
+
+      if (title.length < 3 || title.length > 50) {
+        Swal.showValidationMessage('Title must be between 3 and 50 characters');
+        return false;
+      }
+
+      if (discount < 1 || discount > 100) {
+        Swal.showValidationMessage('Discount must be between 1 and 100');
+        return false;
+      }
+
+      if (new Date(start) >= new Date(end)) {
+        Swal.showValidationMessage('Start date must be before end date');
+        return false;
+      }
+
+      return { title, discount, type, start, end };
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(`/admin/editOffer/${offer._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(result.value)
+      })
+      .then(response => {
+        if (response.ok) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Offer Updated!',
+            text: 'The offer has been updated successfully.',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            location.reload(); 
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Failed to update offer. Try again.',
+          });
+        }
+      });
+    }
+  });
+}
+
+function confirmDelete(offerId) {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "This offer will be permanently deleted!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Delete'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(`/admin/deleteOffer/${offerId}`, {
+        method: 'DELETE'
+      })
+      .then(response => {
+        if (response.ok) {
+          Swal.fire(
+            'Deleted!',
+            'The offer has been deleted.',
+            'success'
+          ).then(() => {
+            location.reload(); 
+          });
+        } else {
+          Swal.fire(
+            'Error!',
+            'Failed to delete the offer. Try again.',
+            'error'
+          );
+        }
+      });
+    }
+  });
+}
+
+</script>

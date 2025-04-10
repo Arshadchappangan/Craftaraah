@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 const category = require('../../models/categorySchema');
+const Offer = require('../../models/offerSchema');
 const { error } = require('console');
 
 
@@ -20,7 +21,14 @@ const productInfo = async (req, res) => {
             $or: [
                 {productName:{$regex:'.*'+search+'.*',$options:'i'}}
             ]
-        }).limit(limit * 1).skip((page - 1) * limit).populate('category').exec();
+        }).limit(limit * 1).skip((page - 1) * limit).populate('category').populate('offers').exec();
+
+        productData.forEach(product => {
+            product.offers.filter(offer => {
+                 const discountedPrice = product.price - (product.price * offer.discountPercentage / 100);
+                 return offer.discountedPrice = Math.max(discountedPrice, 0).toFixed(2);
+            })
+        })
 
         const count = await Product.find({
             isDeleted : false,
@@ -31,12 +39,15 @@ const productInfo = async (req, res) => {
 
         const category = await Category.find({ isListed: true,isDeleted:false });
 
+        const productOffers = await Offer.find({ isActive: true , applicableTo:'Product'});
+
         if (category) {
             res.render('products', {
                 data: productData,
                 currentPage: page,
                 totalPages: Math.ceil(count / limit),
-                category: category
+                category: category,
+                productOffers: productOffers || [],
             })
         } else {
             res.redirect('/pageError')
