@@ -40,6 +40,7 @@ const productInfo = async (req, res) => {
         const category = await Category.find({ isListed: true,isDeleted:false });
 
         const productOffers = await Offer.find({ isActive: true , applicableTo:'Product'});
+        const appliedOffers = await Product.find({ isDeleted: false }).populate('offers').exec();
 
         if (category) {
             res.render('products', {
@@ -48,6 +49,7 @@ const productInfo = async (req, res) => {
                 totalPages: Math.ceil(count / limit),
                 category: category,
                 productOffers: productOffers || [],
+                appliedOffers: appliedOffers || [],
             })
         } else {
             res.redirect('/pageError')

@@ -231,13 +231,11 @@ function searchSubmit(event) {
         
 
         const productOffersData = <%- JSON.stringify(productOffers) %>;
-        const appliedOfferId = <%- JSON.stringify(appliedOfferId) %>; 
 
   function manageOffers(productId) {
 
   const productTypeOffers = productOffersData.filter(offer => offer.applicableTo === 'Product');
 
-  const appliedOffer = productTypeOffers.find(offer => offer._id === appliedOfferId);
 
   Swal.fire({
     title: 'Apply Product Offer',
@@ -256,7 +254,7 @@ function searchSubmit(event) {
       <select id="offer" class="swal2-select">
         <option value="" disabled selected>Select a Product Offer</option>
         ${productTypeOffers.map(offer => `
-          <option value="${offer._id}" ${offer._id === appliedOfferId ? 'selected' : ''}>${offer.title}</option>
+          <option value="${offer._id}">${offer.title}</option>
         `).join('')}
       </select>
     `,
