@@ -45,11 +45,8 @@ router.get('/products',adminAuth,productController.productInfo);
 router.get('/addProducts',adminAuth,productController.loadAddProducts);
 router.post('/addProducts',adminAuth,multer.upload.array('croppedImages',10),productController.addProducts);
 router.get('/editProduct',adminAuth,productController.loadEditProduct)
-router.post('/editProduct/:id',adminAuth,multer.upload.array([
-    { name: 'newImages', maxCount: 5 },
-    { name: 'croppedImages', maxCount: 5 }
-]),productController.editProduct);
-router.post('/deleteImage',adminAuth,productController.deleteImage)
+router.post('/editProduct/:id', adminAuth, multer.upload.fields([{ name: 'newImages', maxCount: 5 },]), productController.editProduct);  
+router.post('/deleteImage',adminAuth,productController.deleteImage);
 router.get('/archivedProducts',adminAuth,productController.archivedProductInfo);
 router.get('/archiveProduct',adminAuth,productController.archiveProduct);
 router.get('/restoreProduct',adminAuth,productController.restoreProduct);

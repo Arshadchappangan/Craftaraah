@@ -4,14 +4,15 @@ const path = require('path');
 
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "public/uploads/product-images/");
+    destination: function (req, file, cb) {
+      cb(null, 'public/uploads/product-images/');
     },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + '-' + file.originalname);
     }
-});
-
+  });
+  
 const profileStorage = multer.diskStorage({
     destination: (req,file,cb) => {
         cb(null,"public/uploads/user-images/")

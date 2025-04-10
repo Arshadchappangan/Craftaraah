@@ -80,26 +80,18 @@
                             <div class="row">
                                 <div class="mb-4">
                                     <label class="form-label">Specifications</label>
-                                    <textarea placeholder="Type product specifications seperated by comma..." id="specification" name="specification"
+                                    <textarea placeholder="Type product specifications seperated by hyphen (-) ..." id="specification" name="specification"
                                         class="form-control border" rows="4"></textarea>
                                     <div id="specification-error" class="error-message"></div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-lg-6 mb-4">
-                                    <label for="product_name" class="form-label">Regular Price</label>
-                                    <input type="text" placeholder="₹" name="regularPrice" class="form-control border"
-                                        id="regular-price">
-                                    <div id="regularPrice-error" class="error-message"></div>
+                                    <label for="product_name" class="form-label">Price</label>
+                                    <input type="text" placeholder="₹" name="price" class="form-control border"
+                                        id="price">
+                                    <div id="price-error" class="error-message"></div>
                                 </div>
-                                <div class="col-lg-6 mb-4">
-                                    <label for="product_name" class="form-label">Sale Price</label>
-                                    <input type="text" placeholder="₹" name="salePrice" class="form-control border"
-                                        id="sale-price">
-                                    <div id="salePrice-error" class="error-message"></div>
-                                </div>
-                            </div>
-                            <div class="row">
                                 <div class="col-lg-6 mb-4">
                                     <label for="product_name" class="form-label">Category</label>
                                     <select class="form-select border" name="category" id="category">
@@ -261,8 +253,7 @@ function displayCroppedImages() {
             const name = document.getElementById('product-name').value.trim();
             const description = document.getElementById('description').value.trim();
             const specification = document.getElementById('specification').value.trim();
-            const regularPrice = document.getElementById('regular-price').value;
-            const salePrice = document.getElementById('sale-price').value;
+            const price = document.getElementById('price').value;
             const category = document.getElementById('category').value;
             const imageInput = document.getElementById('imageInput');
             let isValid = true;
@@ -285,18 +276,8 @@ function displayCroppedImages() {
                 isValid = false;
             }
 
-            if (!/^\d+(\.\d{1,2})?$/.test(regularPrice) || parseFloat(regularPrice) < 0) {
-                displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-                isValid = false;
-            }
-
-            if (!/^\d+(\.\d{1,2})?$/.test(salePrice) || parseFloat(salePrice) < 0) {
-                displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-                isValid = false;
-            }
-
-            if (parseFloat(regularPrice) <= parseFloat(salePrice)) {
-                displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+            if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
+                displayErrorMessage('price-error', 'Please enter a valid non-negative price.');
                 isValid = false;
             }
 

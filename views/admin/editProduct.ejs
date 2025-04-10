@@ -73,33 +73,34 @@
 
       <div class="card mb-4">
         <div class="card-body">
-          <form id="productForm">
+          <form id="productForm" enctype="multipart/form-data">
             <div class="mb-4">
               <label class="form-label">Product Name</label>
               <input type="text" name="productName" id="product-name" class="form-control" value="<%= product.productName %>">
               <div id="productName-error" class="error-message"></div>
             </div>
-
+            <div class="row">
+              <div class="mb-4">
+                  <label class="form-label">Full description</label>
+                  <textarea placeholder="Type here" id="description" name="description"
+                      class="form-control border" rows="4"><%= product.description %></textarea>
+                  <div id="description-error" class="error-message"></div>
+              </div>
+          </div>
+          <div class="row">
             <div class="mb-4">
-              <label class="form-label">Description</label>
-              <textarea name="description" id="description" class="form-control"><%= product.description %></textarea>
-              <div id="description-error" class="error-message"></div>
+                <label class="form-label">Specifications</label>
+                <textarea placeholder="Type product specifications seperated by hyphen (-) ..." id="specification" name="specification"
+                    class="form-control border" rows="4"><%= product.specifications.join('-')%></textarea>
+                <div id="specification-error" class="error-message"></div>
             </div>
-
+        </div>
             <div class="row">
               <div class="col-lg-6 mb-4">
-                <label class="form-label">Regular Price</label>
-                <input type="text" name="regularPrice" id="regular-price" class="form-control" value="<%= product.regularPrice %>">
-                <div id="regularPrice-error" class="error-message"></div>
+                <label class="form-label">Price</label>
+                <input type="text" name="price" id="price" class="form-control" value="<%= product.price %>">
+                <div id="price-error" class="error-message"></div>
               </div>
-              <div class="col-lg-6 mb-4">
-                <label class="form-label">Sale Price</label>
-                <input type="text" name="salePrice" id="sale-price" class="form-control" value="<%= product.salePrice %>">
-                <div id="salePrice-error" class="error-message"></div>
-              </div>
-            </div>
-
-            <div class="row">
               <div class="col-lg-6 mb-4">
                 <label class="form-label">Category</label>
                 <select name="category" id="category" class="form-select">
@@ -112,13 +113,15 @@
               </div>
             </div>
 
+
             <div class="mb-3">
-              <input type="file" id="imageInput" multiple accept="image/*" onchange="previewImages(event)">
+              <input type="file" id="imageInput" multiple accept="image/*" name="newImages" onchange="previewImages(event)">
               <div id="image-error" class="error-message"></div>
               <div id="previewContainer" class="d-flex flex-wrap mt-2">
                 <% product.productImage.forEach((image) => { %>
                   <div class="img-container">
                     <img src="<%= image %>">
+                    <input type="hidden" name="existingImages[]" value="<%= image %>">
                     <i class="fas fa-times" onclick="deleteImage('<%= image %>', '<%= product._id %>')"></i>
                   </div>
                 <% }) %>
@@ -145,7 +148,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
   let cropper;
@@ -249,53 +252,51 @@
       }
     });
 
-    // Append new cropped images
+
     newImages.forEach((file) => {
       formData.append('newImages', file);
     });
 
     fetch(`/admin/editProduct/${productId}`, {
-    method: 'POST',
-    body: formData
+      method: 'POST',
+      body: formData
     })
-    .then(response => response.text())
-    .then(text => {
-    console.log("Server response:", text);
-    try {
-      const json = JSON.parse(text);
-      if (json.status) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Updated!',
-        text: 'Product has been updated successfully.',
-        confirmButtonText: 'OK'
-      }).then(() => {
-        window.location.href = "/admin/products";
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Updated!',
+            text: 'Product has been updated successfully.',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            window.location.href = "/admin/products";
+          });
+        } else if (data.error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Update Failed',
+            text: data.error,
+            confirmButtonText: 'OK'
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Unexpected Response',
+            text: 'Something went wrong while processing the server response.'
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Network Error',
+          text: 'Failed to send request. Please try again later.'
+        });
       });
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Update Failed',
-        text: 'There was a problem updating the product.'
-      });
-    }
-  } catch (e) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Unexpected Response',
-      text: 'Something went wrong while processing the server response.'
-    });
-  }
-})
-.catch(error => {
-  console.error("Error:", error);
-  Swal.fire({
-    icon: 'error',
-    title: 'Network Error',
-    text: 'Failed to send request. Please try again later.'
-  });
-});
-  }
+}
+
 
 
   function validateForm() {
@@ -304,28 +305,26 @@
 
     const name = document.getElementById('product-name').value.trim();
     const desc = document.getElementById('description').value.trim();
-    const regular = document.getElementById('regular-price').value.trim();
-    const sale = document.getElementById('sale-price').value.trim();
+    const price = document.getElementById('price').value.trim();
     const category = document.getElementById('category').value;
 
     if (!name || !/^[a-zA-Z0-9\s\-_,\.;:()]+$/.test(name)) {
       showError("productName-error", "Enter a valid name");
       isValid = false;
     }
+
     if (!desc) {
-      showError("description-error", "Enter description");
+      showError("description-error", 'Please enter the description for product.');
       isValid = false;
     }
-    if (!regular || isNaN(regular) || parseFloat(regular) < 0) {
-      showError("regularPrice-error", "Invalid regular price");
+
+    if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
+      showError('price-error', 'Please enter a valid non-negative price.');
       isValid = false;
     }
-    if (!sale || isNaN(sale) || parseFloat(sale) < 0) {
-      showError("salePrice-error", "Invalid sale price");
-      isValid = false;
-    }
+
     if (!category) {
-      showError("category-error", "Select category");
+      showError("category-error", "Select a category");
       isValid = false;
     }
 

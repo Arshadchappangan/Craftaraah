@@ -21,11 +21,7 @@ const productSchema = new Schema({
         ref : "Category",
         required : true
     },
-    regularPrice : {
-        type : Number,
-        required : true
-    },
-    salePrice : {
+    price : {
         type : Number,
         required : true
     },

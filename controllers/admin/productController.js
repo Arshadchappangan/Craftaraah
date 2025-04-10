@@ -1,6 +1,6 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
-const User = require('../../models/userSchema')
+const User = require('../../models/userSchema');
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
@@ -61,7 +61,7 @@ const addProducts = async (req, res) => {
     try {
         const products = req.body;
         const productExists = await Product.findOne({
-            productName: products.productName
+            productName: { $regex: new RegExp(`^${products.productName}$`, 'i') }
         })
 
         if (!productExists) {
@@ -78,7 +78,7 @@ const addProducts = async (req, res) => {
                 }
             }
 
-            let specsArray = products.specification.split(',')
+            let specsArray = products.specification ? products.specification.split('-') : [];
 
             let categoryId = await Category.findOne({ name: products.category })
 
@@ -87,16 +87,14 @@ const addProducts = async (req, res) => {
                 description: products.description,
                 specifications:specsArray,
                 category: categoryId,
-                regularPrice: products.regularPrice,
-                salePrice: products.salePrice,
-                createdAt: new Date(),
+                price: products.price,
                 productImage: images,
                 status: 'Available'
             })
             await newProduct.save();
-            return res.redirect('/admin/addProducts')
+            return res.redirect('/admin/products')
         } else {
-            return res.status(400).json('Product alreary exists, please try another name')
+            return res.status(400).json('Product already exists, please try another name')
         }
     } catch (error) {
         console.error('Error in saving products : ', error)
@@ -121,51 +119,71 @@ const loadEditProduct = async (req, res) => {
   
 
 
-const editProduct = async (req, res) => {
+  const editProduct = async (req, res) => {
     try {
-        const productId = req.params.id;
+      const productId = req.params.id;
+  
+      const {
+        productName,
+        description,
+        specification,
+        price,
+        category,
+        existingImages,
+      } = req.body;
+  
+      // Normalize existing images (remove domain if present)
+      let images = [];
+      if (existingImages) {
+        const existing = Array.isArray(existingImages)
+          ? existingImages
+          : [existingImages];
+  
+          images = existing.map(url => {
+            const index = url.indexOf('/uploads/');
+            return index !== -1 ? url.slice(index) : url;
+          });
+          
+      }
+  
+      // Add new uploaded images
+      if (req.files && req.files.newImages) {
+        const newImages = Array.isArray(req.files.newImages)
+          ? req.files.newImages
+          : [req.files.newImages];
+  
+        const newPaths = newImages.map(file => '/uploads/product-images/' + file.filename);
+        images.push(...newPaths);
+  
+        console.log('🆕 New Images Added:', newPaths);
+      }
 
-        let existingImages = req.body['existingImages[]'];
-        if (!Array.isArray(existingImages)) {
-            existingImages = existingImages ? [existingImages] : []; 
-        }
+      images = [...new Set(images)]; // ensure unique paths only
 
-        // Process new images (resize and store paths)
-        const newImages = [];
-        if (req.files && req.files.length > 0) {
-            for (let file of req.files) {
-                const originalImagePath = file.path;
-                const extension = path.extname(file.originalname);
-                const timestamp = Date.now();
-                const resizedImagePath = path.join('public', 'uploads', 'product-images', `resized-${timestamp}${extension}`);
-
-                await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
-
-                newImages.push(`/uploads/product-images/resized-${timestamp}${extension}`);
-            }
-        }
-
-        const updatedProduct = await Product.findByIdAndUpdate(
-            productId,
-            {
-                $set: { ...req.body },
-                $push: { productImage: { $each: [...newImages] } }, 
-            },
-            { new: true }
-        );
-        
-
-        if (updatedProduct) {
-            return res.json({ status: true, message: "Product updated successfully!" });
-        } else {
-            return res.status(404).json({ status: false, message: "Product not updated!" });
-        }
+      const updatedProduct = await Product.findByIdAndUpdate(
+        productId,
+        {
+          productName,
+          description,
+          specification,
+          price,
+          category,
+          productImage: images,
+        },
+        { new: true }
+      );
+  
+      if (!updatedProduct) {
+        return res.status(404).json({ success: false, message: 'Product not found' });
+      }
+  
+      res.status(200).json({ success: true, message: 'Product updated successfully', product: updatedProduct });
+  
     } catch (error) {
-        console.error("Error updating product:", error);
-        return res.status(500).json({ status: false, message: "Internal Server Error" });
+      console.error('Error while editing product:', error.message);
+      res.status(500).json({ success: false, message: 'Something went wrong', error: error.message });
     }
-};
-
+  };
 
 
 
