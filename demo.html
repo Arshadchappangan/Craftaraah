@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offer Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+  <style>
+    .status-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .status-active { background-color: #d1fae5; color: #065f46; }
+    .status-scheduled { background-color: #dbeafe; color: #1e40af; }
+    .status-planning { background-color: #fef9c3; color: #92400e; }
+  </style>
+</head>
+<body class="bg-light">
+<div class="container py-5">
+  <h4 class="fw-bold mb-4">Welcome to OfferPilot, <span class="text-primary">Aravind!</span></h4>
+  <div class="row g-4 mb-5">
+    <div class="col-md-3">
+      <div class="bg-white shadow rounded p-3">
+        <h6>Total Offers Created</h6>
+        <h4>120 <span class="text-success fs-6">↑ 25%</span></h4>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="bg-white shadow rounded p-3">
+        <h6>Total Offers Redeemed</h6>
+        <h4>70 <span class="text-danger fs-6">↓ 3.5%</span></h4>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="bg-white shadow rounded p-3">
+        <h6>Avg. Engagement/Offer</h6>
+        <h4>3.8% <span class="text-success fs-6">↑ 3%</span></h4>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="bg-white shadow rounded p-3">
+        <h6>Conversion Rate</h6>
+        <h4>10% <span class="text-success fs-6">↑ 5.5%</span></h4>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <input type="text" class="form-control w-50" placeholder="Search offers by title, status, or tier...">
+    <div>
+      <button class="btn btn-outline-secondary me-2">Filter</button>
+      <button class="btn btn-primary">Create offer</button>
+      <button class="btn btn-outline-secondary ms-2">Export</button>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover bg-white rounded shadow">
+      <thead class="table-light">
+        <tr>
+          <th><input type="checkbox"></th>
+          <th>Offer Title</th>
+          <th>Sponsor</th>
+          <th>Status</th>
+          <th>Tier</th>
+          <th>Offer Type</th>
+          <th>Created Date</th>
+          <th>Expiration Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>35% Off - Gold Users</td>
+          <td>XYZ Corp</td>
+          <td><span class="status-badge status-active">Active</span></td>
+          <td>All Users</td>
+          <td>Discount</td>
+          <td>28/06/2024</td>
+          <td>05/07/2025</td>
+          <td>
+            <i class="bi bi-pencil me-2"></i>
+            <i class="bi bi-trash me-2"></i>
+            <i class="bi bi-copy"></i>
+          </td>
+        </tr>
+        <!-- Repeat other rows similarly -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <div>
+      <select class="form-select form-select-sm w-auto">
+        <option selected>10 per page</option>
+        <option>25 per page</option>
+        <option>50 per page</option>
+      </select>
+    </div>
+    <div>
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item disabled"><a class="page-link">«</a></li>
+          <li class="page-item active"><a class="page-link">1</a></li>
+          <li class="page-item"><a class="page-link">2</a></li>
+          <li class="page-item"><a class="page-link">3</a></li>
+          <li class="page-item"><a class="page-link">»</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+</body>
+</html>

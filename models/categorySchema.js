@@ -20,9 +20,11 @@ const categorySchema = new mongoose.Schema({
         required : true,
         default : false
     },
-    categoryOffer : {
-        type : Number,
-        default : 0
+    offers : {
+        type : [{
+            type : Schema.Types.ObjectId,
+            ref : "Offer",
+        }]
     },
     createdAt : {
         type : Date,

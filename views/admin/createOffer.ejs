@@ -1,0 +1,207 @@
+<%- include("../../views/partials/admin/header") %>
+
+    <!-- In <head> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    
+
+
+    <style>
+        .error-message {
+            color: red;
+        }
+    </style>
+
+    <section class="container justify-content-center">
+        <div class="row justify-content-center">
+            <div class="col-9">
+                <h3 class="fw-bold my-3">Create New Offer</h3>
+            </div>
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form id="offerForm" onsubmit="return validateAndSubmit(event)">
+
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">Offer Title</label>
+                                    <input type="text" name="title" class="form-control border" >
+                                    <div id="title-error" class="error-message"></div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">Discount Value</label>
+                                    <input type="number" name="discountValue" class="form-control border">
+                                    <div id="discount-error" class="error-message"></div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">Start Date</label>
+                                    <input type="date" name="startDate" class="form-control border">
+                                    <div id="start-date-error" class="error-message"></div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">End Date</label>
+                                    <input type="date" name="endDate" class="form-control border">
+                                    <div id="end-date-error" class="error-message"></div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">Applicable To</label>
+                                    <select id="applicableToSelect" class="form-select border" name="applicableTo">
+                                        <option value="product">Product</option>
+                                        <option value="category">Category</option>
+                                        <option value="all">All Products</option>
+                                    </select>
+                                    <div id="applicable-error" class="error-message"></div>
+                                </div>
+                            
+                                <div class="col-md-6 mb-4">
+                                    <label id="selectLabel" class="form-label">Select Products</label>
+                            
+                                    <select id="productSelect" class="form-select border" name="products[]" multiple>
+                                        <% products.forEach(product => { %>
+                                            <option value="<%= product._id %>"><%= product.productName %></option>
+                                        <% }) %>
+                                    </select>
+                            
+                                    <select id="categorySelect" class="form-select border d-none" name="categories[]" multiple>
+                                        <% categories.forEach(category => { %>
+                                            <option value="<%= category._id %>"><%= category.name %></option>
+                                        <% }) %>
+                                    </select>
+                                    <div id="select-error" class="error-message"></div>
+                                </div>
+                            </div>
+                            
+                            
+
+                            <div class="text-end">
+                                <a href="/admin/createOffer" class="btn btn-outline-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Create Offer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Before </body> -->
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const applicableToSelect = document.getElementById('applicableToSelect');
+            const productSelect = document.getElementById('productSelect');
+            const categorySelect = document.getElementById('categorySelect');
+    
+            applicableToSelect.addEventListener('change', function () {
+                const value = this.value;
+    
+                if (value === 'product') {
+                    document.getElementById('selectLabel').innerText = 'Select Products';
+                    productSelect.classList.remove('d-none');
+                    productSelect.disabled = false;
+                    categorySelect.classList.add('d-none');
+                    categorySelect.disabled = true;
+                } else if (value === 'category') {
+                    document.getElementById('selectLabel').innerText = 'Select Categories';
+                    categorySelect.classList.remove('d-none');
+                    categorySelect.disabled = false;
+                    productSelect.classList.add('d-none');
+                    productSelect.disabled = true;
+                } else if (value === 'all') {
+                    document.getElementById('selectLabel').innerText = '';
+                    productSelect.classList.add('d-none');
+                    categorySelect.classList.add('d-none');
+                    productSelect.disabled = true;
+                    categorySelect.disabled = true;
+                }
+            });
+    
+            applicableToSelect.dispatchEvent(new Event('change'));
+        });
+
+
+        function validateAndSubmit(event) {
+            event.preventDefault();
+
+            if (validateForm()) {
+                document.getElementById('offerForm').submit(); // Submit the form if validation passes
+            }
+        }
+
+
+        isValid = true; 
+        function validateForm() {
+
+            clearErrorMessages(); 
+
+            const title = document.querySelector('input[name="title"]').value.trim();
+            const discountValue = document.querySelector('input[name="discountValue"]').value.trim();
+            const startDate = document.querySelector('input[name="startDate"]').value.trim();
+            const endDate = document.querySelector('input[name="endDate"]').value.trim();
+            const applicableTo = document.querySelector('select[name="applicableTo"]').value;
+            let productsOrCategoriesSelected = false;
+
+            if (applicableTo === 'product') {
+                productsOrCategoriesSelected = document.querySelector('select[name="products[]"]').selectedOptions.length > 0;
+            } else if (applicableTo === 'category') {
+                productsOrCategoriesSelected = document.querySelector('select[name="categories[]"]').selectedOptions.length > 0;
+            }
+
+            if (title.length < 3 || title.length > 50) {
+                displayErrorMessage('title-error', 'Title must be between 3 and 50 characters.');
+                isValid = false;
+            }
+
+            if (isNaN(discountValue) || discountValue <= 0 || discountValue > 100) {
+                displayErrorMessage('discount-error', 'Discount value must be a positive number.');
+                isValid = false;
+            }
+
+            if (new Date(startDate) >= new Date(endDate)) {
+                displayErrorMessage('start-date-error', 'Start date must be before end date.');
+                isValid = false;
+            }
+
+            if (new Date(startDate) < new Date()) {
+                displayErrorMessage('start-date-error', 'Start date must be in the future.');
+                isValid = false;
+            }
+
+            if (new Date(endDate) < new Date()) {
+                displayErrorMessage('end-date-error', 'End date must be in the future.');
+                isValid = false;
+            }
+
+            if (applicableTo === 'product' && !productsOrCategoriesSelected) {
+                displayErrorMessage('select-error', 'Please select at least one product.');
+                isValid = false;
+            } else if (applicableTo === 'category' && !productsOrCategoriesSelected) {
+                displayErrorMessage('select-error', 'Please select at least one category.');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function displayErrorMessage(elementId, message) {
+            var errorElement = document.getElementById(elementId);
+            errorElement.innerText = message;
+            errorElement.style.display = "block";
+        }
+
+        function clearErrorMessages() {
+            const errorElements = document.getElementsByClassName('error-message');
+            Array.from(errorElements).forEach(element => {
+                element.innerText = '';
+            });
+        }
+    </script>
+    

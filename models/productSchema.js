@@ -25,10 +25,10 @@ const productSchema = new Schema({
         type : Number,
         required : true
     },
-    productOffer : {
-        type : Number,
-        default : 0
-    },
+    offers : [{
+        type : Schema.Types.ObjectId,
+        ref : "Offer",
+    }],
     stock : {
         type : Number,
         default : 0
