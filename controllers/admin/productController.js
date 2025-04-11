@@ -63,7 +63,7 @@ const productInfo = async (req, res) => {
                         const offerPrice = product.price - (product.price * discount / 100);
                         if (discount > maxDiscount) {
                             maxDiscount = discount;
-                            discountedPrice = offerPrice;
+                            discountedPrice = Math.round(offerPrice);
                         }
                     }
                 });

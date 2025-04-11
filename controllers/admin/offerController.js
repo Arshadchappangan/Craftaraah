@@ -170,7 +170,7 @@ const deactivateProductOffer = async (req, res) => {
     try {
         const { productId, activeOfferId: offerId } = req.body;
 
-        const product = await Product.findById(productId);
+        const product = await Product.findById(productId)
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found." });
         }
@@ -184,7 +184,6 @@ const deactivateProductOffer = async (req, res) => {
             return res.status(404).json({ success: false, message: "Offer not found." });
         }
 
-        // Remove the product from the offer's list
         offer.products = offer.products.filter(id => id.toString() !== productId.toString());
         await offer.save();
 
@@ -195,7 +194,94 @@ const deactivateProductOffer = async (req, res) => {
     }
 };
 
+const activateCategoryOffer = async (req, res) => {
+    try {
+        const { offerId, categoryId } = req.body;
 
+        const offer = await Offer.findById(offerId);
+        if (!offer) {
+            return res.status(404).json({ success: false, message: "Offer not found." });
+        }
+
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({ success: false, message: "Category not found." });
+        }
+
+        const products = await Product.find({ category: categoryId });
+        if (!products) {
+            return res.status(404).json({ success: false, message: "No products found for this category." });
+        }
+
+        const isAlreadyApplied = category.offers.includes(offerId);
+        if (isAlreadyApplied) {
+            return res.json({ success: true, message: "Offer already applied to this category." });
+        }
+
+        if (category.offers.length > 0) {
+            for (const existingOfferId of category.offers) {
+                const oldOffer = await Offer.findById(existingOfferId);
+                if (oldOffer) {
+                    oldOffer.products.pull(categoryId);
+                    await oldOffer.save();
+                }
+            }
+            category.offers = []; 
+        }
+        category.offers.push(offerId);
+        await category.save();
+
+        offer.categories.push(categoryId);
+        await offer.save();
+
+        for (const product of products) {
+                product.offers.push(offerId);
+                await product.save();
+        }
+
+        return res.json({ success: true, message: "Offer applied successfully." });
+
+    } catch (error) {
+        console.log("Error applying offer:", error);
+        return res.status(500).json({ success: false, message: "An error occurred while applying the offer." });
+    }
+}
+
+const deactivateCategoryOffer = async (req, res) => {
+    try {
+        const { categoryId, activeOfferId: offerId } = req.body;
+
+        const category = await Category.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({ success: false, message: "Category not found." });
+        }
+
+        category.offers = category.offers.filter(id => id.toString() !== offerId.toString());
+        await category.save();
+
+        const offer = await Offer.findById(offerId);
+        if (!offer) {
+            return res.status(404).json({ success: false, message: "Offer not found." });
+        }
+        offer.categories = offer.categories.filter(id => id.toString() !== categoryId.toString());
+        await offer.save();
+
+        const products = await Product.find({ category: categoryId });
+        if (!products) {
+            return res.status(404).json({ success: false, message: "No products found for this category." });
+        }
+
+        for (const product of products) {
+            product.offers.pull(offerId);
+            await product.save();
+        }
+
+        return res.json({ success: true, message: "Offer deactivated successfully." });
+    } catch (error) {
+        console.error("Error deactivating offer:", error);
+        return res.status(500).json({ success: false, message: "An error occurred while deactivating the offer." });
+    }
+}
 
 module.exports = {
     loadOffers,
@@ -203,5 +289,7 @@ module.exports = {
     editOffer,
     deleteOffer,
     activateProductOffer,
-    deactivateProductOffer
+    deactivateProductOffer,
+    activateCategoryOffer,
+    deactivateCategoryOffer
 }

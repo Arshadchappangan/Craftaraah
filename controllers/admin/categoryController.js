@@ -1,4 +1,5 @@
 const Category = require('../../models/categorySchema');
+const Offer = require('../../models/offerSchema');
 
 
 const categoryInfo = async (req,res) => {
@@ -23,12 +24,32 @@ const categoryInfo = async (req,res) => {
             name:{$regex:'.*'+search+'.*',$options:'i'}
         })
 
+        const categoryOffers = await Offer.find({isActive:true,applicableTo:"Category"});
+
+        const categoryIds = categoryData.map(category => category._id);
+        
+        const offersPerCategory = await Offer.find({
+                applicableTo: 'Category',
+                isActive: true,
+                categories: { $in: categoryIds }
+            }).lean();
+        
+        const activeOfferMap = {};
+        
+        offersPerCategory.forEach(offer => {
+                offer.categories.forEach(categoryId => {
+                    activeOfferMap[categoryId.toString()] = offer;
+                });
+            });
+
         const totalPages = Math.ceil(totalCategories/limit);
         res.render('category',{
             category : categoryData,
             currentPage : page,
             totalPages : totalPages,
             totalCategories : totalCategories,
+            categoryOffers : categoryOffers,
+            activeOfferMap : activeOfferMap,
             searchQuery : search
         })
     } catch (error) {

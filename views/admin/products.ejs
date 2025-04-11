@@ -221,12 +221,11 @@ function searchSubmit(event) {
         const activeOfferMap = <%- JSON.stringify(activeOfferMap) %>;
 
         function manageOffers(productId) {
-          const productTypeOffers = productOffersData.filter(offer => offer.applicableTo === 'Product');
           const activeOffer = activeOfferMap[productId] || null;
           const activeOfferId = activeOffer ? activeOffer._id : null;
 
           Swal.fire({
-            title: 'Apply Product Offer',
+            title: 'Manage Product Offer',
             html: `
               <style>
                 .swal2-popup .swal2-input, 
@@ -241,7 +240,7 @@ function searchSubmit(event) {
               </style>
               <select id="offer" class="swal2-select">
                 <option value="" disabled ${!activeOfferId ? 'selected' : ''}>Select a Product Offer</option>
-                ${productTypeOffers.map(offer => `
+                ${productOffersData.map(offer => `
                   <option value="${offer._id}" ${offer._id === activeOfferId ? 'selected' : ''}>
                     ${offer.title}
                   </option>
