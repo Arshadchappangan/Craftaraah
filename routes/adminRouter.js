@@ -84,7 +84,7 @@ router.get('/offers',adminAuth,offerController.loadOffers);
 router.post('/createOffer',adminAuth,offerController.createOffer);
 router.put('/editOffer/:id',adminAuth,offerController.editOffer);
 router.delete('/deleteOffer/:id',adminAuth,offerController.deleteOffer);
-router.post('/applyProductOffer',adminAuth,offerController.applyProductOffer);
-
+router.post('/activateProductOffer',adminAuth,offerController.activateProductOffer);
+router.post('/deactivateProductOffer',adminAuth,offerController.deactivateProductOffer);
 
 module.exports = router

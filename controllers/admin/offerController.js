@@ -98,7 +98,6 @@ const deleteOffer = async (req, res) => {
                 product.offers = product.offers.filter(offer => offer.toString() !== offerId);
                 await product.save();
             });
-            products.save();
         }
         
         if(categories && categories.length > 0) {
@@ -106,7 +105,6 @@ const deleteOffer = async (req, res) => {
                 category.offers = category.offers.filter(offer => offer.toString() !== offerId);
                 await category.save();
             });
-            categories.save();
         }
 
         await Offer.findByIdAndDelete(offerId);
@@ -120,7 +118,7 @@ const deleteOffer = async (req, res) => {
     }
 }
 
-const applyProductOffer = async (req, res) => {
+const activateProductOffer = async (req, res) => {
     try {
         const { offerId, productId } = req.body;
 
@@ -134,17 +132,25 @@ const applyProductOffer = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product not found." });
         }
 
-        const existingOffer = product.offers.find(existingOfferId => existingOfferId.toString() !== offerId.toString());
-        
-        if (existingOffer) {
-            product.offers.pull(existingOffer);
-            await product.save();
-            
-            const oldOffer = await Offer.findById(existingOffer);
-            oldOffer.products.pull(productId);
-            await oldOffer.save();
+        // Check if the offer is already applied to this product
+        const isAlreadyApplied = product.offers.includes(offerId);
+        if (isAlreadyApplied) {
+            return res.json({ success: true, message: "Offer already applied to this product." });
         }
 
+        // If only one product offer is allowed, remove existing offers
+        if (product.offers.length > 0) {
+            for (const existingOfferId of product.offers) {
+                const oldOffer = await Offer.findById(existingOfferId);
+                if (oldOffer) {
+                    oldOffer.products.pull(productId);
+                    await oldOffer.save();
+                }
+            }
+            product.offers = []; // Clear all existing offers
+        }
+
+        // Add the new offer
         product.offers.push(offerId);
         await product.save();
 
@@ -160,11 +166,42 @@ const applyProductOffer = async (req, res) => {
 };
 
 
+const deactivateProductOffer = async (req, res) => {
+    try {
+        const { productId, activeOfferId: offerId } = req.body;
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found." });
+        }
+
+        // Remove the offer from the product
+        product.offers = product.offers.filter(id => id.toString() !== offerId.toString());
+        await product.save();
+
+        const offer = await Offer.findById(offerId);
+        if (!offer) {
+            return res.status(404).json({ success: false, message: "Offer not found." });
+        }
+
+        // Remove the product from the offer's list
+        offer.products = offer.products.filter(id => id.toString() !== productId.toString());
+        await offer.save();
+
+        return res.json({ success: true, message: "Offer deactivated successfully." });
+    } catch (error) {
+        console.error("Error deactivating offer:", error);
+        return res.status(500).json({ success: false, message: "An error occurred while deactivating the offer." });
+    }
+};
+
+
 
 module.exports = {
     loadOffers,
     createOffer,
     editOffer,
     deleteOffer,
-    applyProductOffer,
+    activateProductOffer,
+    deactivateProductOffer
 }

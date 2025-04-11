@@ -13,7 +13,7 @@ const { error } = require('console');
 const productInfo = async (req, res) => {
     try {
         const search = req.query.search || "";
-        const page = req.query.page || 1;
+        const page = parseInt(req.query.page) || 1;
         const limit = 5;
 
         const productData = await Product.find({
@@ -22,13 +22,6 @@ const productInfo = async (req, res) => {
                 {productName:{$regex:'.*'+search+'.*',$options:'i'}}
             ]
         }).limit(limit * 1).skip((page - 1) * limit).populate('category').populate('offers').exec();
-
-        productData.forEach(product => {
-            product.offers.filter(offer => {
-                 const discountedPrice = product.price - (product.price * offer.discountPercentage / 100);
-                 return offer.discountedPrice = Math.max(discountedPrice, 0).toFixed(2);
-            })
-        })
 
         const count = await Product.find({
             isDeleted : false,
@@ -41,6 +34,46 @@ const productInfo = async (req, res) => {
 
         const productOffers = await Offer.find({ isActive: true , applicableTo:'Product'});
         const appliedOffers = await Product.find({ isDeleted: false }).populate('offers').exec();
+        
+        const productIds = productData.map(product => product._id);
+
+        const offersPerProduct = await Offer.find({
+        applicableTo: 'Product',
+        isActive: true,
+        products: { $in: productIds }
+        }).lean();
+
+        const activeOfferMap = {};
+
+        offersPerProduct.forEach(offer => {
+        offer.products.forEach(productId => {
+            activeOfferMap[productId.toString()] = offer;
+        });
+        });
+
+
+        productData.forEach(product => {
+            let maxDiscount = 0;
+            let discountedPrice = product.price;
+        
+            if (product.offers && product.offers.length > 0) {
+                product.offers.forEach(offer => {
+                    if (offer.isActive) {
+                        const discount = offer.discountPercentage;
+                        const offerPrice = product.price - (product.price * discount / 100);
+                        if (discount > maxDiscount) {
+                            maxDiscount = discount;
+                            discountedPrice = offerPrice;
+                        }
+                    }
+                });
+            }
+        
+            product.maxDiscount = maxDiscount;
+            product.discountedPrice = Math.max(discountedPrice, 0).toFixed(2);
+        });
+        
+
 
         if (category) {
             res.render('products', {
@@ -50,6 +83,7 @@ const productInfo = async (req, res) => {
                 category: category,
                 productOffers: productOffers || [],
                 appliedOffers: appliedOffers || [],
+                activeOfferMap: activeOfferMap,
             })
         } else {
             res.redirect('/pageError')
