@@ -54,9 +54,15 @@ const userSchema = new Schema({
         type : Schema.Types.ObjectId,
         ref : "orders"
     }],
-    createdAt : {
-        type : Date,
-        default : Date.now
+    referral : {
+        link : {
+            type : String,
+            unique : true
+        },
+        isRedeemed : {
+            type : Boolean,
+            default : false
+        }
     },
     searchHistory : [{
         category : {
@@ -76,6 +82,8 @@ const userSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Product'
     }]
+},{
+    timestamps : true
 })
 
 const User = mongoose.model("User",userSchema);

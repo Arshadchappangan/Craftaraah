@@ -74,32 +74,20 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                      <% for (let i = data.length - 1; i >= 0; i--) { 
-                                        const offers = data[i].offers;
-                                        let maxDiscount = 0;
-                                        let discountedPrice = data[i].price;
-                                        
-                                        if (offers.length > 0) {
-                                          offers.forEach(offer => {
-                                            const discount = offer.discountPercentage;
-                                            const offerPrice = data[i].price - (data[i].price * discount / 100);
-                                            if (discount > maxDiscount) {
-                                              maxDiscount = discount;
-                                              discountedPrice = offerPrice.toFixed(2);
-                                            }
-                                          });
-                                        }
-                                        %>
+                                      <% if (data.length === 0) { %>
+                                        <tr>
+                                          <td colspan="6" class="text-center">No products found.</td>
+                                        </tr>
+                                      <% } %>
+                                      
+                                      <% for (let i = data.length - 1; i >= 0; i--) { %>
                                         <tr>
                                             <td class="text-start"><%=data[i].productName%></td>
                                             <td class="text-start"><%= data[i].category ? data[i].category.name : "No Category" %></td>
                                             <td class="text-center"><%= data[i].price %></td>
-                                            <td class="text-end"><%= maxDiscount %></td>
-                                            <td class="text-end"><%= discountedPrice %></td>
+                                            <td class="text-end"><%= data[i].maxDiscount %></td>
+                                            <td class="text-end"><%= data[i].discountedPrice %></td>
                                             <td class="text-start">
-                                                <!-- <a href="/productDetails?id=<%= data[i]._id %>">
-                                                  <i class="fas fa-file-alt text-dark"></i>
-                                                </a> -->
                                                 <a href="/admin/editProduct?id=<%= data[i]._id %>" class="badge bg-primary rounded-pill">
                                                   <i class="fas fa-pencil-alt mx-2">  Edit</i>
                                                 </a><br>
@@ -229,64 +217,98 @@ function searchSubmit(event) {
         });
         }
         
-
         const productOffersData = <%- JSON.stringify(productOffers) %>;
+        const activeOfferMap = <%- JSON.stringify(activeOfferMap) %>;
 
-  function manageOffers(productId) {
+        function manageOffers(productId) {
+          const activeOffer = activeOfferMap[productId] || null;
+          const activeOfferId = activeOffer ? activeOffer._id : null;
 
-  const productTypeOffers = productOffersData.filter(offer => offer.applicableTo === 'Product');
+          Swal.fire({
+            title: 'Manage Product Offer',
+            html: `
+              <style>
+                .swal2-popup .swal2-input, 
+                .swal2-popup .swal2-select {
+                  width: 100% !important;
+                  padding: 10px;
+                  margin: 8px 0;
+                  font-size: 1rem;
+                  border-radius: 8px;
+                  border: 1px solid #ccc;
+                }
+              </style>
+              <select id="offer" class="swal2-select">
+                <option value="" disabled ${!activeOfferId ? 'selected' : ''}>Select a Product Offer</option>
+                ${productOffersData.map(offer => `
+                  <option value="${offer._id}" ${offer._id === activeOfferId ? 'selected' : ''}>
+                    ${offer.title}
+                  </option>
+                `).join('')}
+              </select>
+            `,
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'Activate',
+            denyButtonText: 'Deactivate',
+            preConfirm: () => {
+              const offerSelect = document.getElementById('offer');
+              const offerId = offerSelect.value;
 
+              if (!offerId) {
+                Swal.showValidationMessage('Please select an offer');
+              }
 
-  Swal.fire({
-    title: 'Apply Product Offer',
-    html: `
-      <style>
-        .swal2-popup .swal2-input, 
-        .swal2-popup .swal2-select {
-          width: 100% !important;
-          padding: 10px;
-          margin: 8px 0;
-          font-size: 1rem;
-          border-radius: 8px;
-          border: 1px solid #ccc;
-        }
-      </style>
-      <select id="offer" class="swal2-select">
-        <option value="" disabled selected>Select a Product Offer</option>
-        ${productTypeOffers.map(offer => `
-          <option value="${offer._id}">${offer.title}</option>
-        `).join('')}
-      </select>
-    `,
-    showCancelButton: true,
-    confirmButtonText: 'Apply Offer',
-    preConfirm: () => {
-      const offerId = document.getElementById('offer').value;
-      if (!offerId) {
-        Swal.showValidationMessage('Please select an offer');
-      }
-      return { productId, offerId };
-    }
-  }).then((result) => {
-    if (result.isConfirmed) {
-      fetch(`/admin/applyProductOffer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(result.value)
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          Swal.fire('Success!', data.message, 'success').then(() => {
-            window.location.reload();
+              return { productId, offerId };
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+              fetch(`/admin/activateProductOffer`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(result.value)
+              })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  Swal.fire('Success!', data.message, 'success').then(() => {
+                    window.location.reload();
+                  });
+                } else {
+                  Swal.fire('Error!', data.message, 'error');
+                }
+              });
+            } else if (result.isDenied) {
+              Swal.fire({
+                title: 'Are you sure?',
+                text: `This will remove the currently selected offer from this product.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Deactivate',
+                cancelButtonText: 'Cancel'
+              }).then((confirmResult) => {
+                if (confirmResult.isConfirmed) {
+                  fetch(`/admin/deactivateProductOffer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId, activeOfferId })
+                  })
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.success) {
+                      Swal.fire('Offer Deactivated', data.message, 'success').then(() => {
+                        window.location.reload();
+                      });
+                    } else {
+                      Swal.fire('Error!', data.message, 'error');
+                    }
+                  });
+                }
+              });
+            }
           });
-        } else {
-          Swal.fire('Error!', data.message, 'error');
         }
-      });
-    }
-  });
-}
+
 
 
 

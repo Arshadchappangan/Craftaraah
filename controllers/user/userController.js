@@ -7,6 +7,7 @@ const session = require('express-session')
 const bcrypt = require('bcrypt');
 const { name } = require('ejs');
 const category = require('../../models/categorySchema');
+const Coupon = require('../../models/couponSchema')
 const Cart = require('../../models/cartSchema');
 
 const loadHome = async (req, res) => {
@@ -45,8 +46,14 @@ const pageNotFound = async (req, res) => {
 
 const loadLogin = async (req, res) => {
     try {
+        
         if (!req.session.user) {
-            res.render('login')
+            let referrer = req.query.ref || null
+            if(referrer){
+                res.render('login',{referrer})
+            }else{
+                res.render('login')
+            }
         } else {
             res.redirect('/')
         }
@@ -94,7 +101,7 @@ const verificationMail = async (email, otp) => {
 
 const signup = async (req, res) => {
     try {
-        const { name, email, phone, password } = req.body;
+        const { name, email, phone, password , referrer} = req.body;
         const existingUser = await User.findOne({ email })
         if (existingUser) {
             return res.render('login', { messageExists: "User already exists... Please Signin..." })
@@ -110,7 +117,8 @@ const signup = async (req, res) => {
 
         req.session.email = email;
         req.session.userOTP = otp;
-        req.session.userData = { name, email, phone, password }
+        req.session.userData = { name, email, phone, password };
+        req.session.referrer = referrer
 
 
         console.log("OTP sent", otp)
@@ -137,19 +145,46 @@ const securePassword = async (password) => {
 const verifyOtp = async (req, res) => {
     try {
         const { otp } = req.body
+        const referrer = req.session.referrer
+        console.log('refferer Data : ',referrer)
 
         if (otp === req.session.userOTP) {
             const user = req.session.userData;
             const passwordHashed = await securePassword(user.password);
 
+            let domain = process.env.BASE_URL;
+            let namePart = user.name.slice(0,3).toUpperCase();
+            let numberPart = Math.floor(1000+Math.random()*9000);
+            let referralLink = `${domain}?ref=${namePart}${numberPart}`
+
             const saveUserData = new User({
                 name: user.name,
                 email: user.email,
                 phone: user.phone,
-                password: passwordHashed
+                password: passwordHashed,
+                referral : {
+                    link : referralLink
+                }
             })
 
             await saveUserData.save();
+
+            if(referrer) {
+                const referrerData = await User.findOne({"referral.link" : `${domain}?ref=${referrer}`});
+
+                let referralCoupon = new Coupon({
+                    couponCode : `REF-${referrer}`,
+                    couponType : "percentage",
+                    discountAmount : 15,
+                    minPurchaseAmount : 1000,
+                    maxDiscountAmount : 2000,
+                    isActive : false,
+                    usedBy : [{
+                        userId : referrerData._id
+                    }]
+                });
+                await referralCoupon.save()
+            }
 
             const newUser = await User.findOne({email:user.email});
 
