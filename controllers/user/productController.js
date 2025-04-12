@@ -8,6 +8,7 @@ const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
 const Coupon = require('../../models/couponSchema');
 const Wallet = require('../../models/walletSchema');
+const mongoose = require('mongoose');
 const razorpay = require('../../config/razorpay');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
@@ -897,10 +898,21 @@ const applyCoupon = async (req, res) => {
 const loadCouponPage = async (req, res) => {
     try {
         const user = req.session.user;
-        const coupons = await Coupon.find({isDeleted:false})
-        .sort({isActive:-1,expiryDate:1});
+
+        const coupons = await Coupon.find({
+            isDeleted: false,
+            couponCode: { $not: /^REF/ }
+        }).sort({ isActive: -1, expiryDate: 1 });
+
+        const referralCoupon = await Coupon.findOne({
+            couponCode: { $regex: /^REF/ },   // Starts with 'REF'
+            owner: new mongoose.Types.ObjectId(user._id)                   // Belongs to the current user
+        });
         
-        res.render('couponDetails',{user,coupons});
+
+        console.log('referral coupon : ',referralCoupon)
+        
+        res.render('couponDetails',{user,coupons,referralCoupon});
     } catch (error) {
         console.error('Load coupon page error:', error);
         res.redirect('/pageNotFound');

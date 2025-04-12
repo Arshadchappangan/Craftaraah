@@ -11,6 +11,10 @@ const couponSchema = new mongoose.Schema({
         enum: ['percentage', 'fixed'],
         required: true
     },
+    owner : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : "User"
+    },
     discountAmount: {
         type: Number,
         required: true

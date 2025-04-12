@@ -49,11 +49,7 @@ const loadLogin = async (req, res) => {
         
         if (!req.session.user) {
             let referrer = req.query.ref || null
-            if(referrer){
-                res.render('login',{referrer})
-            }else{
-                res.render('login')
-            }
+            res.render('login',{referrer})
         } else {
             res.redirect('/')
         }
@@ -176,12 +172,10 @@ const verifyOtp = async (req, res) => {
                     couponCode : `REF-${referrer}`,
                     couponType : "percentage",
                     discountAmount : 15,
+                    owner : referrerData._id,
                     minPurchaseAmount : 1000,
                     maxDiscountAmount : 2000,
-                    isActive : false,
-                    usedBy : [{
-                        userId : referrerData._id
-                    }]
+                    expiryDate : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                 });
                 await referralCoupon.save()
             }
