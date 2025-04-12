@@ -141,13 +141,15 @@ const activateProductOffer = async (req, res) => {
         // If only one product offer is allowed, remove existing offers
         if (product.offers.length > 0) {
             for (const existingOfferId of product.offers) {
-                const oldOffer = await Offer.findById(existingOfferId);
-                if (oldOffer) {
-                    oldOffer.products.pull(productId);
-                    await oldOffer.save();
+                const existingOffer = await Offer.findById(existingOfferId);
+                if (existingOffer && existingOffer.applicableTo === "Product") {
+                    existingOffer.products.pull(productId);
+                    await existingOffer.save();
+
+                    product.offers = product.offers.filter(id => id.toString() !== existingOfferId.toString()); 
                 }
             }
-            product.offers = []; // Clear all existing offers
+           
         }
 
         // Add the new offer
