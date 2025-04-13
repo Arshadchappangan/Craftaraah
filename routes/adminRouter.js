@@ -92,5 +92,7 @@ router.post('/deactivateCategoryOffer',adminAuth,offerController.deactivateCateg
 //sales management
 
 router.get('/sales',adminAuth,orderController.loadSalesPage);
+router.get('/downloadSalesPdf',adminAuth,orderController.downloadSalesPdf);
+
 
 module.exports = router
