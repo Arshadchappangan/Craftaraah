@@ -98,6 +98,35 @@
     </div>
 
     <!-- filter Form -->
+    <form action="/admin/sales" method="GET" class="mb-4 row">
+      <div class="col-md-3">
+        <select name="range" class="form-select" onchange="this.form.submit()">
+          <option value="">All</option>
+          <option value="day" <%= range === 'day' ? 'selected' : '' %>>Today</option>
+          <option value="week" <%= range === 'week' ? 'selected' : '' %>>This Week</option>
+          <option value="month" <%= range === 'month' ? 'selected' : '' %>>This Month</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <input type="date" name="startDate" class="form-control" value="<%= startDate || '' %>" />
+      </div>
+      <div class="col-md-3">
+        <input type="date" name="endDate" class="form-control" value="<%= endDate || '' %>" />
+      </div>
+
+      <div class="col-md-2 d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary w-50 mx-2">
+          <i class="fas fa-filter"></i> Filter
+        </button>
+        <a href="/admin/sales" class="btn btn-danger w-50">
+          <i class="fas fa-times"></i> Clear
+        </a>
+      </div>
+
+    </form>
+    
+  </div>
 
     <!-- Sales Table -->
     <div class="row">
@@ -155,5 +184,88 @@
 </div>
 
 <!-- Chart Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById("salesChart").getContext("2d");
+
+const salesLabels = <%- JSON.stringify(chartLabels) %>;  
+const orders = <%- JSON.stringify(chartOrders) %>;         
+const revenue = <%- JSON.stringify(chartRevenue) %>;       
+
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: salesLabels,
+    datasets: [
+      {
+        label: 'Total Orders',
+        data: orders,
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        yAxisID: 'y'  
+      },
+      {
+        label: 'Total Revenue',
+        data: revenue,
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        yAxisID: 'y1'  
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: {
+      mode: 'index',
+      intersect: false
+    },
+    stacked: false,
+    plugins: {
+      tooltip: {
+        mode: 'index',
+        intersect: false
+      },
+      legend: {
+        position: 'top'
+      }
+    },
+    scales: {
+      y: {
+        type: 'linear',
+        display: true,
+        position: 'left',
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Orders'
+        }
+      },
+      y1: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        beginAtZero: true,
+        grid: {
+          drawOnChartArea: false
+        },
+        title: {
+          display: true,
+          text: 'Revenue'
+        }
+      }
+    }
+  }
+});
 
 </script>
+
+
+
