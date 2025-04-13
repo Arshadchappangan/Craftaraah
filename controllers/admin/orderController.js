@@ -405,6 +405,68 @@ const downloadSalesPdf = async(req,res) => {
     res.redirect('pageError')
   }
 }
+
+
+const downloadSalesExcel = async (req,res) => {
+  try {
+    const range = req.session.range;
+    const startDate = req.session.start;
+    const endDate = req.session.end;
+
+    let filter = {};
+    filterbydate(filter,range,startDate,endDate);
+
+    const orders = await Order.find(filter).populate('userId').sort({createdAt:-1})
+
+    let totalRevenue = 0;
+    let totalDiscount = 0;
+    let couponDeduction = 0
+
+    orders.forEach(order => {
+      if(order.status !== 'Cancelled' && order.status !== 'Returned'){
+        totalRevenue += order.finalAmount;
+        totalDiscount += order.discount;
+        couponDeduction += order.couponDiscount
+      }
+    });
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Sales Report')
+
+    worksheet.columns = [
+      {header:"Order ID",key:"orderId",width:30},
+      {header:"Date",key:"date",width:25},
+      {header:"Total price",key:"totalPrice",width:25},
+      {header:"Discount",key:"discount",width:25},
+      {header:"Coupon discount",key:"couponDiscount",width:25},
+      {header:"Final amount",key:"finalAmount",width:25}
+    ]
+
+    orders.forEach((order) => {
+      worksheet.addRow({
+        orderId : order.orderId,
+        date : order.createdAt.toISOString().split('T')[0],
+        totalPrice : order.totalPrice,
+        discount : order.discount,
+        couponDiscount : order.couponDiscount || 0,
+        finalAmount : order.finalAmount
+      })
+    })
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", "attachment; filename=sales_report.xlsx");
+
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (error) {
+    console.error(error)
+    res.redirect('/pageError')
+  }
+}
   
         
 
@@ -418,5 +480,6 @@ module.exports = {
     rejectReturn,
     refund,
     loadSalesPage,
-    downloadSalesPdf
+    downloadSalesPdf,
+    downloadSalesExcel
 }
