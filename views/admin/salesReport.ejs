@@ -1,0 +1,159 @@
+<%- include("../../views/partials/admin/header") %>
+
+<div class="content">
+  <div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+      <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+        <div>
+          <h2 class="text-white pb-2 fw-bold">Sales Report</h2>
+          <h5 class="text-white op-7 mb-2">Analyze your store's sales performance</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-inner mt--5">
+
+    <!-- Stats Cards -->
+    <div class="row mt--2">
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-primary bubble-shadow-small">
+                  <i class="fas fa-shopping-cart"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Total Orders</p>
+                  <h4 class="card-title"><%= orders.length %></h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-success bubble-shadow-small">
+                  <i class="fas fa-rupee-sign"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Total Revenue</p>
+                  <h4 class="card-title">₹ <%= totalRevenue %></h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-warning bubble-shadow-small">
+                  <i class="fas fa-percent"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Total Discount</p>
+                  <h4 class="card-title">₹ <%= totalDiscount %></h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-danger bubble-shadow-small">
+                  <i class="fas fa-ticket-alt"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Coupon Deductions</p>
+                  <h4 class="card-title">₹ <%= couponDeduction %></h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- filter Form -->
+
+    <!-- Sales Table -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-round">
+          <div class="card-header">
+            <div class="card-title">Sales Report Table</div>
+          </div>
+          <div class="card-body table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Order ID</th>
+                  <th>User</th>
+                  <th>Total Amount</th>
+                  <th>Discount</th>
+                  <th>Coupon</th>
+                  <th>Final Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% orders.forEach(order => { %>
+                  <tr>
+                    <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                    <td><%= order.orderId %></td>
+                    <td><%= order.userId.name %></td>
+                    <td>₹ <%= order.totalPrice %></td>
+                    <td>₹ <%= order.discount || 0 %></td>
+                    <td>₹ <%= order.couponDiscount || 0 %></td>
+                    <td>₹ <%= order.finalAmount %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sales Chart -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-round">
+          <div class="card-header">
+            <div class="card-title">Sales Chart</div>
+          </div>
+          <div class="card-body">
+            <canvas id="salesChart" height="120"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart Script -->
+
+</script>

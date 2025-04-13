@@ -89,4 +89,8 @@ router.post('/deactivateProductOffer',adminAuth,offerController.deactivateProduc
 router.post('/activateCategoryOffer',adminAuth,offerController.activateCategoryOffer);
 router.post('/deactivateCategoryOffer',adminAuth,offerController.deactivateCategoryOffer);
 
+//sales management
+
+router.get('/sales',adminAuth,orderController.loadSalesPage);
+
 module.exports = router

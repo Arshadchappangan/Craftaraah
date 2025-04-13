@@ -68,8 +68,8 @@
                                             <th scope="col" class="text-start">Name</th>
                                             <th scope="col" class="text-start">Category</th>
                                             <th scope="col" class="text-center">Price</th>
-                                            <th scope="col" class="text-end">Discount (%)</th>
-                                            <th scope="col" class="text-end">Offer Price</th>
+                                            <th scope="col" class="text-center">Discount (%)</th>
+                                            <th scope="col" class="text-center">Offer Price</th>
                                             <th scope="col" class="text-start">Actions</th>
                                         </tr>
                                     </thead>
@@ -84,9 +84,9 @@
                                         <tr>
                                             <td class="text-start"><%=data[i].productName%></td>
                                             <td class="text-start"><%= data[i].category ? data[i].category.name : "No Category" %></td>
-                                            <td class="text-center"><%= data[i].price %></td>
-                                            <td class="text-end"><%= data[i].maxDiscount %></td>
-                                            <td class="text-end"><%= data[i].discountedPrice %></td>
+                                            <td class="text-center">₹ <%= data[i].price %></td>
+                                            <td class="text-center"><%= data[i].maxDiscount %> %</td>
+                                            <td class="text-center">₹ <%= data[i].discountedPrice %></td>
                                             <td class="text-start">
                                                 <a href="/admin/editProduct?id=<%= data[i]._id %>" class="badge bg-primary rounded-pill">
                                                   <i class="fas fa-pencil-alt mx-2">  Edit</i>

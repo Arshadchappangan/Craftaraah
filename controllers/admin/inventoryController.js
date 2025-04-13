@@ -1,5 +1,37 @@
 const Product = require('../../models/productSchema');
 
+
+
+function calculateDiscount(productData) {
+  const applyDiscount = (product) => {
+      let maxDiscount = 0;
+      let discountedPrice = product.price;
+
+      if (product.offers && product.offers.length > 0) {
+          product.offers.forEach(offer => {
+              if (offer.isActive) {
+                  const discount = offer.discountPercentage;
+                  const offerPrice = product.price - (product.price * discount / 100);
+                  if (discount > maxDiscount) {
+                      maxDiscount = discount;
+                      discountedPrice = Math.round(offerPrice);
+                  }
+              }
+          });
+      }
+
+      product.maxDiscount = maxDiscount;
+      product.discountedPrice = Math.max(discountedPrice, 0).toFixed(2);
+  };
+
+  if (Array.isArray(productData)) {
+      productData.forEach(product => applyDiscount(product));
+  } else {
+      applyDiscount(productData);
+  }
+}
+
+
 const loadInventory = async (req, res) => {
     try {
       const { filter, search } = req.query;
@@ -31,8 +63,11 @@ const loadInventory = async (req, res) => {
   
       const products = await Product.find(query)
         .skip(skip)
-        .limit(limit);
-  
+        .limit(limit)
+        .populate('offers');
+
+        calculateDiscount(products)
+      
 
       const totalStockAgg = await Product.aggregate([
         { $match: { isBlocked: false, isDeleted: false } },

@@ -10,6 +10,35 @@ const category = require('../../models/categorySchema');
 const Coupon = require('../../models/couponSchema')
 const Cart = require('../../models/cartSchema');
 
+function calculateDiscount(productData) {
+    const applyDiscount = (product) => {
+        let maxDiscount = 0;
+        let discountedPrice = product.price;
+
+        if (product.offers && product.offers.length > 0) {
+            product.offers.forEach(offer => {
+                if (offer.isActive) {
+                    const discount = offer.discountPercentage;
+                    const offerPrice = product.price - (product.price * discount / 100);
+                    if (discount > maxDiscount) {
+                        maxDiscount = discount;
+                        discountedPrice = Math.round(offerPrice);
+                    }
+                }
+            });
+        }
+
+        product.maxDiscount = maxDiscount;
+        product.discountedPrice = Math.max(discountedPrice, 0).toFixed(2);
+    };
+
+    if (Array.isArray(productData)) {
+        productData.forEach(product => applyDiscount(product));
+    } else {
+        applyDiscount(productData);
+    }
+}
+
 const loadHome = async (req, res) => {
     try {
         const category = await Category.find({isDeleted:false});
@@ -140,66 +169,70 @@ const securePassword = async (password) => {
 
 const verifyOtp = async (req, res) => {
     try {
-        const { otp } = req.body
-        const referrer = req.session.referrer
-        console.log('refferer Data : ',referrer)
+        const { otp } = req.body;
+        const referrer = req.session.referrer;
+        const user = req.session.userData;
+        const domain = process.env.BASE_URL;
 
-        if (otp === req.session.userOTP) {
-            const user = req.session.userData;
-            const passwordHashed = await securePassword(user.password);
-
-            let domain = process.env.BASE_URL;
-            let namePart = user.name.slice(0,3).toUpperCase();
-            let numberPart = Math.floor(1000+Math.random()*9000);
-            let referralLink = `${domain}?ref=${namePart}${numberPart}`
-
-            const saveUserData = new User({
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-                password: passwordHashed,
-                referral : {
-                    link : referralLink
-                }
-            })
-
-            await saveUserData.save();
-
-            if(referrer) {
-                const referrerData = await User.findOne({"referral.link" : `${domain}?ref=${referrer}`});
-
-                let referralCoupon = new Coupon({
-                    couponCode : `REF-${referrer}`,
-                    couponType : "percentage",
-                    discountAmount : 15,
-                    owner : referrerData._id,
-                    minPurchaseAmount : 1000,
-                    maxDiscountAmount : 2000,
-                    expiryDate : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                });
-                await referralCoupon.save()
-            }
-
-            const newUser = await User.findOne({email:user.email});
-
-            req.session.user = {
-                _id: newUser._id,
-                name: newUser.name,
-                email: newUser.email
-            };
-
-            res.json({ success: true, redirectUrl: "/" })
-            req.session.user = saveUserData._id;
-        } else {
-            res.status(400).json({ success: false, message: "Invalid OTP, Please try again" })
+        if (otp !== req.session.userOTP) {
+            return res.status(400).json({ success: false, message: "Invalid OTP, Please try again" });
         }
+
+        // ✅ Check if user already exists
+        const existingUser = await User.findOne({ email: user.email });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: "Email already registered." });
+        }
+
+        const passwordHashed = await securePassword(user.password);
+        const namePart = user.name.slice(0, 3).toUpperCase();
+        const numberPart = Math.floor(1000 + Math.random() * 9000);
+        const referralLink = `${domain}?ref=${namePart}${numberPart}`;
+
+        const saveUserData = new User({
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            password: passwordHashed,
+            referral: {
+                link: referralLink
+            }
+        });
+
+        await saveUserData.save();
+
+        if (referrer) {
+            const referrerData = await User.findOne({ "referral.link": `${domain}?ref=${referrer}` });
+
+            if (referrerData) {
+                const referralCoupon = new Coupon({
+                    couponCode: `REF-${referrer}`,
+                    couponType: "percentage",
+                    discountAmount: 15,
+                    owner: referrerData._id,
+                    minPurchaseAmount: 1000,
+                    maxDiscountAmount: 2000,
+                    expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                });
+
+                await referralCoupon.save();
+            }
+        }
+
+        req.session.user = {
+            _id: saveUserData._id,
+            name: saveUserData.name,
+            email: saveUserData.email
+        };
+
+        res.json({ success: true, redirectUrl: "/" });
 
     } catch (error) {
         console.error("Error in verifying OTP : ", error);
-        res.status(500).json({ success: false, message: "an error occured" })
-
+        res.status(500).json({ success: false, message: "An error occurred." });
     }
 }
+
 
 const resendOtp = async (req, res) => {
     try {
@@ -272,25 +305,40 @@ const logout = async (req, res) => {
 const loadShopPage = async (req, res) => {
     try {
         const user = req.session.user;
-        const userData = await User.findOne({ _id: user });
-        const categories = await Category.find({ isListed: true,isDeleted:false });
+        let userData = null;
+        if (user) {
+            userData = await User.findOne({ _id: user });
+        }
+
+        const categories = await Category.find({ isListed: true, isDeleted: false });
         const categoryIds = categories.map(cat => cat._id);
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = 9;
+        const skip = (page - 1) * limit;
+
+        const totalProducts = await Product.countDocuments({
+            isDeleted: false,
+            isBlocked: false,
+            category: { $in: categoryIds }
+        });
+        const totalPages = Math.ceil(totalProducts / limit);
 
         let filteredProducts = await Product.find({
             isDeleted: false,
             isBlocked: false,
             category: { $in: categoryIds }
-        });
+        })
+        .populate('offers') // Ensure offers are populated
+        .skip(skip)
+        .limit(limit);
 
-        const productIds = filteredProducts.map(p => p._id);
-        userData.savedFilteredProducts = productIds;
-        await userData.save();
+        calculateDiscount(filteredProducts);
 
-        const page = parseInt(req.query.page) || 1;
-        const limit = 9;
-        const totalPages = Math.ceil(filteredProducts.length / limit);
-        const skip = (page - 1) * limit;
-        filteredProducts = filteredProducts.slice(skip, skip + limit);
+        if (userData) {
+            userData.savedFilteredProducts = filteredProducts.map(p => p._id);
+            await userData.save();
+        }
 
         res.render('shop-grid', {
             user: userData,
@@ -301,10 +349,11 @@ const loadShopPage = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error.message);
+        console.log("Shop page error: ", error.message);
         res.redirect('/pageNotFound');
     }
 };
+
 
 
 const filterProducts = async (req,res) => {

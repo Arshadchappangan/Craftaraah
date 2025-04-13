@@ -9,6 +9,35 @@ const Offer = require('../../models/offerSchema');
 const { error } = require('console');
 
 
+function calculateDiscount(productData) {
+    const applyDiscount = (product) => {
+        let maxDiscount = 0;
+        let discountedPrice = product.price;
+
+        if (product.offers && product.offers.length > 0) {
+            product.offers.forEach(offer => {
+                if (offer.isActive) {
+                    const discount = offer.discountPercentage;
+                    const offerPrice = product.price - (product.price * discount / 100);
+                    if (discount > maxDiscount) {
+                        maxDiscount = discount;
+                        discountedPrice = Math.round(offerPrice);
+                    }
+                }
+            });
+        }
+
+        product.maxDiscount = maxDiscount;
+        product.discountedPrice = Math.max(discountedPrice, 0).toFixed(2);
+    };
+
+    if (Array.isArray(productData)) {
+        productData.forEach(product => applyDiscount(product));
+    } else {
+        applyDiscount(productData);
+    }
+}
+
 
 const productInfo = async (req, res) => {
     try {
@@ -51,30 +80,10 @@ const productInfo = async (req, res) => {
         });
         });
 
+        calculateDiscount(productData)
 
-        productData.forEach(product => {
-            let maxDiscount = 0;
-            let discountedPrice = product.price;
+        console.log('product data ; ',productData)
         
-            if (product.offers && product.offers.length > 0) {
-                product.offers.forEach(offer => {
-                    if (offer.isActive) {
-                        const discount = offer.discountPercentage;
-                        const offerPrice = product.price - (product.price * discount / 100);
-                        if (discount > maxDiscount) {
-                            maxDiscount = discount;
-                            discountedPrice = Math.round(offerPrice);
-                        }
-                    }
-                });
-            }
-        
-            product.maxDiscount = maxDiscount;
-            product.discountedPrice = Math.max(discountedPrice, 0).toFixed(2);
-        });
-        
-
-
         if (category) {
             res.render('products', {
                 data: productData,
@@ -92,7 +101,6 @@ const productInfo = async (req, res) => {
     } catch (error) {
         res.redirect('/pageError')
     }
-
 }
 
 const loadAddProducts = async (req, res) => {

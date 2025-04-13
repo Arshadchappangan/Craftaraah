@@ -58,7 +58,7 @@
                     <%}else{%>
                       <td class="text-start">₹ <%= coupon.discountAmount %></td>
                       <%}%>
-                    <td class="text-start"><%= coupon.expiryDate%></td>
+                    <td class="text-start"><%= new Date(coupon.expiryDate).toLocaleDateString()%></td>
                     <td class="text-end">
                       <% if (coupon.isActive) { %>
                       <button class="badge badge-success">Active</button>

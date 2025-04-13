@@ -227,7 +227,35 @@ const refund = async (req, res) => {
     }
 };
 
+const loadSalesPage = async (req,res) => {
+  try {
+    const orders = await Order.find().populate('userId')
 
+    let totalRevenue = 0;
+    let totalDiscount = 0;
+    let couponDeduction = 0
+
+    orders.forEach(order => {
+      if(order.status !== 'Cancelled' && order.status !== 'Returned'){
+        totalRevenue += order.finalAmount;
+        totalDiscount += order.discount;
+        couponDeduction += order.couponDiscount
+      }
+    });
+
+
+    res.render('salesReport',{
+      orders,
+      totalRevenue,
+      totalDiscount,
+      couponDeduction,
+      range : 'month'
+    })
+
+  } catch (error) {
+    
+  }
+}
 
   
         
@@ -240,5 +268,6 @@ module.exports = {
     viewReturns,
     approveReturn,
     rejectReturn,
-    refund
+    refund,
+    loadSalesPage
 }

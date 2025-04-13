@@ -102,16 +102,19 @@
                                                     <h5><%=cart.items[i].productId.productName%></h5>
                                                 </td>
                                                 <td>
-                                                    ₹<%=cart.items[i].productId.regularPrice%>
+                                                    ₹<%=cart.items[i].productId.price%>
                                                 </td>
                                                 <td>
-                                                    ₹<%=cart.items[i].productId.salePrice%>
+                                                    ₹<%=cart.items[i].productId.discountedPrice%>
                                                 </td>
                                                 <td class="shoping__cart__quantity">
                                                     <%=cart.items[i].quantity%>
                                                 </td>
+                                                <%  let totalPrice = 0;
+                                                    cart.items[i].totalPrice = cart.items[i].productId.discountedPrice * cart.items[i].quantity 
+                                                %>
                                                 <td>
-                                                    ₹<%=cart.items[i].totalPrice%>
+                                                    ₹<%= cart.items[i].totalPrice %>
                                                 </td>
                                             </tr>
                                             <%}%>

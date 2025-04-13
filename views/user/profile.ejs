@@ -146,10 +146,17 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card">
+                        <label for="" class="form-label">Copy and share your referral link</label>
+                        <div class="referral-container mt-3">
+                            <input type="text" id="referralLink" class="form-control referral-input" value="<%= user.referral.link %>" readonly>
+                            <i class="fa fa-clone" onclick="copyReferralLink()"></i>
+                          </div>
+                    </div>
+                       
                 </div>
                     
-
-
+                            
 
             </div>
         </div>
@@ -251,5 +258,27 @@
                 }
             });
         }
+
+        function copyReferralLink() {
+            const input = document.getElementById("referralLink");
+            const copyButton = document.querySelector(".referral-container i");
+            input.select();
+            input.setSelectionRange(0, 99999); // For mobile
+            document.execCommand("copy");
+
+            copyButton.className = "fa fa-check text-success";
+            setTimeout(() => {
+                copyButton.className = "fa fa-clone";
+                        }, 750);
+
+            // Swal.fire({
+            // icon: 'success',
+            // title: 'Copied!',
+            // text: 'Referral link copied to clipboard',
+            // timer: 1500,
+            // showConfirmButton: false
+            // });
+        }
+
     </script>
     
