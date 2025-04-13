@@ -32,6 +32,8 @@ const verifyPayment = (req,res) => {
         .update(razorOrderId + "|" + paymentId)
         .digest('hex');
 
+        // signature = 10;
+
         if (hash === signature) {
             return res.status(200).json({status: true});
         }else {

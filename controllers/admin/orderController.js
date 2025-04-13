@@ -227,7 +227,86 @@ const refund = async (req, res) => {
     }
 };
 
+const loadSalesPage = async (req,res) => {
+  try {
+    const isValidDate = (d) => d instanceof Date && !isNaN(d);
+    const {range,startDate,endDate} = req.query;
 
+    let filter = {}
+    const today = new Date();
+
+    if(range === 'day'){
+      const start = new Date(today.setHours(0,0,0,0));
+      const end = new Date(today.setHours(23,59,59,999));
+      filter.createdAt = {$gte:start,$lte:end};
+    }else if(range === 'week'){
+      const start = new Date(today);
+      start.setDate(start.getDate()-6);
+      filter.createdAt = {$gte:start,$lte:new Date()}
+    }else if(range === 'month'){
+      const start = new Date(today.getFullYear(),today.getMonth(),1);
+      const end = new Date(today.getFullYear(),today.getMonth()+1,0);
+      filter.createdAt = {$gte:start,$lte:end};
+    }else if(startDate && endDate){
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+
+      if (isValidDate(start) && isValidDate(end)) {
+      filter.createdAt = { $gte: start, $lte: end };
+      }
+    }
+
+
+    const orders = await Order.find(filter).populate('userId').sort({createdAt:-1})
+
+    let totalRevenue = 0;
+    let totalDiscount = 0;
+    let couponDeduction = 0
+
+    orders.forEach(order => {
+      if(order.status !== 'Cancelled' && order.status !== 'Returned'){
+        totalRevenue += order.finalAmount;
+        totalDiscount += order.discount;
+        couponDeduction += order.couponDiscount
+      }
+    });
+
+    const dailyStatsMap = {};
+    orders.forEach(order => {
+      const date = new Date(order.createdAt).toLocaleDateString('en-GB');
+      if (!dailyStatsMap[date]) {
+        dailyStatsMap[date] = {
+          revenue: 0,
+          orders: 0
+        };
+      }
+    dailyStatsMap[date].revenue += order.finalAmount;
+    dailyStatsMap[date].orders += 1;
+  });
+  const chartLabels = Object.keys(dailyStatsMap);
+  const chartRevenue = chartLabels.map(date => dailyStatsMap[date].revenue);
+  const chartOrders = chartLabels.map(date => dailyStatsMap[date].orders);
+
+
+    res.render('salesReport',{
+      orders,
+      totalRevenue,
+      totalDiscount,
+      couponDeduction,
+      range,
+      startDate,
+      endDate,
+      chartLabels,
+      chartOrders,
+      chartRevenue
+    })
+
+  } catch (error) {
+    console.error(error)
+    res.redirect('/pageError')
+  }
+}
 
   
         
@@ -240,5 +319,6 @@ module.exports = {
     viewReturns,
     approveReturn,
     rejectReturn,
-    refund
+    refund,
+    loadSalesPage
 }

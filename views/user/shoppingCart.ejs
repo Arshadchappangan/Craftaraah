@@ -100,7 +100,7 @@
                                         ₹<%=cart.items[i].price%>
                                     </td>
                                     <td class="shoping__cart__price">
-                                        ₹<%=cart.items[i].offerPrice%>
+                                        ₹<%=cart.items[i].productId.discountedPrice%>
                                     </td>
                                     <td class="shoping__cart__quantity">
                                         <div class="quantity">
@@ -115,6 +115,9 @@
                                             </div>
                                         </div>
                                     </td>
+                                    <%  let totalPrice = 0;
+                                        cart.items[i].totalPrice = cart.items[i].productId.discountedPrice * cart.items[i].quantity 
+                                    %>
                                     <td class="shoping__cart__total">
                                         ₹<%=cart.items[i].totalPrice%>
                                     </td>

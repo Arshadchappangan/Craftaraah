@@ -130,6 +130,57 @@
     <h2 class="text-center mb-5 text-dark">Available Coupons</h2>
     <div class="row g-4 ">
 
+        <!-- referral coupon -->
+        <% if(referralCoupon){ %>
+
+            <%
+                console.log('referralCoupon : ',referralCoupon)
+                const daysSinceCreated = (new Date() - new Date(referralCoupon.createdAt)) / (1000 * 3600 * 24);
+                const isNew = daysSinceCreated <= 3;
+                const isExpired = new Date(referralCoupon.expiryDate).getTime() < Date.now();
+                const usedByEntry = referralCoupon.usedBy;
+                const isUsed = usedByEntry && usedByEntry.usedCount >= referralCoupon.usageLimit;
+            %>
+
+            <div class="col-md-6">
+                <div class="coupon-card mb-4 <%= (!referralCoupon.isActive || isExpired || isUsed) ? 'inactive-coupon' : '' %>">
+    
+                    <% if (isExpired) { %>
+                        <div class="inactive-badge">EXPIRED</div>
+                    <% } else if (!referralCoupon.isActive) { %>
+                        <div class="inactive-badge">INACTIVE</div>
+                    <% } else if (isUsed) { %>
+                        <div class="inactive-badge">USED</div>
+                    <% } else if (isNew) { %>
+                        <div class="new-badge">NEW</div>
+                    <% } %>
+        
+                
+                    <div class="coupon-left text-center bg-green-left">
+                        <i style="font-size: larger;" class="fa fa-gift"></i>
+                        <% if(referralCoupon.couponType === 'percentage') {%>
+                        <h2><%= referralCoupon.discountAmount %> % OFF</h2>
+                        <% }else{ %>
+                        <h2>FLAT <br>₹ <%= referralCoupon.discountAmount %> OFF</h2>
+                        <% } %>
+                        <p class="mb-0 text-dark">Valid till <%= new Date(referralCoupon.expiryDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                    </div>
+                    <div class="coupon-right bg-green-right">
+                        <h5 class="text-light mb-2">Your Promo Code:</h5>
+                        <div class="coupon-code position-relative" id="coupon-<%= referralCoupon.couponCode %>">
+                            <span><%= referralCoupon.couponCode %></span>
+                            <button class="copy-btn" data-target="coupon-<%= referralCoupon.couponCode %>">
+                                <i class="fa fa-clone"></i>
+                            </button>
+                        </div>     
+                        <p class="mb-1 text-light">Valid on orders above ₹ <%= referralCoupon.minPurchaseAmount %></p>
+                        <small>Maximum offer price is ₹ <%= referralCoupon.maxDiscountAmount %></small>
+                    </div>
+                </div>
+            </div>
+            
+        <% } %>
+
         <!-- Coupon -->
          <% for(let i=0;i<coupons.length;i++){ %>
 
@@ -182,6 +233,7 @@
             
         <% } %>
 
+
     </div>
 </div>
 
@@ -200,8 +252,8 @@
                     .then(() => {
                         btn.innerHTML = '<i class="fa fa-check text-success"></i>';
                         setTimeout(() => {
-                            btn.innerHTML = '<i class="fa fa-copy"></i>';
-                        }, 1500);
+                            btn.innerHTML = '<i class="fa fa-clone"></i>';
+                        }, 750);
                     })
                     .catch(err => {
                         console.error('Copy failed', err);

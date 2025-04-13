@@ -145,8 +145,9 @@
                 <tr>
                   <th>Product</th>
                   <!-- <th>SKU</th> -->
-                  <th>Quantity</th>
+                  <th>Stock</th>
                   <th>Price</th>
+                  <th>Offer Price</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -156,7 +157,8 @@
                 <tr data-status="<%= product.stock === 0 ? 'out' : product.stock < 10 ? 'low' : 'in' %>">
                     <td><%= product.productName %></td>
                     <td><%= product.stock %></td>
-                    <td>₹<%= product.salePrice %></td>
+                    <td>₹ <%= product.price %></td>
+                    <td>₹ <%= product.discountedPrice %></td>
                     <td>
                       <% if (product.stock === 0) { %>
                         <span class="badge badge-danger">Out of Stock</span>

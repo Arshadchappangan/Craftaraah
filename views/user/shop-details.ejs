@@ -85,13 +85,11 @@
                             <%}%>
                             <span>(<%=review.length%> reviews)</span>
                         </div>
-                        <div class="product__details__price" style="display: inline-block;">₹<%=product.salePrice%></div>
-                        <span><strike>₹<%=product.regularPrice%></strike></span>
-                        <% 
-                            let discount = Math.round(((product.regularPrice - product.salePrice) / product.regularPrice) * 100); 
-                        %>
-                        <% if(discount > 0) { %>
-                            <span class="ml-2 text-success"><b>(<%=discount%>% OFF)</b></span>
+                        <div class="product__details__price" style="display: inline-block;">₹<%=product.discountedPrice%></div>
+                        <span><strike>₹<%=product.price%></strike></span>
+
+                        <% if(product.maxDiscount > 0) { %>
+                            <span class="ml-2 text-success"><b>(<%= product.maxDiscount %>% OFF)</b></span>
                         <% } %>
 
                         <p><%=product.category.description%></p>

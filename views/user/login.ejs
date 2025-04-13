@@ -39,7 +39,9 @@
 		<div class="login">
 			<form id="signupForm" method="post" action="/signup">
 				<label for="chk" aria-hidden="true">Signup</label>
+				<% if(typeof referrer !== 'undefined' && referrer){ %>
 				<input type="hidden" value="<%= referrer %>" name="referrer">
+				<% } %>
 				<input type="text" id="name" name="name" placeholder="Full Name">
 				<div id="nameError" class="error"></div>
 				<input type="email" id="email" name="email" placeholder="Email">
