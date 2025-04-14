@@ -453,6 +453,25 @@ const downloadSalesExcel = async (req,res) => {
       })
     })
 
+    const totalRow = worksheet.addRow({
+      date: "",
+      orderId: "TOTAL",
+      totalPrice: { formula: `SUM(C2:C${orders.length + 1})` },
+      discount: { formula: `SUM(D2:D${orders.length + 1})` },
+      couponDiscount: { formula: `SUM(E2:E${orders.length + 1})` },
+      finalAmount: { formula: `SUM(F2:F${orders.length + 1})` },
+    });
+  
+    // Style the total row
+    totalRow.font = { bold: true };
+    totalRow.getCell("B").alignment = { horizontal: "right" };
+    totalRow.eachCell((cell) => {
+      cell.border = {
+        top: { style: "thin" },
+        bottom: { style: "double" },
+      };
+    });
+
     res.setHeader(
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

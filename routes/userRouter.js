@@ -7,11 +7,12 @@ const passport = require('passport');
 const {userAuth,adminAuth} = require('../middlewares/auth')
 const multer = require('../middlewares/multer');
 const paymentController = require('../controllers/user/paymentController')
+const nocache = require('../middlewares/noCache')
 
 router.get('/pageNotFound',userController.pageNotFound)
 
-router.get('/',userController.loadHome);
-router.get('/login',userController.loadLogin)
+router.get('/',nocache,userController.loadHome);
+router.get('/login',nocache,userController.loadLogin)
 router.get('/logout',userController.logout)
 
 //signin & signupn management

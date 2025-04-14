@@ -10,6 +10,7 @@ const category = require('../../models/categorySchema');
 const Coupon = require('../../models/couponSchema')
 const Cart = require('../../models/cartSchema');
 
+
 function calculateDiscount(productData) {
     const applyDiscount = (product) => {
         let maxDiscount = 0;
@@ -42,9 +43,11 @@ function calculateDiscount(productData) {
 const loadHome = async (req, res) => {
     try {
         const category = await Category.find({isDeleted:false});
-        const product = await Product.find({isDeleted:false}).sort({createdAt:-1});
+        const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('offers');
+        calculateDiscount(product)
         const cartExist = await Cart.find({userId:req.session.user}).populate('items.productId');
         let userData = null;
+
 
         if (req.session.user) {
             userData = await User.findById(req.session.user);
@@ -370,7 +373,9 @@ const filterProducts = async (req,res) => {
             isDeleted : false,
             isBlocked : false,
             category : findCategory._id
-        }).lean();
+        }).populate('offers').lean();
+
+        calculateDiscount(findProducts)
 
         findProducts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -424,12 +429,19 @@ const filterPrice = async (req,res) => {
         const userData = await User.findOne({_id:user});
         const categories = await Category.find({isListed:true}).lean();
         const {gt,lt} = req.query
-        let findProducts = await Product.find({
+
+        let products = await Product.find({
             productName: { $regex: '.*' + search + '.*', $options: "i" },
-            salePrice: {$gt:gt,$lt:lt},
             isBlocked:false,
             isDeleted:false
-        }).lean()
+        }).populate('offers')
+
+        calculateDiscount(products)
+
+        let findProducts = products.filter(product => {
+            const discountedPrice = parseFloat(product.discountedPrice);
+            return discountedPrice > parseFloat(gt) && discountedPrice <= parseFloat(lt);
+        });
 
         findProducts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
 
@@ -486,8 +498,10 @@ const searchProducts = async (req, res) => {
                 productName: { $regex: '.*' + search + '.*', $options: "i" },
                 isBlocked: false,
                 category: { $in: categoryIds }
-            });
+            }).populate('offers');
         }
+
+        calculateDiscount(searchResult)
 
         searchResult.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -557,6 +571,7 @@ const sortProducts = async (req, res) => {
 
 
 
+
 module.exports = {
     loadHome,
     pageNotFound,
@@ -568,8 +583,8 @@ module.exports = {
     signin,
     logout,
     loadShopPage,
-    filterProducts,
     filterPrice,
+    filterProducts,
     searchProducts,
     sortProducts
 }
