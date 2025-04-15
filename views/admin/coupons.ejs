@@ -7,25 +7,123 @@
   }
 </style>
 
-<div class="container">
-  <div class="page-inner">
-    <div class="d-flex justify-content-between align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-      <div>
-        <h3 class="fw-bold mb-3">Coupons</h3>
-      </div>
-      <div style="width: 500px; margin-bottom: 30px;">
+<div class="content">
+  <div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+      <div class="d-flex align-items-left align-items-md-center justify-content-between flex-column flex-md-row">
+        <div>
+          <h2 class="text-white pb-2 fw-bold">Coupon Management</h2>
+          <h5 class="text-white op-7 mb-2">Manage coupons effectively</h5>
+        </div>
         <nav class="nav-search p-0 d-none d-lg-flex">
-          <form class="input-group" action="/admin/coupon" method="get" id="searchForm" onsubmit="searchSubmit(event)">
+          <form class="input-group" action="" method="get" id="searchForm" onsubmit="searchSubmit(event)">
             <div class="input-group-prepend">
               <button type="submit" class="btn btn-search pe-1">
                 <i class="fa fa-search search-icon"></i>
               </button>
             </div>
-            <input id="searchInput" name="search" type="text" placeholder="Search ..." class="form-control" />
+            <input
+              id="searchInput"
+              name="search"
+              type="text"
+              placeholder="Search ..."
+              class="form-control"
+            />
           </form>
         </nav>
       </div>
     </div>
+  </div>
+
+  <div class="row mt--3 mx-3">
+      
+    <!-- Total Customers -->
+    <div class="col-sm-6 col-md-3">
+      <div class="card card-stats card-round">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-icon">
+              <div class="icon-big text-center icon-primary bubble-shadow-small">
+                <i class="fas fa-ticket-alt"></i>
+              </div>
+            </div>
+            <div class="col col-stats ms-3 ms-sm-0">
+              <div class="numbers">
+                <p class="card-category">Total Coupons</p>
+                <h4 class="card-title">30</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Low Stock -->
+    <div class="col-sm-6 col-md-3">
+      <div class="card card-stats card-round">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-icon">
+              <div class="icon-big text-center icon-warning bubble-shadow-small">
+                <i class="fas fa-check-circle"></i>
+              </div>
+            </div>
+            <div class="col col-stats ms-3 ms-sm-0">
+              <div class="numbers">
+                <p class="card-category">Active Coupons</p>
+                <h4 class="card-title">30</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Out of Stock -->
+    <div class="col-sm-6 col-md-3">
+      <div class="card card-stats card-round">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-icon">
+              <div class="icon-big text-center icon-danger bubble-shadow-small">
+                <i class="fas fa-calendar-times"></i>
+              </div>
+            </div>
+            <div class="col col-stats ms-3 ms-sm-0">
+              <div class="numbers">
+                <p class="card-category">Expired Coupons</p>
+                <h4 class="card-title">20</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Products -->
+    <div class="col-sm-6 col-md-3">
+      <div class="card card-stats card-round">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-icon">
+              <div class="icon-big text-center icon-success bubble-shadow-small">
+                <i class="fas fa-gift"></i>
+              </div>
+            </div>
+            <div class="col col-stats ms-3 ms-sm-0">
+              <div class="numbers">
+                <p class="card-category">Redeemed Coupons</p>
+                <h4 class="card-title">20</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="page-inner">
 
     <div class="row">
       <!-- Left Side: Coupon Table -->

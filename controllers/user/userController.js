@@ -305,272 +305,69 @@ const logout = async (req, res) => {
 }
 
 
-const loadShopPage = async (req, res) => {
+
+const loadShopPage = async (req,res) => {
     try {
-        const user = req.session.user;
-        let userData = null;
-        if (user) {
-            userData = await User.findOne({ _id: user });
+
+        const {
+            search,
+            category,
+            minPrice,
+            maxPrice,
+            sortBy,
+            sortOrder,
+            page,
+            limit = 9
+        } = req.query
+
+        const condition = {};
+
+        if(search){
+            condition.productName = {$regex:search,$options:'i'};
         }
 
-        const categories = await Category.find({ isListed: true, isDeleted: false });
-        const categoryIds = categories.map(cat => cat._id);
-
-        const page = parseInt(req.query.page) || 1;
-        const limit = 9;
-        const skip = (page - 1) * limit;
-
-        const totalProducts = await Product.countDocuments({
-            isDeleted: false,
-            isBlocked: false,
-            category: { $in: categoryIds }
-        });
-        const totalPages = Math.ceil(totalProducts / limit);
-
-        let filteredProducts = await Product.find({
-            isDeleted: false,
-            isBlocked: false,
-            category: { $in: categoryIds }
-        })
-        .populate('offers') // Ensure offers are populated
-        .skip(skip)
-        .limit(limit);
-
-        calculateDiscount(filteredProducts);
-
-        if (userData) {
-            userData.savedFilteredProducts = filteredProducts.map(p => p._id);
-            await userData.save();
+        if(category) condition.category = category;
+        if (minPrice || maxPrice) {
+            condition.price = {};
+            if (minPrice) condition.price.$gte = parseInt(minPrice);
+            if (maxPrice) condition.price.$lte = parseInt(maxPrice);
         }
-
-        res.render('shop-grid', {
-            user: userData,
-            products: filteredProducts,
-            category: categories,
-            totalPages,
-            currentPage: page
-        });
-
-    } catch (error) {
-        console.log("Shop page error: ", error.message);
-        res.redirect('/pageNotFound');
-    }
-};
-
-
-
-const filterProducts = async (req,res) => {
-    try {
-        const user = req.session.user;
-        const category = req.query.category;
-        const search = req.session.searchKeyword || '';
-        const findCategory = category ? await Category.findOne({_id:category}) : null; 
-
-
-
-        let findProducts = await Product.find({
-            productName: { $regex: '.*' + search + '.*', $options: "i" },
-            isDeleted : false,
-            isBlocked : false,
-            category : findCategory._id
-        }).populate('offers').lean();
-
-        calculateDiscount(findProducts)
-
-        findProducts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-        const categories = await Category.find({isListed:true})
-
-        let itemsPerPage = 9
-        let currentPage = parseInt(req.query.page) || 1;
-        let startIndex = (currentPage - 1) * itemsPerPage
-        let endIndex = startIndex + itemsPerPage;
-        let totalPages = Math.ceil(findProducts.length/itemsPerPage);
-        let currentProduct = findProducts.slice(startIndex,endIndex)
-
-        let userData = null;
-        if(user){
-            userData = await User.findOne({_id:user});
-            if(userData){
-                const searchEntry = {
-                    category : findCategory ? findCategory._id : null,
-                    searchedOn : new Date()
-                }
-                userData.searchHistory.push(searchEntry)
-
-                const filteredProductIds = currentProduct.map(p => p._id);
-                userData.savedFilteredProducts = filteredProductIds;
-
-                await userData.save();
-            }
-        }
-
-
-        res.render('shop-grid',{
-            user : userData,
-            products : currentProduct,
-            category : categories,
-            totalPages,
-            currentPage,
-            selectedCategory : category || null,
-
-        })
-    } catch (error) {
-        console.log(error)
-        res.redirect('/pageNotFound')
-    }
-}
-
-
-const filterPrice = async (req,res) => {
-    try {
-        const user = req.session.user;
-        const search = req.session.searchKeyword || '';
-        const userData = await User.findOne({_id:user});
-        const categories = await Category.find({isListed:true}).lean();
-        const {gt,lt} = req.query
-
-        let products = await Product.find({
-            productName: { $regex: '.*' + search + '.*', $options: "i" },
-            isBlocked:false,
-            isDeleted:false
-        }).populate('offers')
-
-        calculateDiscount(products)
-
-        let findProducts = products.filter(product => {
-            const discountedPrice = parseFloat(product.discountedPrice);
-            return discountedPrice > parseFloat(gt) && discountedPrice <= parseFloat(lt);
-        });
-
-        findProducts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
-
-        let itemsPerPage = 9
-        let currentPage = parseInt(req.query.page) || 1;
-        let startIndex = (currentPage - 1) * itemsPerPage
-        let endIndex = startIndex + itemsPerPage;
-        let totalPages = Math.ceil(findProducts.length/itemsPerPage);
-        let currentProduct = findProducts.slice(startIndex,endIndex)
-
-        const filteredProductIds = currentProduct.map(p => p._id);
-        userData.savedFilteredProducts = filteredProductIds;
-
-        await userData.save();
-
-        res.render('shop-grid',{
-            user : userData,
-            products : currentProduct,
-            category : categories,
-            totalPages,
-            currentPage
-
-        })
         
+
+        const sortOptions = {};
+        if(sortBy){
+            sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1
+        }
+
+        const skip = (parseInt(page)-1) * parseInt(limit);
+
+        const products = await Product.find(condition)
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(parseInt(limit))
+        .populate('offers');
+
+        calculateDiscount(products);
+
+        const totalProducts = await Product.countDocuments(condition);
+        const categories = await Category.find({isDeleted:false,isListed:true});
+
+        let currentPage = parseInt(page) || 1
+        let totalPages = Math.ceil(totalProducts/limit)
+
+        res.render('shop-grid',{
+            products,
+            category : categories,
+            query : req.query,
+            currentPage,
+            totalPages
+        })
+
     } catch (error) {
-        console.log(error)
-        res.redirect('/pageNotFound')
+        console.error(error);
+        res.json({success:false,message:"Server Error"})
     }
 }
-
-const searchProducts = async (req, res) => {
-    try {
-        const user = req.session.user;
-        const userData = await User.findOne({ _id: user }).populate('savedFilteredProducts');
-        const search = req.body.query;
-        req.session.searchKeyword = search;
-        const categories = await Category.find({ isListed: true }).lean();
-        const categoryIds = categories.map(category => category._id.toString());
-
-        if (search === '') {
-            userData.savedFilteredProducts = [];
-            await userData.save();
-            return res.redirect('/shop');
-        }
-
-        let searchResult = [];
-
-        if (userData.savedFilteredProducts && userData.savedFilteredProducts.length > 0) {
-            searchResult = userData.savedFilteredProducts.filter(product =>
-                product.productName.toLowerCase().includes(search.toLowerCase())
-            );
-        } else {
-            searchResult = await Product.find({
-                productName: { $regex: '.*' + search + '.*', $options: "i" },
-                isBlocked: false,
-                category: { $in: categoryIds }
-            }).populate('offers');
-        }
-
-        calculateDiscount(searchResult)
-
-        searchResult.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-        let itemsPerPage = 9;
-        let currentPage = parseInt(req.query.page) || 1;
-        let totalPages = Math.ceil(searchResult.length / itemsPerPage);
-        let currentProduct = searchResult.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-        res.render('shop-grid', {
-            user: userData,
-            products: currentProduct,
-            category: categories,
-            totalPages,
-            currentPage
-        });
-
-    } catch (error) {
-        console.log(error);
-        res.redirect('/pageNotFound');
-    }
-};
-
-
-const sortProducts = async (req, res) => {
-    try {
-        const user = req.session.user;
-        const sortBy = req.query.by || 'createdAt';
-        const type = parseInt(req.query.type) || -1;
-        const userData = await User.findOne({ _id: user }).populate('savedFilteredProducts');
-        const categories = await Category.find({ isListed: true });
-        const categoryIds = categories.map(category => category._id.toString());
-
-        const page = parseInt(req.query.page) || 1;
-        const limit = 9;
-        const skip = (page - 1) * limit;
-
-        let sortedProducts;
-
-        if (userData.savedFilteredProducts && userData.savedFilteredProducts.length > 0) {
-            sortedProducts = [...userData.savedFilteredProducts];
-            sortedProducts.sort((a, b) =>
-                type === 1 ? a[sortBy] - b[sortBy] : b[sortBy] - a[sortBy]
-            );
-        } else {
-            sortedProducts = await Product.find({
-                isBlocked: false,
-                category: { $in: categoryIds }
-            }).sort({ [sortBy]: type }).lean();
-        }
-
-        const totalPages = Math.ceil(sortedProducts.length / limit);
-        sortedProducts = sortedProducts.slice(skip, skip + limit);
-
-        res.render('shop-grid', {
-            user: userData,
-            products: sortedProducts,
-            category: categories,
-            totalPages,
-            currentPage: page
-        });
-    } catch (error) {
-        console.log(error);
-        res.redirect('/pageNotFound');
-    }
-};
-
-
-
-
 
 module.exports = {
     loadHome,
@@ -582,9 +379,5 @@ module.exports = {
     resendOtp,
     signin,
     logout,
-    loadShopPage,
-    filterPrice,
-    filterProducts,
-    searchProducts,
-    sortProducts
+    loadShopPage
 }

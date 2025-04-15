@@ -63,25 +63,7 @@ const userSchema = new Schema({
             type : Boolean,
             default : false
         }
-    },
-    searchHistory : [{
-        category : {
-            type : Schema.Types.ObjectId,
-            ref : "category"
-        },
-        brand : {
-            type : Schema.Types.ObjectId,
-            ref : "brand"
-        },
-        searchOn : {
-            type : Date,
-            default : Date.now
-        }
-    }],
-    savedFilteredProducts: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Product'
-    }]
+    }
 },{
     timestamps : true
 })

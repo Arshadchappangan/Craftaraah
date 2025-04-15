@@ -29,10 +29,10 @@ router.get('/auth/google/callback',passport.authenticate('google',{failureRedire
 // Shopping page
 
 router.get('/shop',userAuth,userController.loadShopPage)
-router.get('/filter',userAuth,userController.filterProducts)
-router.get('/filterPrice',userAuth,userController.filterPrice)
-router.post('/search',userAuth,userController.searchProducts)
-router.get('/sort',userAuth,userController.sortProducts)
+// router.get('/filter',userAuth,userController.filterProducts)
+// router.get('/filterPrice',userAuth,userController.filterPrice)
+// router.post('/search',userAuth,userController.searchProducts)
+// router.get('/sort',userAuth,userController.sortProducts)
 
 //product details
 
