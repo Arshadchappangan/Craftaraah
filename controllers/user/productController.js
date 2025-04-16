@@ -9,95 +9,12 @@ const Order = require('../../models/orderSchema');
 const Coupon = require('../../models/couponSchema');
 const Wallet = require('../../models/walletSchema');
 const mongoose = require('mongoose');
+const userHelper = require('../../helpers/userHelpers')
 const razorpay = require('../../config/razorpay');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 
-function generateOrderId() {
-    const date = new Date().toISOString().slice(0,10).replace(/-/g, '');
-    const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
-    return `ORD-${date}-${randomStr}`;
-  }
-  
-  function calculateDiscount(productData) {
-    const applyDiscount = (product) => {
-        let maxDiscount = 0;
-        let discountedPrice = product.price;
-
-        if (product.offers && product.offers.length > 0) {
-            product.offers.forEach(offer => {
-                if (offer.isActive) {
-                    const discount = offer.discountPercentage;
-                    const offerPrice = product.price - (product.price * discount / 100);
-                    if (discount > maxDiscount) {
-                        maxDiscount = discount;
-                        discountedPrice = Math.round(offerPrice);
-                    }
-                }
-            });
-        }
-
-        product.maxDiscount = maxDiscount;
-        product.discountedPrice = Math.max(discountedPrice, 0).toFixed(2);
-    };
-
-    if (Array.isArray(productData)) {
-        productData.forEach(product => applyDiscount(product));
-    } else {
-        applyDiscount(productData);
-    }
-}
-
-function calculateCartTotals(findCart) {
-    let subtotal = 0;
-    findCart.items.forEach(item => {
-        subtotal += item.productId.price * item.quantity;
-    });
-
-    let discount = 0;
-    findCart.items.forEach(item => {
-        discount += item.productId.discountedPrice * item.quantity;
-    });
-
-    discount = subtotal - discount;
-
-    let shippingCharge = 0;
-    if (subtotal < 1000) {
-        shippingCharge = 50;
-    }
-
-    let tax = 0;
-    if (subtotal > 3000) {
-        tax = Math.floor(subtotal * 0.12);
-    }
-
-    return { subtotal, discount, shippingCharge, tax };
-}
-
-
-
-async function couponDiscountApply(couponCode,subtotal){
-    let coupon = null;
-    let couponDiscount = 0;
-    if(couponCode){
-        coupon = await Coupon.findOne({couponCode:couponCode,isDeleted:false,isActive:true});
-        if(coupon){
-            if(coupon.couponType === 'percentage'){
-                couponDiscount = Math.floor((subtotal * coupon.discountAmount) / 100);
-            }else if(coupon.couponType === 'fixed'){
-                couponDiscount = coupon.discountAmount;
-            }
-            if(couponDiscount > coupon.maxDiscountAmount){
-                couponDiscount = coupon.maxDiscountAmount;
-            }
-            if(coupon.minPurchaseAmount > subtotal){
-                couponDiscount = 0;
-            }
-        }
-    }
-    return {subtotal,coupon,couponDiscount}
-}
 
 
 const loadProductDetails = async(req,res) => {
@@ -116,7 +33,7 @@ const loadProductDetails = async(req,res) => {
         const review = await Review.find({productId:productId}).populate('userId').sort({createdAt:-1});
         const overallRating = review.length > 0 ? Math.ceil(product.productRating / review.length) : 0
 
-        calculateDiscount(product)
+        userHelper.calculateDiscount(product)
 
         res.render('shop-details',{
             user : userData,
@@ -169,7 +86,6 @@ const loadShoppingCart = async (req,res) => {
             }
           })
           
-        // let coupons = await Coupon.find({isDeleted:false,isActive:true});
 
         if(!findCart){
             findCart = {items:[]}
@@ -187,11 +103,11 @@ const loadShoppingCart = async (req,res) => {
             });
         }
 
-        findCart.items.forEach(item => calculateDiscount(item.productId))
+        findCart.items.forEach(item => userHelper.calculateDiscount(item.productId))
 
-        let cartData = calculateCartTotals(findCart)
+        let cartData = userHelper.calculateCartTotals(findCart)
         
-        let couponData = await couponDiscountApply(couponCode,cartData.subtotal)
+        let couponData = await userHelper.couponDiscountApply(couponCode,cartData.subtotal)
 
         let total = cartData.subtotal - couponData.couponDiscount - cartData.discount + cartData.shippingCharge + cartData.tax;
 
@@ -203,7 +119,6 @@ const loadShoppingCart = async (req,res) => {
             shippingCharge : cartData.shippingCharge,
             tax : cartData.tax,
             total : total,
-            // coupons : coupons || null,
             coupon : couponData.coupon || null,
             couponDiscount : couponData.couponDiscount || 0
         });
@@ -224,7 +139,7 @@ const addToCart = async (req, res) => {
         if (!productData) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
-        calculateDiscount(productData)
+        userHelper.calculateDiscount(productData);
 
         let cart = await Cart.findOne({ userId: user._id });
 
@@ -456,11 +371,11 @@ const addToWishlist = async (req, res) => {
             }
           })
 
-        cart.items.forEach(item => calculateDiscount(item.productId))
+        cart.items.forEach(item => userHelper.calculateDiscount(item.productId))
 
-        let cartData = calculateCartTotals(cart)
+        let cartData = userHelper.calculateCartTotals(cart)
 
-        let couponData = await couponDiscountApply(couponCode,cartData.subtotal)
+        let couponData = await userHelper.couponDiscountApply(couponCode,cartData.subtotal)
 
         let total = cartData.subtotal - couponData.couponDiscount - cartData.discount + cartData.shippingCharge + cartData.tax;
 
@@ -488,7 +403,6 @@ const addToWishlist = async (req, res) => {
 
 const placeOrder = async (req, res) => {
     try {
-        console.log('inside this place order function')
         const user = req.session.user;
         const couponCode = req.session.couponCode || null;
         let cart = await Cart.findOne({userId:user._id}).populate({
@@ -498,14 +412,14 @@ const placeOrder = async (req, res) => {
             }
           })
         const address = await Address.findOne({userId:user._id});
-        const orderId = generateOrderId();
+        const orderId = userHelper.generateOrderId()
         const { razorOrderId, paymentId, signature, paymentMethod,selectedAddress } = req.body;
 
-        cart.items.forEach(item => calculateDiscount(item.productId))
+        cart.items.forEach(item => userHelper.calculateDiscount(item.productId))
 
-        let cartData = calculateCartTotals(cart)
+        let cartData = userHelper.calculateCartTotals(cart)
 
-        let couponData = await couponDiscountApply(couponCode,cartData.subtotal)
+        let couponData = await userHelper.couponDiscountApply(couponCode,cartData.subtotal)
 
         let total = cartData.subtotal - couponData.couponDiscount - cartData.discount + cartData.shippingCharge + cartData.tax;
 
@@ -515,6 +429,7 @@ const placeOrder = async (req, res) => {
             quantity: item.quantity,
             price: item.productId.discountedPrice
           }));
+        
 
           let selectedAddressDetails = address.address[selectedAddress];
 
@@ -573,7 +488,7 @@ const placeOrder = async (req, res) => {
             );
         }
 
-        return res.json({success:true});
+        res.json({success:true});
 
     } catch (error) {
         console.error("Error in placeOrder:", error);
@@ -796,6 +711,7 @@ const downloadInvoice = async (req, res) => {
             doc.text(`${total.toFixed(2)}`, 420, y);
 
             y += 25;
+
         });
 
         doc.moveTo(50, y + 5).lineTo(550, y + 5).stroke();
