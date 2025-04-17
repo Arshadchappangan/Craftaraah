@@ -15,6 +15,9 @@ const walletSchema = new Schema({
         default: 0 
     },
     transactions: [{
+        transactionId : {
+            type : String
+        },
         transactionType: { 
             type: String, 
             enum: ['Topup', 'Debit', 'Refund', 'Cashback'] 

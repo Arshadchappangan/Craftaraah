@@ -6,6 +6,7 @@ const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
 const { removeFromWishlist } = require('../user/productController');
+const adminHelpers = require('../../helpers/adminHelpers');
 
 
 
@@ -237,10 +238,11 @@ const refund = async (req, res) => {
         const refundAmount = order.finalAmount; 
         wallet.balance += refundAmount;
         wallet.transactions.push({
+            transactionId: adminHelpers.generateTransactionId(),
             transactionType: "Refund",
             amount: refundAmount,
             date: new Date(),
-            description: `Refund for the order with order Id : ${orderId}`
+            description: `Refund for the order with order Id : ${order.orderId}`
         });
 
         await wallet.save();

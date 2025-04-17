@@ -99,7 +99,7 @@
                                                 textClass = "text-muted";
                                         }
                                     %>
-                                    <span class="badge p-2" style="border-radius: 50%;">
+                                    <span class="badge p-2" style="border-radius: 50%; border: none;">
                                         <i class="<%= iconClass %> fa-2x"></i>
                                     </span>
                                     <div>
@@ -111,9 +111,7 @@
                                     <strong class="<%= textClass %>">
                                         ₹<%= transaction.amount %>
                                     </strong>
-                                    <span class="text-<%= transaction.status === 'Completed' ? 'success' : 'danger' %>">
-                                        <%= transaction.status %>
-                                    </span>
+                                    <!-- <span onclick="viewDetails()" class="text-muted mx-2" style="font-size: 0.9rem;"><i class="fas fa-info-circle text-dark" title="<%= transaction.details %>"></i></span> -->
                                 </div>
                             </li>
                         <% }); %>

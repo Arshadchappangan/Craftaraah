@@ -11,6 +11,7 @@ const Wallet = require('../../models/walletSchema');
 const mongoose = require('mongoose');
 const userHelper = require('../../helpers/userHelpers')
 const razorpay = require('../../config/razorpay');
+const adminHelpers = require('../../helpers/adminHelpers')
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
@@ -423,6 +424,10 @@ const placeOrder = async (req, res) => {
 
         let total = cartData.subtotal - couponData.couponDiscount - cartData.discount + cartData.shippingCharge + cartData.tax;
 
+        if(paymentMethod === 'COD' && total > 1000){
+            return res.json({success:false,message:"Cash on delivery option only available for orders less than ₹1000"})
+        }
+
 
         const orderedItems = cart.items.map(item => ({
             product: item.productId._id,
@@ -453,7 +458,6 @@ const placeOrder = async (req, res) => {
                 status : "Paid"
             }
         })
-
 
         req.session.orderId = placeOrder._id;
 
@@ -596,12 +600,13 @@ const cancelOrder = async (req, res) => {
 
             wallet.balance += refundAmount;
             wallet.transactions.push({
+                transactionId: adminHelpers.generateTransactionId(),
                 transactionType: "Refund",
                 amount: refundAmount,
                 date: new Date(),
                 description: product
                     ? `Refund for "${order.orderedItems[productIndex].product.productName}"`
-                    : `Refund for order ID: ${order.orderId}`,
+                    : `Refund for order ID: ${order.orderId}`
             });
             await wallet.save();
         }
