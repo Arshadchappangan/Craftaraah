@@ -1,7 +1,40 @@
 const Order = require('../../models/orderSchema');
 const Wallet = require('../../models/walletSchema');
 const User = require('../../models/userSchema')
+const PDFDocument = require('pdfkit-table');
+const ExcelJS = require('exceljs');
+const fs = require('fs');
+const path = require('path');
 const { removeFromWishlist } = require('../user/productController');
+
+
+
+const isValidDate = (d) => d instanceof Date && !isNaN(d);
+
+function filterbydate(filter,range,startDate,endDate){
+  const today = new Date();
+if(range === 'today'){
+  const start = new Date(today.setHours(0,0,0,0));
+  const end = new Date(today.setHours(23,59,59,999));
+  filter.createdAt = {$gte:start,$lte:end};
+}else if(range === 'week'){
+  const start = new Date(today);
+  start.setDate(start.getDate()-6);
+  filter.createdAt = {$gte:start,$lte:new Date()}
+}else if(range === 'month'){
+  const start = new Date(today.getFullYear(),today.getMonth(),1);
+  const end = new Date(today.getFullYear(),today.getMonth()+1,0);
+  filter.createdAt = {$gte:start,$lte:end};
+}else if(startDate && endDate){
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  end.setHours(23, 59, 59, 999);
+
+  if (isValidDate(start) && isValidDate(end)) {
+  filter.createdAt = { $gte: start, $lte: end };
+  }
+}
+}
 
 
 const viewOrders = async (req, res) => {
@@ -12,7 +45,6 @@ const viewOrders = async (req, res) => {
   
       const { status, startDate, endDate, sort, search } = req.query;
   
-      // 1️⃣ Create match filter
       const matchStage = {};
   
       if (status && status !== 'All') {
@@ -25,7 +57,6 @@ const viewOrders = async (req, res) => {
         if (endDate) matchStage.createdAt.$lte = new Date(endDate);
       }
   
-      // Apply after $lookup, so we can search user.name
       const searchStage = [];
       if (typeof search === 'string' && search.trim() !== '') {
         const searchRegex = new RegExp(search.trim(), 'i');
@@ -39,7 +70,6 @@ const viewOrders = async (req, res) => {
         });
       }
   
-      // 2️⃣ Sorting
       const sortStage = {};
       if (sort === 'date_asc') sortStage.createdAt = 1;
       else if (sort === 'date_desc') sortStage.createdAt = -1;
@@ -49,7 +79,6 @@ const viewOrders = async (req, res) => {
       else if (sort === 'items_desc') sortStage['orderedItems.length'] = -1;
       else sortStage.createdAt = -1;
   
-      // 3️⃣ Aggregation Pipeline
       const pipeline = [
         { $match: matchStage },
         {
@@ -229,34 +258,14 @@ const refund = async (req, res) => {
 
 const loadSalesPage = async (req,res) => {
   try {
-    const isValidDate = (d) => d instanceof Date && !isNaN(d);
     const {range,startDate,endDate} = req.query;
+    
+    req.session.range = range;
+    req.session.start = startDate;
+    req.session.end = endDate;
 
-    let filter = {}
-    const today = new Date();
-
-    if(range === 'day'){
-      const start = new Date(today.setHours(0,0,0,0));
-      const end = new Date(today.setHours(23,59,59,999));
-      filter.createdAt = {$gte:start,$lte:end};
-    }else if(range === 'week'){
-      const start = new Date(today);
-      start.setDate(start.getDate()-6);
-      filter.createdAt = {$gte:start,$lte:new Date()}
-    }else if(range === 'month'){
-      const start = new Date(today.getFullYear(),today.getMonth(),1);
-      const end = new Date(today.getFullYear(),today.getMonth()+1,0);
-      filter.createdAt = {$gte:start,$lte:end};
-    }else if(startDate && endDate){
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999);
-
-      if (isValidDate(start) && isValidDate(end)) {
-      filter.createdAt = { $gte: start, $lte: end };
-      }
-    }
-
+    let filter = {}  
+    filterbydate(filter,range,startDate,endDate)
 
     const orders = await Order.find(filter).populate('userId').sort({createdAt:-1})
 
@@ -308,6 +317,175 @@ const loadSalesPage = async (req,res) => {
   }
 }
 
+
+const downloadSalesPdf = async(req,res) => {
+  try {
+    const range = req.session.range;
+    const startDate = req.session.start;
+    const endDate = req.session.end;
+
+    let filter = {};
+    filterbydate(filter,range,startDate,endDate);
+
+    const orders = await Order.find(filter).populate('userId').sort({createdAt:-1})
+
+    let totalRevenue = 0;
+    let totalDiscount = 0;
+    let couponDeduction = 0
+
+    orders.forEach(order => {
+      if(order.status !== 'Cancelled' && order.status !== 'Returned'){
+        totalRevenue += order.finalAmount;
+        totalDiscount += order.discount;
+        couponDeduction += order.couponDiscount
+      }
+    });
+
+    const doc = new PDFDocument({margin:30,size:'A4'});
+    res.setHeader('Content-type','application/pdf');
+    res.setHeader('Content-Disposition','attachment; filename = sales_report.pdf');
+
+    doc.pipe(res);
+
+    doc.fontSize(18).text("Sales Report",{align:'center'});
+    doc.moveDown();
+
+    if(startDate && endDate){
+      doc
+      .fontSize(12)
+      .text(`Report period  : ${new Date(startDate).toISOString().split('T')[0]} to ${new Date(endDate).toISOString().split('T')[0]}`)
+    }else if(range){
+      doc
+      .fontSize(12)
+      .text(`Report Range   : ${range.charAt(0).toUpperCase() + range.slice(1)}`)
+    }else{
+      doc
+      .fontSize(12)
+      .text(`Report Range   : Overall`)
+    }
+
+    doc
+    .text(`Total Orders     : ${orders.length}`)
+    .text(`Total Revenue    : ${totalRevenue}`)
+    .text(`Total Discount   : ${totalDiscount}`)
+    .text(`Coupon deduction : ${couponDeduction || 0}`)
+    .moveDown();
+
+    const table = {
+      headers : [
+        "Order ID",
+        "Date",
+        "Total price",
+        "Discount",
+        "Coupon Discount",
+        "Final Amount"
+      ],
+      rows : orders.map((order) => [
+        order.orderId,
+        order.createdAt.toISOString().split("T")[0],
+        order.totalPrice,
+        order.discount,
+        order.couponDiscount,
+        order.finalAmount
+      ])
+    }
+
+    await doc.table(table,{
+      prepareHeader : () => doc.font('Helvetica-Bold').fontSize(10),
+      prepareRow : (row,i) => doc.font('Helvetica').fontSize(10),
+      columnSpacing : 5,
+      padding : 5,
+      columnsSize : [140,80,75,75,75,75]
+    })
+
+    doc.end()
+
+  } catch (error) {
+    console.error(error)
+    res.redirect('pageError')
+  }
+}
+
+
+const downloadSalesExcel = async (req,res) => {
+  try {
+    const range = req.session.range;
+    const startDate = req.session.start;
+    const endDate = req.session.end;
+
+    let filter = {};
+    filterbydate(filter,range,startDate,endDate);
+
+    const orders = await Order.find(filter).populate('userId').sort({createdAt:-1})
+
+    let totalRevenue = 0;
+    let totalDiscount = 0;
+    let couponDeduction = 0
+
+    orders.forEach(order => {
+      if(order.status !== 'Cancelled' && order.status !== 'Returned'){
+        totalRevenue += order.finalAmount;
+        totalDiscount += order.discount;
+        couponDeduction += order.couponDiscount
+      }
+    });
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Sales Report')
+
+    worksheet.columns = [
+      {header:"Order ID",key:"orderId",width:30},
+      {header:"Date",key:"date",width:25},
+      {header:"Total price",key:"totalPrice",width:25},
+      {header:"Discount",key:"discount",width:25},
+      {header:"Coupon discount",key:"couponDiscount",width:25},
+      {header:"Final amount",key:"finalAmount",width:25}
+    ]
+
+    orders.forEach((order) => {
+      worksheet.addRow({
+        orderId : order.orderId,
+        date : order.createdAt.toISOString().split('T')[0],
+        totalPrice : order.totalPrice,
+        discount : order.discount,
+        couponDiscount : order.couponDiscount || 0,
+        finalAmount : order.finalAmount
+      })
+    })
+
+    const totalRow = worksheet.addRow({
+      date: "",
+      orderId: "TOTAL",
+      totalPrice: { formula: `SUM(C2:C${orders.length + 1})` },
+      discount: { formula: `SUM(D2:D${orders.length + 1})` },
+      couponDiscount: { formula: `SUM(E2:E${orders.length + 1})` },
+      finalAmount: { formula: `SUM(F2:F${orders.length + 1})` },
+    });
+  
+    // Style the total row
+    totalRow.font = { bold: true };
+    totalRow.getCell("B").alignment = { horizontal: "right" };
+    totalRow.eachCell((cell) => {
+      cell.border = {
+        top: { style: "thin" },
+        bottom: { style: "double" },
+      };
+    });
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", "attachment; filename=sales_report.xlsx");
+
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (error) {
+    console.error(error)
+    res.redirect('/pageError')
+  }
+}
   
         
 
@@ -320,5 +498,7 @@ module.exports = {
     approveReturn,
     rejectReturn,
     refund,
-    loadSalesPage
+    loadSalesPage,
+    downloadSalesPdf,
+    downloadSalesExcel
 }

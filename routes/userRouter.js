@@ -7,11 +7,13 @@ const passport = require('passport');
 const {userAuth,adminAuth} = require('../middlewares/auth')
 const multer = require('../middlewares/multer');
 const paymentController = require('../controllers/user/paymentController')
+const nocache = require('../middlewares/noCache')
+const userMiddlewares = require('../middlewares/userMiddlewares')
 
 router.get('/pageNotFound',userController.pageNotFound)
 
-router.get('/',userController.loadHome);
-router.get('/login',userController.loadLogin)
+router.get('/',nocache,userController.loadHome);
+router.get('/login',nocache,userController.loadLogin)
 router.get('/logout',userController.logout)
 
 //signin & signupn management
@@ -26,12 +28,8 @@ router.get('/auth/google/callback',passport.authenticate('google',{failureRedire
 
 
 // Shopping page
-
 router.get('/shop',userAuth,userController.loadShopPage)
-router.get('/filter',userAuth,userController.filterProducts)
-router.get('/filterPrice',userAuth,userController.filterPrice)
-router.post('/search',userAuth,userController.searchProducts)
-router.get('/sort',userAuth,userController.sortProducts)
+
 
 //product details
 
@@ -87,7 +85,7 @@ router.get('/removeFromWishlist',userAuth,productController.removeFromWishlist);
 //order management
 router.get('/checkCart',userAuth,productController.checkCartStatus);
 router.get('/checkout',userAuth,productController.checkout);
-router.post('/placeOrder',userAuth,productController.placeOrder);
+router.post('/placeOrder',userAuth,userMiddlewares.verifyStock,productController.placeOrder);
 router.get('/orderPlaced',userAuth,productController.orderPlaced);
 router.get('/orderDetails',userAuth,productController.orderDetails);
 router.post('/cancelOrder',userAuth,productController.cancelOrder);
@@ -96,7 +94,7 @@ router.get('/invoice/:id',userAuth,productController.downloadInvoice);
 router.get('/orderFailure',userAuth,productController.orderFailed);
 
 //razorpay payment
-router.post('/razorpayOrder',userAuth,paymentController.createRazorpayOrder);
+router.post('/razorpayOrder',userAuth,userMiddlewares.verifyStock,paymentController.createRazorpayOrder);
 router.post('/verifyPayment',userAuth,paymentController.verifyPayment);
 
 

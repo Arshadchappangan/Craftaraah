@@ -102,7 +102,7 @@
       <div class="col-md-3">
         <select name="range" class="form-select" onchange="this.form.submit()">
           <option value="">All</option>
-          <option value="day" <%= range === 'day' ? 'selected' : '' %>>Today</option>
+          <option value="today" <%= range === 'today' ? 'selected' : '' %>>Today</option>
           <option value="week" <%= range === 'week' ? 'selected' : '' %>>This Week</option>
           <option value="month" <%= range === 'month' ? 'selected' : '' %>>This Month</option>
         </select>
@@ -132,8 +132,16 @@
     <div class="row">
       <div class="col-md-12">
         <div class="card card-round">
-          <div class="card-header">
+          <div class="card-header d-flex justify-content-between">
             <div class="card-title">Sales Report Table</div>
+            <div class="card-tools">
+              <a href="/admin/downloadSalesPdf" class="btn btn-danger btn-sm">
+                <i class="fas fa-file-pdf"></i> Download PDF
+              </a>
+              <a href="/admin/downloadSalesExcel" class="btn btn-success btn-sm">
+                <i class="fas fa-file-excel"></i> Download Excel
+              </a>
+            </div>
           </div>
           <div class="card-body table-responsive">
             <table class="table">

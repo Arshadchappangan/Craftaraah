@@ -1,28 +1,23 @@
 <%- include("../../views/partials/admin/header") %>
 
-<div class="container">
-  <div class="page-inner">
-    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-      <div class="container d-flex justify-content-between">
-        <h3 class="fw-bold mb-3" style="display: inline-block;">Return Requests</h3>
-        <div style="width: 500px; margin-bottom: 30px; display: inline-block;">
-          <nav class="nav-search p-0 d-none d-lg-flex">
-            <form class="input-group" action="/admin/returns" method="get" id="searchForm" onsubmit="searchSubmit(event)">
-              <div class="input-group-prepend">
-                <button type="submit" class="btn btn-search pe-1">
-                  <i class="fa fa-search search-icon"></i>
-                </button>
-              </div>
-              <input id="searchInput" name="search" type="text" placeholder="Search ..." class="form-control" />
-            </form>
-          </nav>
+
+<div class="content">
+  <div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+      <div class="d-flex align-items-left align-items-md-center justify-content-between flex-column flex-md-row">
+        <div>
+          <h2 class="text-white pb-2 fw-bold">Return Requests</h2>
+          <h5 class="text-white op-7 mb-2">Manage order returns effectively</h5>
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="page-inner">
+    
 
     <div class="row">
       <div class="col-md-1"></div>
-
       <div class="col-md-10">
         <div class="card card-round">
           <div class="card-header">

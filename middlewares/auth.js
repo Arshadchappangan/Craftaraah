@@ -21,9 +21,10 @@ const userAuth = (req,res,next) => {
 
 
 const adminAuth = (req,res,next) => {
-     User.findOne({isAdmin:true})
+    if(req.session.admin){
+        User.findById(req.session.admin)
      .then(data => {
-        if(data){
+        if(data && data.isAdmin){
             next()
         }else{
             res.redirect("/admin/login")
@@ -33,6 +34,9 @@ const adminAuth = (req,res,next) => {
         console.log("Error in Admin Authentication");
         res.status(500).send("Internal server error")
      })
+    }else{
+        res.redirect('/admin/login')
+    }
 }
 
 module.exports = {

@@ -2,7 +2,6 @@ const User = require('../../models/userSchema')
 const Category = require('../../models/categorySchema')
 const Product = require('../../models/productSchema')
 const Address = require('../../models/addressSchema')
-const nodeMailer = require('nodemailer');
 const env = require('dotenv').config();
 const session = require('express-session')
 const bcrypt = require('bcrypt');
@@ -12,53 +11,7 @@ const { reviewSubmission } = require('./productController');
 const { use } = require('passport');
 const Order = require('../../models/orderSchema');
 const Wallet = require('../../models/walletSchema');
-
-
-const generateOtp = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-const verificationMail = async (email, otp) => {
-    try {
-        const transporter = nodeMailer.createTransport({
-            service: 'gmail',
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            auth: {
-                user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD
-            }
-        })
-
-        const info = await transporter.sendMail({
-            from: process.env.NODEMAILER_EMAIL,
-            to: email,
-            subject: "Verify your account",
-            text: `Your OTP is ${otp}`,
-            html: `<h3>Your one-time password (OTP) for account verification is :</h3>
-            <h1> OTP : ${otp}</h1>
-            <h3>This OTP is valid for 1 minute and should not be shared with anyone for security reasons. <br>If you did not request this OTP, please ignore this email or contact our support team immediately.</h3>
-            <h3>Best regards,</h3>
-            <h3>craftaraah</h3>`
-        })
-
-        return info.accepted.length > 0;
-
-    } catch (error) {
-        console.error("Error in sending Email");
-        return false
-    }
-}
-
-const securePassword = async (password) => {
-    try {
-        const passwordHashed = await bcrypt.hash(password, 10);
-        return passwordHashed;
-    } catch (error) {
-
-    }
-}
+const userHelper = require('../../helpers/userHelpers')
 
 
 const loadForgotPassword = async (req, res) => {
@@ -75,8 +28,8 @@ const forgotEmailVerify = async (req, res) => {
         const { email } = req.body;
         const user = await User.findOne({ email: email })
         if (user) {
-            const otp = generateOtp()
-            const emailSent = await verificationMail(email, otp)
+            const otp = userHelper.generateOtp()
+            const emailSent = await userHelper.verificationMail(email, otp)
             if (emailSent) {
                 req.session.userOTP = otp;
                 req.session.email = email;
@@ -124,9 +77,9 @@ const resendForgotOtp = async (req, res) => {
             return res.status(400).json({ success: false, message: "Email not found in session" })
         }
 
-        const otp = generateOtp();
+        const otp = userHelper.generateOtp();
         req.session.userOTP = otp;
-        const emailSent = await verificationMail(email, otp);
+        const emailSent = await userHelper.verificationMail(email, otp);
         console.log('mail sent to : ', email)
         if (emailSent) {
             console.log("Resend OTP : ", otp);
@@ -145,7 +98,7 @@ const resetPassword = async (req, res) => {
     try {
         const { password } = req.body;
         const userId = req.session.user._id;
-        const passwordHashed = await securePassword(password);
+        const passwordHashed = await userHelper.securePassword(password);
         await User.findByIdAndUpdate(userId, { $set: { password: passwordHashed } })
         req.session.user = null;
         res.redirect('/login')
@@ -175,8 +128,8 @@ const changeEmail = async (req, res) => {
         const email = req.session.user.email
 
         if (!req.session.email || req.session.email !== email || !req.session.otpSent) {
-            const otp = generateOtp();
-            const emailSent = await verificationMail(email, otp);
+            const otp = userHelper.generateOtp();
+            const emailSent = await userHelper.verificationMail(email, otp);
             if (emailSent) {
                 req.session.userOTP = otp;
                 req.session.email = email;

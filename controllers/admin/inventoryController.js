@@ -114,6 +114,7 @@ const loadInventory = async (req, res) => {
 
 const updateStock = async (req,res) => {
     try {
+        
         const id = req.params.id
         const quantity = req.body.quantity;
         await Product.findByIdAndUpdate(id,{stock:quantity});

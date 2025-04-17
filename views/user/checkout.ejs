@@ -58,7 +58,7 @@
     <!-- Hero Section End -->
 
     <!-- Breadcrumb Section Begin -->
-    <section class="breadcrumb-section set-bg container" data-setbg="user/img/image.png">
+    <section class="breadcrumb-section set-bg container-fluid" data-setbg="user/img/image.png">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
@@ -221,7 +221,6 @@
         });
 
         function placeOrder(event) {
-            console.log('inside place order'); 
             event.preventDefault();
 
             const paymentMethodInput = document.querySelector('input[name="paymentMethod"]:checked');
@@ -257,50 +256,54 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-
                     if (paymentMethod === 'payment') {
                         payNow(totalAmount);
                     } else if (paymentMethod === 'COD') {
-                        fetch('/placeOrder', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                selectedAddress,
-                                paymentMethod
-                            })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Order Placed!',
-                                    text: 'Redirecting to success page...',
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    window.location.href = '/orderPlaced';
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Failed',
-                                    text: 'Something went wrong!',
-                                });
-                            }
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'Could not place order. Please try again later.',
-                            });
-                        });
+                        COD(selectedAddress,paymentMethod)
                     }
                 }
+            });
+        }
+
+        async function COD(selectedAddress,paymentMethod) {
+            fetch('/placeOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                    body: JSON.stringify({
+                    selectedAddress,
+                    paymentMethod
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Placed!',
+                        text: 'Redirecting to success page...',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = '/orderPlaced';
+                    });
+                } else {
+                    const errorMessage = Array.isArray(data.error) ? data.error[0] : data.message || 'Order failed';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed',
+                        text: errorMessage,
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Could not place order. Please try again later.',
+                });
             });
         }
 
@@ -315,6 +318,15 @@
                 body: JSON.stringify({ amount })
             });
             const data = await res.json();
+
+            if (!res.ok || data.error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.error[0] || 'Payment initiation failed.'
+            });
+            return;
+        }
 
             const options = {
                 key : data.key,

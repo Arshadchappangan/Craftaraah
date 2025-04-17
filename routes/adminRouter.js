@@ -8,6 +8,7 @@ const orderController = require('../controllers/admin/orderController');
 const inventoryController = require('../controllers/admin/inventoryController');
 const couponController = require('../controllers/admin/couponController');
 const offerController = require('../controllers/admin/offerController');
+const nocache = require('../middlewares/noCache')
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const multer = require('../middlewares/multer')
 
@@ -16,10 +17,10 @@ const multer = require('../middlewares/multer')
 router.get('/pageError',adminController.pageError);
 
 //login management
-router.get('/login',adminController.loadLogin);
+router.get('/login',nocache,adminController.loadLogin);
 router.post('/login',adminController.login);
-router.get('/',adminAuth,adminController.loadDashboard);
-router.get('/logout',adminController.logout);
+router.get('/',nocache,adminAuth,adminController.loadDashboard);
+router.get('/logout',adminAuth,adminController.logout);
 
 //user management
 router.get('/users',adminAuth,customerController.customerInfo);
@@ -92,5 +93,8 @@ router.post('/deactivateCategoryOffer',adminAuth,offerController.deactivateCateg
 //sales management
 
 router.get('/sales',adminAuth,orderController.loadSalesPage);
+router.get('/downloadSalesPdf',adminAuth,orderController.downloadSalesPdf);
+router.get('/downloadSalesExcel',adminAuth,orderController.downloadSalesExcel);
+
 
 module.exports = router

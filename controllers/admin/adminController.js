@@ -21,11 +21,7 @@ const login = async (req, res) => {
             const passwordMatch = await bcrypt.compare(password, admin.password);
             if (passwordMatch) {
 
-                req.session.admin = {
-                    _id: admin._id,
-                    name: admin.name,
-                    email: admin.email
-                };
+                req.session.admin = admin._id
                 
                 return res.redirect('/admin')
             } else {
@@ -68,8 +64,8 @@ const pageError = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-
-        req.session.admin = null;
+        delete req.session.admin
+        console.log(req.session.admin)
         res.redirect("/admin/login")
 
     } catch (error) {
