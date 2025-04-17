@@ -79,6 +79,7 @@
                 <th scope="col" class="text-center">Quantity</th>
                 <th scope="col" class="text-center">Price</th>
                 <th scope="col" class="text-center">Subtotal</th>
+                <th scope="col" class="text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -89,6 +90,13 @@
                   <td class="align-middle text-center"><%= item.quantity %></td>
                   <td class="align-middle text-center">₹<%= item.price %></td>
                   <td class="align-middle text-center">₹<%= item.quantity * item.price %></td>
+                    <td class="align-middle text-center">
+                    <% if (order.status === 'Ordered' || order.status === 'Processing') { %>
+                      <a onclick="confirmCancel('<%= order._id %>','<%= item.product._id %>')" class="badge bg-danger rounded-pill text-light">
+                        <i class="fa fa-times-circle text-light"></i>  Cancel
+                      </a>
+                    <% } %>
+                    </td>
                 </tr>
               <% }) %>
             </tbody>
@@ -112,7 +120,7 @@
           <% } %>
 
           <!-- Cancel Order -->
-          <% if (order.status === 'Ordered' || order.status === 'Processing') { %>
+          <% if (order.status === 'Ordered' || order.status === 'Processing' || order.status === 'Partially Cancelled') { %>
               <a onclick="confirmCancel('<%= order._id %>')" class="btn btn-outline-danger">
                 <i class="bi bi-x-circle"></i> Cancel Order
               </a>
@@ -127,10 +135,10 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    async function confirmCancel(orderId) {
+    async function confirmCancel(orderId,productId) {
     const result = await Swal.fire({
         title: "Are you sure?",
-        text: "This order will be cancelled!",
+        text: productId ? "This product will be cancelled!" : "This order will be cancelled",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#d33",
@@ -140,7 +148,7 @@
 
     if (result.isConfirmed) {
         try {
-            const response = await fetch(`/cancelOrder?id=${orderId}`, { method: "POST" });
+            const response = await fetch(`/cancelOrder?orderId=${orderId}&productId=${productId}`, { method: "POST" });
             const data = await response.json();
 
             if (data.success) {

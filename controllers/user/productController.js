@@ -564,44 +564,75 @@ const orderDetails = async(req,res) => {
     }
 }
 
-const cancelOrder = async (req,res) => {
+const cancelOrder = async (req, res) => {
     try {
         const user = req.session.user;
-        const id = req.query.id;
-        const order = await Order.findById(id);
-        const wallet = await Wallet.findOne({ userId: user._id });
+        const { orderId, productId } = req.query;
 
-        for (const item of order.orderedItems) {
-            await Product.findByIdAndUpdate(
-                item.product,
-                { $inc: { stock: item.quantity } },
-                { new: true }
-            );
+        const order = await Order.findById(orderId).populate('orderedItems.product');
+        if (!order) return res.status(404).json({ success: false, message: "Order not found." });
+
+        let product = null
+        let productIndex = null;
+        if(productId !== 'undefined'){
+            product = productId ? await Product.findById(productId).populate('offers') : null;
+            if (productId && !product) return res.status(404).json({ success: false, message: "Product not found." });
+            productIndex = order.orderedItems.findIndex(item => item.product._id.toString() === productId);
+            if (productId && productIndex === -1) {
+                return res.status(404).json({ success: false, message: "Product not found in the order." });
+            }
+        }
+   
+
+        let wallet = await Wallet.findOne({ userId: user._id });
+        if (!wallet) {
+            wallet = new Wallet({ userId: user._id, balance: 0, transactions: [] });
         }
 
         if (wallet && order.paymentMethod === "Razorpay") {
-            const refundAmount = order.finalAmount; 
+            const refundAmount = productId
+                ? order.orderedItems[productIndex].price * order.orderedItems[productIndex].quantity
+                : order.finalAmount;
+
             wallet.balance += refundAmount;
             wallet.transactions.push({
-            transactionType: "Refund",
-            amount: refundAmount,
-            date: new Date(),
-            description: `Refund for the order with order Id : ${order.orderId}`,
-        });
+                transactionType: "Refund",
+                amount: refundAmount,
+                date: new Date(),
+                description: product
+                    ? `Refund for "${order.orderedItems[productIndex].product.productName}"`
+                    : `Refund for order ID: ${order.orderId}`,
+            });
             await wallet.save();
         }
 
-        
+        if (orderId && product) {
+            if (productIndex !== -1) {
+                await Product.findByIdAndUpdate(productId, {
+                    $inc: { stock: order.orderedItems[productIndex].quantity },
+                });
+                order.orderedItems.splice(productIndex, 1);
+            }
+        } else {
+            for (const item of order.orderedItems) {
+                await Product.findByIdAndUpdate(
+                    item.product,
+                    { $inc: { stock: item.quantity } },
+                    { new: true }
+                );
+            }
+        }
 
-        order.status = "Cancelled"
+        order.status = order.orderedItems.length === 0 ? "Cancelled" : "Partially Cancelled";
         await order.save();
-        return res.json({ success: true, message: "Order cancelled successfully!" });
 
+        return res.json({ success: true, message: "Cancellation processed successfully!" });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ success: false, message: "Something went wrong" });
     }
-}
+};
+
 
 
 const returnOrder = async (req,res) => {

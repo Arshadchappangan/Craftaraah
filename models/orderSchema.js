@@ -26,7 +26,11 @@ const orderSchema = new Schema({
         price : {
             type : Number,
             required : true
-        }
+        },
+        // isCancelled : {
+        //     type : Boolean,
+        //     default : false
+        // }
     }],
     totalPrice : {
         type : Number,
@@ -89,7 +93,7 @@ const orderSchema = new Schema({
     },
     status : {
         type : String,
-        enum : ['Ordered','Processing','Shipped','Delivered','Cancelled','Return Requested','Returned'],
+        enum : ['Ordered','Processing','Shipped','Delivered','Cancelled','Partially Cancelled','Return Requested','Returned'],
         default : 'Ordered'
     },
     returnRequest : {
