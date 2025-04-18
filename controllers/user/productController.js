@@ -604,6 +604,7 @@ const cancelOrder = async (req, res) => {
                 transactionType: "Refund",
                 amount: refundAmount,
                 date: new Date(),
+                order: orderId,
                 description: product
                     ? `Refund for "${order.orderedItems[productIndex].product.productName}"`
                     : `Refund for order ID: ${order.orderId}`

@@ -1,4 +1,17 @@
 <%-include("../../views/partials/admin/header")%>
+
+<style>
+  .item-list:hover{
+    background-color: rgb(247, 244, 244);
+  }
+
+  .filter-btn.active {
+    background-color: #007bff;
+    color: white;
+  }
+
+</style>
+
         <div class="content">
           <div class="panel-header bg-primary-gradient">
             <div class="page-inner py-5">
@@ -104,29 +117,17 @@
                 <div class="card card-round">
                   <div class="card-header">
                     <div class="card-head-row">
-                      <div class="card-title">User Statistics</div>
+                      <div class="card-title">Sales Overview</div>
                       <div class="card-tools">
-                        <a
-                          href="#"
-                          class="btn btn-label-success btn-round btn-sm me-2"
-                        >
-                          <span class="btn-label">
-                            <i class="fa fa-pencil"></i>
-                          </span>
-                          Export
-                        </a>
-                        <a href="#" class="btn btn-label-info btn-round btn-sm">
-                          <span class="btn-label">
-                            <i class="fa fa-print"></i>
-                          </span>
-                          Print
-                        </a>
+                        <a href="" id="filter-week" class="btn btn-label-info btn-round btn-sm">Week</a>
+                        <a href="" id="filter-month" class="btn btn-label-info btn-round btn-sm">Month</a>
+                        <a href="" id="filter-year" class="btn btn-label-info btn-round btn-sm">Year</a>
                       </div>
                     </div>
                   </div>
                   <div class="card-body">
                     <div class="chart-container" style="min-height: 375px">
-                      <canvas id="statisticsChart"></canvas>
+                      <canvas id="salesRevenueChart" height="100"></canvas>
                     </div>
                     <div id="myChartLegend"></div>
                   </div>
@@ -191,226 +192,62 @@
                 <div class="card card-round">
                   <div class="card-body">
                     <div class="card-head-row card-tools-still-right">
-                      <div class="card-title">New Customers</div>
-                      <div class="card-tools">
-                        <div class="dropdown">
-                          <button
-                            class="btn btn-icon btn-clean me-0"
-                            type="button"
-                            id="dropdownMenuButton"
-                            data-bs-toggle="dropdown"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                          >
-                            <i class="fas fa-ellipsis-h"></i>
-                          </button>
-                          <div
-                            class="dropdown-menu"
-                            aria-labelledby="dropdownMenuButton"
-                          >
-                            <a class="dropdown-item" href="#">Action</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <a class="dropdown-item" href="#"
-                              >Something else here</a
-                            >
+                      <div class="card-title">Best Selling Products (Top 10)</div>
+                    </div>
+                    <% bestSellingProducts.forEach(item => { %>
+                    <div class="card-list py-1">
+                      <div class="item-list d-flex justify-content-between">
+                        <div class="d-flex">
+                          <div class="avatar">
+                            <img
+                              src="<%= item.photo %>"
+                              alt="..."
+                              class="avatar-img rounded-circle"
+                            />
+                          </div>
+                          <div class="info-user ms-3">
+                            <div class="username"><%= item.name %></div>
+                            <div class="status"><%= item.category %></div>
                           </div>
                         </div>
+                        <div>Sold <strong><%= item.totalQuantitySold %></strong> items</div>
                       </div>
                     </div>
-                    <div class="card-list py-4">
-                      <div class="item-list">
-                        <div class="avatar">
-                          <img
-                            src="assets/img/jm_denis.jpg"
-                            alt="..."
-                            class="avatar-img rounded-circle"
-                          />
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Jimmy Denis</div>
-                          <div class="status">Graphic Designer</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                      <div class="item-list">
-                        <div class="avatar">
-                          <span
-                            class="avatar-title rounded-circle border border-white"
-                            >CF</span
-                          >
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Chandra Felix</div>
-                          <div class="status">Sales Promotion</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                      <div class="item-list">
-                        <div class="avatar">
-                          <img
-                            src="assets/img/talha.jpg"
-                            alt="..."
-                            class="avatar-img rounded-circle"
-                          />
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Talha</div>
-                          <div class="status">Front End Designer</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                      <div class="item-list">
-                        <div class="avatar">
-                          <img
-                            src="assets/img/chadengle.jpg"
-                            alt="..."
-                            class="avatar-img rounded-circle"
-                          />
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Chad</div>
-                          <div class="status">CEO Zeleaf</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                      <div class="item-list">
-                        <div class="avatar">
-                          <span
-                            class="avatar-title rounded-circle border border-white bg-primary"
-                            >H</span
-                          >
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Hizrian</div>
-                          <div class="status">Web Designer</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                      <div class="item-list">
-                        <div class="avatar">
-                          <span
-                            class="avatar-title rounded-circle border border-white bg-secondary"
-                            >F</span
-                          >
-                        </div>
-                        <div class="info-user ms-3">
-                          <div class="username">Farrah</div>
-                          <div class="status">Marketing</div>
-                        </div>
-                        <button class="btn btn-icon btn-link op-8 me-1">
-                          <i class="far fa-envelope"></i>
-                        </button>
-                        <button class="btn btn-icon btn-link btn-danger op-8">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      </div>
-                    </div>
+                    <% })%>
                   </div>
                 </div>
               </div>
-              <div class="col-md-8">
+
+              <div class="col-md-4">
                 <div class="card card-round">
-                  <div class="card-header">
+                  <div class="card-body">
                     <div class="card-head-row card-tools-still-right">
-                      <div class="card-title">Transaction History</div>
-                      <div class="card-tools">
-                        <div class="dropdown">
-                          <button
-                            class="btn btn-icon btn-clean me-0"
-                            type="button"
-                            id="dropdownMenuButton"
-                            data-bs-toggle="dropdown"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                          >
-                            <i class="fas fa-ellipsis-h"></i>
-                          </button>
-                          <div
-                            class="dropdown-menu"
-                            aria-labelledby="dropdownMenuButton"
-                          >
-                            <a class="dropdown-item" href="#">Action</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <a class="dropdown-item" href="#"
-                              >Something else here</a
-                            >
+                      <div class="card-title">Best Selling Categories (Top 10)</div>
+                    </div>
+                    <% bestSellingCategories.forEach(item => { %>
+                    <div class="card-list py-1">
+                      <div class="item-list d-flex justify-content-between">
+                        <div class="d-flex">
+                          <div class="avatar">
+                            <img
+                              src="/uploads/product-images/resized-1744394504898.jpg"
+                              alt="..."
+                              class="avatar-img rounded-circle"
+                            />
+                          </div>
+                          <div class="info-user ms-3">
+                            <div class="username"><%= item.category %></div>
+                            <div style="max-width: 300px;" class="status"><%= item.description %></div>
                           </div>
                         </div>
+                        <div>Sold <strong><%= item.totalQuantitySold %></strong> items</div>
                       </div>
                     </div>
+                    <% })%>
                   </div>
-                  <div class="card-body p-0">
-                    <div class="table-responsive">
-                      <!-- Projects table -->
-                      <table class="table align-items-center mb-0">
-                        <thead class="thead-light">
-                          <tr>
-                            <th scope="col">Payment Number</th>
-                            <th scope="col" class="text-end">Date & Time</th>
-                            <th scope="col" class="text-end">Amount</th>
-                            <th scope="col" class="text-end">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <th scope="row">
-                              <button
-                                class="btn btn-icon btn-round btn-success btn-sm me-2"
-                              >
-                                <i class="fa fa-check"></i>
-                              </button>
-                              Payment from #10231
-                            </th>
-                            <td class="text-end">Mar 19, 2020, 2.45pm</td>
-                            <td class="text-end">$250.00</td>
-                            <td class="text-end">
-                              <span class="badge badge-success">Completed</span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <th scope="row">
-                              <button
-                                class="btn btn-icon btn-round btn-success btn-sm me-2"
-                              >
-                                <i class="fa fa-check"></i>
-                              </button>
-                              Payment from #10231
-                            </th>
-                            <td class="text-end">Mar 19, 2020, 2.45pm</td>
-                            <td class="text-end">$250.00</td>
-                            <td class="text-end">
-                              <span class="badge badge-success">Completed</span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+                </div>
+              </div>
+              
                 </div>
               </div>
             </div>
@@ -419,41 +256,119 @@
 
      
     </div>
-    <!--   Core JS Files   -->
-    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
-    <script src="assets/js/core/popper.min.js"></script>
-    <script src="assets/js/core/bootstrap.min.js"></script>
 
-    <!-- jQuery Scrollbar -->
-    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Chart JS -->
-    <script src="assets/js/plugin/chart.js/chart.min.js"></script>
+    <script>
+      const ctx = document.getElementById('salesRevenueChart').getContext('2d');
+      let salesRevenueChart;
 
-    <!-- jQuery Sparkline -->
-    <script src="assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
+      function createDualChart(labels, revenues, salesCounts) {
+        if (salesRevenueChart) salesRevenueChart.destroy();
 
-    <!-- Chart Circle -->
-    <script src="assets/js/plugin/chart-circle/circles.min.js"></script>
+        salesRevenueChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Revenue (₹)',
+                data: revenues,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: '#4BC0C0',
+                borderWidth: 2,
+                yAxisID: 'y',
+                tension: 0.2
+              },
+              {
+                label: 'Sales Count',
+                data: salesCounts,
+                backgroundColor: 'rgba(107, 165, 236, 0.87)',
+                borderColor: 'rgba(0, 97, 217, 0.87)',
+                borderWidth: 2,
+                yAxisID: 'y1',
+                tension: 0.2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+            },
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+              }
+            },
+            scales: {
+              y: {
+                type: 'linear',
+                position: 'left',
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Revenue (₹)'
+                }
+              },
+              y1: {
+                type: 'linear',
+                position: 'right',
+                beginAtZero: true,
+                grid: {
+                  drawOnChartArea: false
+                },
+                title: {
+                  display: true,
+                  text: 'Sales Count'
+                }
+              }
+            }
+          }
+        });
+      }
 
-    <!-- Datatables -->
-    <script src="assets/js/plugin/datatables/datatables.min.js"></script>
+      function setActiveButton(id) {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        document.getElementById(id).classList.add('active');
+      }
 
-    <!-- Bootstrap Notify -->
-    <script src="assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
+      function fetchChartData(range = 'all') {
+        fetch(`/admin/salesOverviewData?range=${range}`)
+          .then(res => res.json())
+          .then(data => {
+            createDualChart(data.labels, data.revenues, data.salesCount);
+          })
+          .catch(err => console.error(err));
+      }
 
-    <!-- jQuery Vector Maps -->
-    <script src="assets/js/plugin/jsvectormap/jsvectormap.min.js"></script>
-    <script src="assets/js/plugin/jsvectormap/world.js"></script>
+      // Initial Load
+      fetchChartData('year');
+      setActiveButton('filter-year');
 
-    <!-- Sweet Alert -->
-    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+      // Filters
+      document.getElementById('filter-year').addEventListener('click', e => {
+        e.preventDefault();
+        fetchChartData('year');
+        setActiveButton('filter-year');
+      });
 
-    <!-- Kaiadmin JS -->
-    <script src="assets/js/kaiadmin.min.js"></script>
+      document.getElementById('filter-week').addEventListener('click', e => {
+        e.preventDefault();
+        fetchChartData('week');
+        setActiveButton('filter-week');
+      });
 
-    <!-- Kaiadmin DEMO methods, don't include it in your project! -->
-    <script src="assets/js/setting-demo.js"></script>
-    <script src="assets/js/demo.js"></script>
+      document.getElementById('filter-month').addEventListener('click', e => {
+        e.preventDefault();
+        fetchChartData('month');
+        setActiveButton('filter-month');
+      });
+    </script>
   </body>
 </html>

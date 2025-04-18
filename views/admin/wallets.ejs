@@ -135,15 +135,6 @@
           </div>
           <div class="card-body table-responsive">
             <table class="table">
-              <thead>
-                <tr>
-                  <th>Transaction Type</th>
-                  <th>Transaction ID</th>
-                  <th>Transaction Date</th>
-                  <th>User</th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
               <tbody>
                 <div class="transaction-container">
                   <% wallet.forEach((data, index) => { %>
@@ -220,11 +211,12 @@
                               <p><strong>Remarks:</strong> <%= data.transaction.description || "N/A" %></p>
                           </div>
                         </div> 
-                        <button class="btn btn-info">
-                          <i class="fas fa-info-circle"></i>  Go to order
-                        </button>
+                        <a href="/admin/orderDetails?id=<%= data.transaction.order %>">
+                          <button class="btn btn-info">
+                            <i class="fas fa-info-circle"></i>  Go to order
+                          </button>
+                        </a>
                       </div>
-                      
                     </div>
                   <% }) %>
                 </div>

@@ -96,6 +96,7 @@ router.post('/deactivateCategoryOffer',adminAuth,offerController.deactivateCateg
 router.get('/sales',adminAuth,orderController.loadSalesPage);
 router.get('/downloadSalesPdf',adminAuth,orderController.downloadSalesPdf);
 router.get('/downloadSalesExcel',adminAuth,orderController.downloadSalesExcel);
+router.get('/salesOverviewData',adminAuth,orderController.salesOverviewData)
 
 //wallet management
 router.get('/wallets',adminAuth,walletController.loadWallets);

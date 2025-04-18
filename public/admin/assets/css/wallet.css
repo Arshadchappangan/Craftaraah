@@ -92,11 +92,11 @@
 }
 
 .details-part .transaction-details {
-    max-width: 300px;
+    max-width: 320px;
     overflow-x: hidden;
 }
 
-.details-part button{
+.details-part a{
     width: 200px;
     margin: 0 auto;
 }
