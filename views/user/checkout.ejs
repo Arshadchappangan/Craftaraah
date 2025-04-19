@@ -188,7 +188,14 @@
                                 <div class="checkout__input__checkbox">
                                     <label for="payment">
                                         <input type="radio" id="payment" name="paymentMethod" value="payment">
-                                        Payment
+                                        Online Payment
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <div class="checkout__input__checkbox">
+                                    <label for="wallet">
+                                        <input type="radio" id="wallet" name="paymentMethod" value="wallet">
+                                        Wallet Payment
                                         <span class="checkmark"></span>
                                     </label>
                                 </div>
@@ -249,7 +256,7 @@
 
             Swal.fire({
                 title: 'Confirm Order',
-                text: `Place order with ${paymentMethod === 'payment' ? 'Online Payment' : 'Cash on Delivery'}?`,
+                text: `Place order with ${paymentMethod === 'payment' ? 'Online Payment' : paymentMethod === 'wallet' ? 'Wallet Payment' : 'Cash on Delivery'}?`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, place order',
@@ -259,13 +266,15 @@
                     if (paymentMethod === 'payment') {
                         payNow(totalAmount);
                     } else if (paymentMethod === 'COD') {
-                        COD(selectedAddress,paymentMethod)
+                        order(selectedAddress,paymentMethod)
+                    }else if(paymentMethod === 'wallet'){
+                        order(selectedAddress,paymentMethod)
                     }
                 }
             });
         }
 
-        async function COD(selectedAddress,paymentMethod) {
+        async function order(selectedAddress,paymentMethod) {
             fetch('/placeOrder', {
                 method: 'POST',
                 headers: {

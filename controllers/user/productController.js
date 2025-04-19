@@ -460,8 +460,26 @@ const placeOrder = async (req, res) => {
         })
 
         req.session.orderId = placeOrder._id;
-
         await placeOrder.save();
+
+        if(paymentMethod === 'wallet'){
+            const wallet = await Wallet.findOne({userId:user._id});
+            if(wallet.balance < total){
+                return res.json({success:false,message:'Insufficient wallet balance. Please choose another payment method or top up your wallet.'})
+            }
+            wallet.balance -= total;
+            wallet.transactions.push({
+                transactionType : 'Debit',
+                transactionId : adminHelpers.generateTransactionId(),
+                amount : total,
+                order : placeOrder._id,
+                date : new Date(),
+                description : `Order payment with the order ID ${orderId}`
+            })
+    
+            await wallet.save();
+        }
+
         await Cart.findOneAndDelete({userId:user._id}); 
 
         let userUsage = null;
