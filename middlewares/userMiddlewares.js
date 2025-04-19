@@ -4,7 +4,16 @@ const userHelper = require('../helpers/userHelpers')
 
 const verifyStock = async (req,res,next) => {
     try {
-        console.log('verify stock 1')
+
+        console.log('inside verify stock function')
+
+        if(req.body.authSkip){
+            console.log('Auth skip is true')
+             return next()
+        }
+
+        console.log('Auth skip is false')
+
         const user = req.session.user;
         let cart = await Cart.findOne({userId:user._id}).populate({
             path: 'items.productId',

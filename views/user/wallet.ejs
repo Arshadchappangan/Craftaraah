@@ -53,7 +53,7 @@
                         <i class="fas fa-credit-card fa-2x"></i>
                     </div>
                 </div>
-                <button class="btn btn-dark mt-3" data-bs-toggle="modal" data-bs-target="#addMoneyModal">Topup</button>
+                <button id="topup" class="btn btn-dark mt-3" data-bs-toggle="modal">Topup</button>
             </div>
 
             <!-- Wallet Activity -->
@@ -111,7 +111,6 @@
                                     <strong class="<%= textClass %>">
                                         ₹<%= transaction.amount %>
                                     </strong>
-                                    <!-- <span onclick="viewDetails()" class="text-muted mx-2" style="font-size: 0.9rem;"><i class="fas fa-info-circle text-dark" title="<%= transaction.details %>"></i></span> -->
                                 </div>
                             </li>
                         <% }); %>
@@ -123,23 +122,146 @@
     </div>
 </div>
 
-<!-- Add Money Modal -->
-<div class="modal fade" id="addMoneyModal" tabindex="-1" aria-labelledby="addMoneyModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Money to Wallet</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form action="/addMoney" method="POST">
-                    <label for="amount" class="form-label">Enter Amount (₹)</label>
-                    <input type="number" name="amount" id="amount" class="form-control" required>
-                    <button type="submit" class="btn btn-dark mt-3">Add Money</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <%- include("../../views/partials/user/footer") %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+
+<script>
+
+document.getElementById('topup').addEventListener('click', () => {
+    Swal.fire({
+        title: 'Top-Up Balance',
+        input: 'number',
+        inputLabel: 'Enter amount to top-up',
+        inputAttributes: {
+            min: 1,
+            step: 1
+        },
+        inputPlaceholder: 'Enter amount',
+        showCancelButton: true,
+        confirmButtonText: 'Top Up',
+        preConfirm: (amount) => {
+            amount = Number(amount)
+            if (!amount || amount <= 0) {
+                Swal.showValidationMessage('Please enter a valid amount');
+                return false;
+            }
+            return amount;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const amount = result.value;
+
+            fetch('/razorpayOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ amount, authSkip: true })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data || data.error) {
+                    console.log('data terminated')
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Payment initiation failed.'
+                    });
+                    return;
+                }
+
+                console.log('razorpay options ')
+                const options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: "INR",
+                    name: "Craftaraah Ecommerce",
+                    description: "Wallet Topup",
+                    order_id: data.orderId,
+                    handler: function (response) {
+                        console.log("Payment response:", response);
+
+                        fetch('/verifyPayment', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                paymentId: response.razorpay_payment_id,
+                                razorOrderId: response.razorpay_order_id,
+                                signature: response.razorpay_signature
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status) {
+                                fetch('/topupWallet', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ amount })
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Topup Success',
+                                            text: `₹ ${amount} added to the wallet`,
+                                            timer: 1500,
+                                            showConfirmButton: false
+                                        }).then(() => {
+                                            window.location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Topup Failed',
+                                            text: 'Failed to topup the amount',
+                                            timer: 1500,
+                                            showConfirmButton: false
+                                        });
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Verification Failed',
+                                    text: 'Could not verify the payment'
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Error verifying payment:", err);
+                            window.location.href = "/orderFailure";
+                        });
+                    },
+                    theme: {
+                        color: "#F37254"
+                    }
+                };
+
+                console.log('razorpay options : ',options)
+
+                const razorpay = new Razorpay(options);
+
+                razorpay.on('payment.failed', function (response) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Failed',
+                        text: response.error.description || 'Payment process was not completed.'
+                    });
+                });
+
+                razorpay.open();
+            });
+        }
+    });
+});
+
+
+
+</script>

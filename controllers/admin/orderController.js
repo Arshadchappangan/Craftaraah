@@ -524,10 +524,6 @@ const salesOverviewData = async (req,res) => {
     const revenues = data.map(d => d.revenue);
     const salesCount = data.map(d => d.salesCount);
 
-    console.log('labels : ',labels)
-    console.log('revenue : ',revenues)
-    console.log('selesCount : ',salesCount)
-
     res.json({labels,revenues,salesCount})
 
   } catch (error) {

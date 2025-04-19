@@ -142,6 +142,8 @@ const securePassword = async (password) => {
 }
 
 
+
+
   module.exports = {
     generateOrderId,
     calculateDiscount,
