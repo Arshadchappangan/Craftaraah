@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const Order = require('../../models/orderSchema');
 const category = require('../../models/categorySchema');
+const adminHelper = require('../../helpers/adminHelpers')
 
 
 const loadLogin = (req, res) => {
@@ -44,94 +45,25 @@ const loadDashboard = async (req, res) => {
         const categories = await Category.find({isDeleted:false})
         const orders = await Order.find({});
 
-        const bestSellingProducts = await Order.aggregate([
-            {$unwind:"$orderedItems"},
-            {
-                $group:{
-                    _id:"$orderedItems.product",
-                    totalQuantitySold : {$sum : "$orderedItems.quantity" } 
-                }
-            },
-            {$sort:{totalQuantitySold:-1}},
-            {$limit:10},
-            {$lookup:{
-                from : 'products',
-                localField : '_id',
-                foreignField : '_id',
-                as : 'productDetails'
-            }},
-            {$unwind:"$productDetails"},
-            {$lookup:{
-                from : 'categories',
-                localField : 'productDetails.category',
-                foreignField : '_id',
-                as : 'categoryDetails'
-            }},
-            {$unwind:"$categoryDetails"},
-            {$project:{
-                _id : 0,
-                name : "$productDetails.productName",
-                photo : { $arrayElemAt: ["$productDetails.productImage", 0] },
-                totalQuantitySold : 1,
-                category : "$categoryDetails.name"
-            }},
-        ])
-
-        const bestSellingCategories = await Order.aggregate([
-            { $unwind: "$orderedItems" },
-          
-            {
-              $lookup: {
-                from: "products",
-                localField: "orderedItems.product",
-                foreignField: "_id",
-                as: "productDetails"
-              }
-            },
-            { $unwind: "$productDetails" },
-          
-            {
-              $group: {
-                _id: "$productDetails.category",
-                totalQuantitySold: { $sum: "$orderedItems.quantity" }
-              }
-            },
-            { $sort: { totalQuantitySold: -1 } },
-            { $limit: 10 },
-          
-            {
-              $lookup: {
-                from: "categories",
-                localField: "_id",
-                foreignField: "_id",
-                as: "categoryDetails"
-              }
-            },
-            { $unwind: "$categoryDetails" },
-          
-            {
-              $project: {
-                _id: 0,
-                category: "$categoryDetails.name",
-                description:"$categoryDetails.description",
-                totalQuantitySold: 1
-              }
-            }
-          ])
+        const matchStage = adminHelper.filterRange({type:'all'})
+        const bestProducts = await adminHelper.saleCountProducts(matchStage);
+        const bestCategories = await adminHelper.saleCountCategories(matchStage);
 
 
         if (!req.session.admin) {
             return res.redirect('/admin/login')
         }
+
         res.render('dashboard',{
             customers : users,
             products:products,
             categories:categories,
             orders:orders,
-            bestSellingProducts,
-            bestSellingCategories
+            saleCountProducts : bestProducts,
+            saleCountCategories : bestCategories
         })
     } catch (error) {
+        console.error(error)
         res.redirect('/pageError')
     }
 }

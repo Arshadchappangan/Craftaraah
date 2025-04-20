@@ -211,11 +211,13 @@
                               <p><strong>Remarks:</strong> <%= data.transaction.description || "N/A" %></p>
                           </div>
                         </div> 
+                        <% if(data.transaction.transactionType === 'Debit' || data.transaction.transactionType === 'Refund'){ %>
                         <a href="/admin/orderDetails?id=<%= data.transaction.order %>">
                           <button class="btn btn-info">
                             <i class="fas fa-info-circle"></i>  Go to order
                           </button>
                         </a>
+                        <% } %>
                       </div>
                     </div>
                   <% }) %>

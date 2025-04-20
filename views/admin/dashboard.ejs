@@ -194,26 +194,26 @@
                     <div class="card-head-row card-tools-still-right">
                       <div class="card-title">Best Selling Products (Top 10)</div>
                     </div>
-                    <% bestSellingProducts.forEach(item => { %>
+                    <% for(let i=0;i<10;i++) { %>
                     <div class="card-list py-1">
                       <div class="item-list d-flex justify-content-between">
                         <div class="d-flex">
                           <div class="avatar">
                             <img
-                              src="<%= item.photo %>"
+                              src="<%= saleCountProducts[i].photo %>"
                               alt="..."
                               class="avatar-img rounded-circle"
                             />
                           </div>
                           <div class="info-user ms-3">
-                            <div class="username"><%= item.name %></div>
-                            <div class="status"><%= item.category %></div>
+                            <div class="username"><%= saleCountProducts[i].name %></div>
+                            <div class="status"><%= saleCountProducts[i].category %></div>
                           </div>
                         </div>
-                        <div>Sold <strong><%= item.totalQuantitySold %></strong> items</div>
+                        <div>Sold <strong><%= saleCountProducts[i].totalQuantitySold %></strong> items</div>
                       </div>
                     </div>
-                    <% })%>
+                    <% }%>
                   </div>
                 </div>
               </div>
@@ -224,7 +224,7 @@
                     <div class="card-head-row card-tools-still-right">
                       <div class="card-title">Best Selling Categories (Top 10)</div>
                     </div>
-                    <% bestSellingCategories.forEach(item => { %>
+                    <% for(let i=0;i<7;i++) { %>
                     <div class="card-list py-1">
                       <div class="item-list d-flex justify-content-between">
                         <div class="d-flex">
@@ -236,14 +236,14 @@
                             />
                           </div>
                           <div class="info-user ms-3">
-                            <div class="username"><%= item.category %></div>
-                            <div style="max-width: 300px;" class="status"><%= item.description %></div>
+                            <div class="username"><%= saleCountCategories[i].category %></div>
+                            <div style="max-width: 300px;" class="status"><%= saleCountCategories[i].description %></div>
                           </div>
                         </div>
-                        <div>Sold <strong><%= item.totalQuantitySold %></strong> items</div>
+                        <div>Sold <strong><%= saleCountCategories[i].totalQuantitySold %></strong> items</div>
                       </div>
                     </div>
-                    <% })%>
+                    <% }%>
                   </div>
                 </div>
               </div>
