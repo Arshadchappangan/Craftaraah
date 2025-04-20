@@ -156,7 +156,7 @@
                 </tr>
               </thead>
               <tbody>
-                <% for(let i = 0; i < Math.min(10, saleCount.currentProductCount.length); i++) { %>
+                <% for(let i = 0; i < saleCount.currentProductCount.length; i++) { %>
                   <tr>
                     <td><%= saleCount.currentProductCount[i].name %></td>
                     <td class="text-center"><%= saleCount.currentProductCount[i].totalQuantitySold %></td>
@@ -172,6 +172,16 @@
               </tbody>
             </table>
             <div>* All progresses are compared to previous one</div>
+            <nav aria-label="Product Pagination" class="mt-3">
+              <ul class="pagination justify-content-center">
+                <% for(let i = 1; i <= totalProductPages; i++) { %>
+                  <li class="page-item <%= i === pageProduct ? 'active' : '' %>">
+                    <a class="page-link" href="?pageProduct=<%= i %>&pageCategory=<%= pageCategory %>"><%= i %></a>
+                  </li>
+                <% } %>
+              </ul>
+            </nav>
+            
           </div>
         </div>
       </div>
@@ -193,7 +203,7 @@
                 </tr>
               </thead>
               <tbody>
-                <% for(let i = 0; i < Math.min(10, saleCount.currentCategoryCount.length); i++) { %>
+                <% for(let i = 0; i < saleCount.currentCategoryCount.length; i++) { %>
                   <tr>
                     <td><%= saleCount.currentCategoryCount[i].category %></td>
                     <td class="text-center"><%= saleCount.currentCategoryCount[i].totalQuantitySold %></td>
@@ -209,6 +219,15 @@
               </tbody>
             </table>
             <div>* All progresses are compared to previous one</div>
+            <nav aria-label="Category Pagination" class="mt-3">
+              <ul class="pagination justify-content-center">
+                <% for(let i = 1; i <= totalCategoryPages; i++) { %>
+                  <li class="page-item <%= i === pageCategory ? 'active' : '' %>">
+                    <a class="page-link" href="?pageProduct=<%= pageProduct %>&pageCategory=<%= i %>"><%= i %></a>
+                  </li>
+                <% } %>
+              </ul>
+            </nav>
           </div>
         </div>
       </div>

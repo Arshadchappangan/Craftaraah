@@ -5,7 +5,15 @@ const moment = require('moment')
 const loadSalesPage = async (req,res) => {
     try {
 
-      let {startDate,endDate,range} = req.query;
+      let {startDate,endDate,range,pageProduct = 1,pageCategory = 1} = req.query;
+
+      let limit = 5;
+
+      pageProduct = parseInt(pageProduct);
+      pageCategory = parseInt(pageCategory);
+
+      const productSkip = (pageProduct - 1) * limit;
+      const categorySkip = (pageCategory - 1) * limit;
 
         const orders = await Order.find({})
 
@@ -14,7 +22,6 @@ const loadSalesPage = async (req,res) => {
         let saleCount = null;
 
         if(!range) range = 'week'
-        startDate
 
         if (startDate && endDate) {
           const start = new Date(startDate);
@@ -76,13 +83,28 @@ const loadSalesPage = async (req,res) => {
         saleCount.revenueGrowthProduct = revenueGrowthProduct;
         saleCount.revenueGrowthCategory = revenueGrowthCategory;
 
+        let totalProductPages = Math.ceil(saleCount.currentProductCount.length / limit);
+        saleCount.currentProductCount = saleCount.currentProductCount.slice(productSkip, pageProduct * limit);
+        saleCount.saleGrowthProduct = saleCount.saleGrowthProduct.slice(productSkip, pageProduct * limit);
+        saleCount.revenueGrowthProduct = saleCount.revenueGrowthProduct.slice(productSkip, pageProduct * limit);
+        
+        let totalCategoryPages = Math.ceil(saleCount.currentCategoryCount.length / limit);
+        saleCount.currentCategoryCount = saleCount.currentCategoryCount.slice(categorySkip, pageCategory * limit);
+        saleCount.saleGrowthCategory = saleCount.saleGrowthCategory.slice(categorySkip, pageCategory * limit);
+        saleCount.revenueGrowthCategory = saleCount.revenueGrowthCategory.slice(categorySkip, pageCategory * limit);
+        
+
         
       res.render('salesReport',{
         orders,
         saleCount,
         range,
         startDate,
-        endDate
+        endDate,
+        totalProductPages,
+        totalCategoryPages,
+        pageProduct,
+        pageCategory
       })
 
     } catch (error) {
