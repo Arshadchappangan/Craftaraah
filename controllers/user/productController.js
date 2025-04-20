@@ -11,6 +11,7 @@ const Wallet = require('../../models/walletSchema');
 const mongoose = require('mongoose');
 const userHelper = require('../../helpers/userHelpers')
 const razorpay = require('../../config/razorpay');
+const adminHelpers = require('../../helpers/adminHelpers')
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
@@ -423,6 +424,10 @@ const placeOrder = async (req, res) => {
 
         let total = cartData.subtotal - couponData.couponDiscount - cartData.discount + cartData.shippingCharge + cartData.tax;
 
+        if(paymentMethod === 'COD' && total > 1000){
+            return res.json({success:false,message:"Cash on delivery option only available for orders less than ₹1000"})
+        }
+
 
         const orderedItems = cart.items.map(item => ({
             product: item.productId._id,
@@ -454,10 +459,27 @@ const placeOrder = async (req, res) => {
             }
         })
 
-
         req.session.orderId = placeOrder._id;
-
         await placeOrder.save();
+
+        if(paymentMethod === 'wallet'){
+            const wallet = await Wallet.findOne({userId:user._id});
+            if(wallet.balance < total){
+                return res.json({success:false,message:'Insufficient wallet balance. Please choose another payment method or top up your wallet.'})
+            }
+            wallet.balance -= total;
+            wallet.transactions.push({
+                transactionType : 'Debit',
+                transactionId : adminHelpers.generateTransactionId(),
+                amount : total,
+                order : placeOrder._id,
+                date : new Date(),
+                description : `Order payment with the order ID ${orderId}`
+            })
+    
+            await wallet.save();
+        }
+
         await Cart.findOneAndDelete({userId:user._id}); 
 
         let userUsage = null;
@@ -596,12 +618,14 @@ const cancelOrder = async (req, res) => {
 
             wallet.balance += refundAmount;
             wallet.transactions.push({
+                transactionId: adminHelpers.generateTransactionId(),
                 transactionType: "Refund",
                 amount: refundAmount,
                 date: new Date(),
+                order: orderId,
                 description: product
                     ? `Refund for "${order.orderedItems[productIndex].product.productName}"`
-                    : `Refund for order ID: ${order.orderId}`,
+                    : `Refund for order ID: ${order.orderId}`
             });
             await wallet.save();
         }
@@ -837,8 +861,8 @@ const loadCouponPage = async (req, res) => {
         }).sort({ isActive: -1, expiryDate: 1 });
 
         const referralCoupon = await Coupon.findOne({
-            couponCode: { $regex: /^REF/ },   // Starts with 'REF'
-            owner: new mongoose.Types.ObjectId(user._id)                   // Belongs to the current user
+            couponCode: { $regex: /^REF/ },  
+            owner: new mongoose.Types.ObjectId(user._id)   
         });
         
 

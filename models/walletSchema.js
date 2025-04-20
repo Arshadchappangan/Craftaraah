@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Order = require('./orderSchema');
 const {Schema} = mongoose;
 
 const walletSchema = new Schema({
@@ -15,6 +16,9 @@ const walletSchema = new Schema({
         default: 0 
     },
     transactions: [{
+        transactionId : {
+            type : String
+        },
         transactionType: { 
             type: String, 
             enum: ['Topup', 'Debit', 'Refund', 'Cashback'] 
@@ -23,6 +27,10 @@ const walletSchema = new Schema({
         date: { 
             type: Date, 
             default: Date.now 
+        },
+        order : {
+            type : Schema.Types.ObjectId,
+            ref : 'Order'
         },
         description: {
             type : String

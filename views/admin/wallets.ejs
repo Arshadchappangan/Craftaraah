@@ -1,0 +1,259 @@
+<%-include("../../views/partials/admin/header")%>
+
+<link rel="stylesheet" href="/admin/assets/css/wallet.css">
+
+<style>
+  .clickable-row:hover {
+  background-color: #eef2f7;
+}
+
+</style>
+
+<div class="content">
+  <div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+      <div class="d-flex align-items-left align-items-md-center justify-content-between flex-column flex-md-row">
+        <div>
+          <h2 class="text-white pb-2 fw-bold">Wallet Management</h2>
+          <h5 class="text-white op-7 mb-2">Manage wallets and transactions effectively</h5>
+        </div>
+        <nav class="nav-search p-0 d-none d-lg-flex">
+          <form class="input-group" action="" method="get" id="searchForm" onsubmit="searchSubmit(event)">
+            <div class="input-group-prepend">
+              <button type="submit" class="btn btn-search pe-1">
+                <i class="fa fa-search search-icon"></i>
+              </button>
+            </div>
+            <input
+              id="searchInput"
+              name="search"
+              type="text"
+              placeholder="Search ..."
+              class="form-control"
+            />
+          </form>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <div class="page-inner mt--5">
+    <div class="row mt--2">
+      
+      <!-- Total Stock -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-primary bubble-shadow-small">
+                  <i class="fas fa-boxes"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Total Wallets generated</p>
+                  <h4 class="card-title">30 items</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Low Stock -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-warning bubble-shadow-small">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Low Stock</p>
+                  <h4 class="card-title">20</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Out of Stock -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-danger bubble-shadow-small">
+                  <i class="fas fa-times-circle"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Out of Stock</p>
+                  <h4 class="card-title">31</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Products -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-info bubble-shadow-small">
+                  <i class="fas fa-tags"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category">Total Products</p>
+                  <h4 class="card-title">15</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+      
+
+    <!-- Inventory Stock Table -->
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card card-round">
+          <div class="card-header">
+            <div class="card-title">Wallet transactions</div>
+          </div>
+          <div class="card-body table-responsive">
+            <table class="table">
+              <tbody>
+                <div class="transaction-container">
+                  <% wallet.forEach((data, index) => { %>
+
+                    <% 
+                        let transactionType = "";
+                        let iconClass = "";
+                        let textClass = "";
+                                        
+                        switch(data.transaction.transactionType) {
+                          case "Topup":
+                            transactionType = "Top-up"  
+                            iconClass = "fas fa-plus-circle text-primary";
+                            textClass = "text-primary";
+                            break;
+                          case "Debit":
+                            transactionType = "Debit";
+                            iconClass = "fas fa-minus-circle text-danger";
+                            textClass = "text-danger";
+                            break;
+                          case "Refund":
+                            transactionType = "Refund";
+                            iconClass = "fas fa-undo text-success";
+                            textClass = "text-success";
+                            break;
+                          case "Cashback":
+                            transactionType = "Cashback";
+                            iconClass = "fas fa-gift text-warning";
+                            textClass = "text-warning";
+                            break;
+                          default:
+                            transactionType = "Unknown";
+                            iconClass = "fas fa-question-circle text-muted"
+                            textClass = "text-muted";
+                        }
+                      %>
+
+                    <div class="transaction-card" data-index="<%= index %>">
+                      <div class="transaction-summary">
+                        <div class="user">
+                          <div class="d-flex align-items-center">
+                            <span class="badge p-2 mx-2" style="border-radius: 50%; border: none;">
+                              <i class="<%= iconClass %> fa-2x"></i>
+                            </span>
+                            <div>
+                              <strong><%= data.transaction.transactionType %></strong>
+                              <p class="text-muted mb-0"><%= data.transaction.date.toLocaleString() %></p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="d-flex">
+                          <div>
+                            <strong style="font-size: larger;" class="<%= textClass %>">
+                              ₹ <%= data.transaction.amount %>
+                            </strong>
+                          </div>
+                          <div class="status <%= data.transaction.status %>"><%= data.transaction.status %></div>
+                          <div class="arrow">&#9660;</div>
+                        </div>
+                      </div>
+                
+                      <div class="details-part">
+                        <div class="d-flex justify-content-between">
+                          <div class="user-details">
+                            <div><img src="<%= data.user.photo %>" alt=""></div>
+                            <div>
+                              <p><strong>Wallet ID:</strong> <%= data.walletId %></p>
+                              <p><strong>Name:</strong> <%= data.user.name %></p>
+                              <p><strong>Email:</strong> <%= data.user.email %></p>
+                            </div>
+                          </div>
+                          <div class="transaction-details">
+                              <p><strong>Transaction ID:</strong> <%= data.transaction.transactionId %></p>
+                              <p><strong>Remarks:</strong> <%= data.transaction.description || "N/A" %></p>
+                          </div>
+                        </div> 
+                        <% if(data.transaction.transactionType === 'Debit' || data.transaction.transactionType === 'Refund'){ %>
+                        <a href="/admin/orderDetails?id=<%= data.transaction.order %>">
+                          <button class="btn btn-info">
+                            <i class="fas fa-info-circle"></i>  Go to order
+                          </button>
+                        </a>
+                        <% } %>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+                
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>   
+
+<!-- Chart Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const cards = document.querySelectorAll(".transaction-card");
+
+    cards.forEach((card) => {
+      const summary = card.querySelector(".transaction-summary");
+      summary.addEventListener("click", () => {
+        // Close all cards
+        cards.forEach((c) => {
+          if (c !== card) c.classList.remove("active");
+        });
+
+        // Toggle current
+        card.classList.toggle("active");
+      });
+    });
+  });
+</script>
+
+
+
+  

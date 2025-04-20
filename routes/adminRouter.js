@@ -8,6 +8,8 @@ const orderController = require('../controllers/admin/orderController');
 const inventoryController = require('../controllers/admin/inventoryController');
 const couponController = require('../controllers/admin/couponController');
 const offerController = require('../controllers/admin/offerController');
+const walletController = require('../controllers/admin/walletController');
+const salesController = require('../controllers/admin/salesController')
 const nocache = require('../middlewares/noCache')
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const multer = require('../middlewares/multer')
@@ -92,9 +94,13 @@ router.post('/deactivateCategoryOffer',adminAuth,offerController.deactivateCateg
 
 //sales management
 
-router.get('/sales',adminAuth,orderController.loadSalesPage);
-router.get('/downloadSalesPdf',adminAuth,orderController.downloadSalesPdf);
-router.get('/downloadSalesExcel',adminAuth,orderController.downloadSalesExcel);
+router.get('/sales',adminAuth,salesController.loadSalesPage);
+router.get('/downloadSalesPdf',adminAuth,salesController.downloadSalesPdf);
+router.get('/downloadSalesExcel',adminAuth,salesController.downloadSalesExcel);
+router.get('/salesOverviewData',adminAuth,salesController.salesOverviewData)
+
+//wallet management
+router.get('/wallets',adminAuth,walletController.loadWallets);
 
 
 module.exports = router

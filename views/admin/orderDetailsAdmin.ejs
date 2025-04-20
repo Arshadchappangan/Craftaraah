@@ -17,13 +17,13 @@
                         <h4 class="card-title">#<%= order.orderId %></h4>
                         <div>
                             <select id="orderStatus" class="form-select" <%= ["Returned", "Cancelled"].includes(order.status) ? "disabled" : "" %>>
-                                <option disabled value="Ordered" <%= order.status === "Ordered" ? "selected" : "" %>>Ordered</option>
+                                <option hidden disabled value="Ordered" <%= order.status === "Ordered" ? "selected" : "" %>>Ordered</option>
                                 <option value="Processing" <%= order.status === "Processing" ? "selected" : "" %>>Processing</option>
                                 <option value="Shipped" <%= order.status === "Shipped" ? "selected" : "" %>>Shipped</option>
                                 <option value="Delivered" <%= order.status === "Delivered" ? "selected" : "" %>>Delivered</option>
-                                <option disabled value="Cancelled" <%= order.status === "Cancelled" ? "selected" : "" %>>Cancelled</option>
-                                <option disabled value="Return Requested" <%= order.status === "Return Requested" ? "selected" : "" %>>Return Requested</option>
-                                <option disabled value="Returned" <%= order.status === "Returned" ? "selected" : "" %>>Returned</option>
+                                <option hidden value="Cancelled" <%= order.status === "Cancelled" ? "selected" : "" %>>Cancelled</option>
+                                <option hidden disabled value="Return Requested" <%= order.status === "Return Requested" ? "selected" : "" %>>Return Requested</option>
+                                <option hidden disabled value="Returned" <%= order.status === "Returned" ? "selected" : "" %>>Returned</option>
                             </select>
                         </div>
                     </div>
@@ -64,9 +64,10 @@
                                     <tr>
                                         <td class="text-start"><img style="height: 80px;" src="<%= item.product.productImage[0]%>" alt=""></td>
                                         <td class="text-start"><%= item.product.productName %></td>
-                                        <td class="text-center">₹ <%= item.product.salePrice%></td>
+                                        <td class="text-center">₹ <%= item.product.price%></td>
                                         <td class="text-center"><%= item.quantity %></td>
-                                        <td class="text-center">₹ <%= item.price %></td>
+                                        
+                                        <td class="text-center">₹ <%= item.price * item.quantity %></td>
                                     </tr>
                                 <% }); %>
                             </tbody>

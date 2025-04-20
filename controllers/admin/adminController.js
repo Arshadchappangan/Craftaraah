@@ -3,7 +3,9 @@ const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema')
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const Order = require('../../models/orderSchema')
+const Order = require('../../models/orderSchema');
+const category = require('../../models/categorySchema');
+const adminHelper = require('../../helpers/adminHelpers')
 
 
 const loadLogin = (req, res) => {
@@ -43,17 +45,25 @@ const loadDashboard = async (req, res) => {
         const categories = await Category.find({isDeleted:false})
         const orders = await Order.find({});
 
+        const matchStage = adminHelper.filterRange({type:'all'})
+        const bestProducts = await adminHelper.saleCountProducts(matchStage);
+        const bestCategories = await adminHelper.saleCountCategories(matchStage);
+
 
         if (!req.session.admin) {
             return res.redirect('/admin/login')
         }
+
         res.render('dashboard',{
             customers : users,
             products:products,
             categories:categories,
-            orders:orders
+            orders:orders,
+            saleCountProducts : bestProducts,
+            saleCountCategories : bestCategories
         })
     } catch (error) {
+        console.error(error)
         res.redirect('/pageError')
     }
 }

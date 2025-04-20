@@ -1,0 +1,104 @@
+<style>
+.transaction-container {
+  max-width: 800px;
+  margin: auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+.transaction-card {
+  background: #fff;
+  margin: 10px 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.transaction-card:hover{
+    background-color: #e9ecec;
+}
+.transaction-summary {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  gap: 20px;
+  cursor: pointer;
+}
+.transaction-summary .user {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+.transaction-summary .user img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+.transaction-summary .amount,
+.transaction-summary .method,
+.transaction-summary .status,
+.transaction-summary .arrow {
+  flex-shrink: 0;
+}
+.transaction-summary .status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+.transaction-summary .status.completed {
+  background: #28a745;
+  color: white;
+}
+.transaction-summary .status.pending {
+  background: #ffc107;
+  color: white;
+}
+.transaction-summary .status.canceled {
+  background: #e0e0e0;
+  color: #555;
+}
+.transaction-summary .arrow {
+  font-size: 18px;
+  transform: rotate(0deg);
+  transition: transform 0.3s ease;
+}
+.transaction-card.active .transaction-summary .arrow {
+  transform: rotate(180deg);
+}
+.details-part {
+  padding: 15px 20px;
+  background: #f4f6f9;
+  display: none;
+}
+.transaction-card.active .details-part {
+    display: block;
+    display: flex;
+    flex-direction: column;
+}
+
+.user-details{
+    display: flex;
+
+}
+
+.user-details img {
+    margin-right: 20px;
+    width: 50px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+}
+
+.details-part .transaction-details {
+    max-width: 320px;
+    overflow-x: hidden;
+}
+
+.details-part a{
+    width: 200px;
+    margin: 0 auto;
+}
+
+</style>

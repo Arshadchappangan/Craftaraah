@@ -96,7 +96,7 @@ router.get('/orderFailure',userAuth,productController.orderFailed);
 //razorpay payment
 router.post('/razorpayOrder',userAuth,userMiddlewares.verifyStock,paymentController.createRazorpayOrder);
 router.post('/verifyPayment',userAuth,paymentController.verifyPayment);
-
+router.post('/topupWallet',userAuth,paymentController.topupWallet)
 
 
 module.exports = router;

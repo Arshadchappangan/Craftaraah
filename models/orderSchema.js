@@ -26,11 +26,7 @@ const orderSchema = new Schema({
         price : {
             type : Number,
             required : true
-        },
-        // isCancelled : {
-        //     type : Boolean,
-        //     default : false
-        // }
+        }
     }],
     totalPrice : {
         type : Number,
@@ -72,7 +68,7 @@ const orderSchema = new Schema({
     },
     paymentMethod : {
         type : String,
-        enum : ['COD','Card','Net Banking','UPI','Razorpay'],
+        enum : ['COD','Razorpay','wallet'],
         required : true
     },
     paymentDetails : {
