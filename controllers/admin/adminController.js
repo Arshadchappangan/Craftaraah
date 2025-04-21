@@ -20,7 +20,7 @@ const login = async (req, res) => {
         const { email, password } = req.body;
         const admin = await User.findOne({ email });
         if (admin) {
-            const passwordMatch = await bcrypt.compare(password, admin.password);
+            const passwordMatch = bcrypt.compare(password, admin.password);
             if (passwordMatch) {
 
                 req.session.admin = admin._id
@@ -40,15 +40,49 @@ const login = async (req, res) => {
 
 const loadDashboard = async (req, res) => {
     try {
+        let range = req.query.range;
+        if(!range) range = 'week';
+
         const users = await User.find({});
         const products = await Product.find({});
         const categories = await Category.find({isDeleted:false})
         const orders = await Order.find({});
 
-        const matchStage = adminHelper.filterRange({type:'all'})
-        const bestProducts = await adminHelper.saleCountProducts(matchStage);
-        const bestCategories = await adminHelper.saleCountCategories(matchStage);
+        let currentMatchStage = null;
+        let pastMatchStage = null;
+        let saleCount = null;
 
+        if(range === 'week'){
+            currentMatchStage = adminHelper.filterRange({type:'week',week: new Date()});
+            pastMatchStage = adminHelper.filterRange({type:'week',week: new Date(new Date().setDate(new Date().getDate() - 6))
+            });
+            saleCount = await adminHelper.getCounts(currentMatchStage,pastMatchStage)
+        }else if(range === 'month'){
+            const now = new Date();
+            const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);  
+                    
+            currentMatchStage = adminHelper.filterRange({ type: 'month', month: currentMonth });
+            pastMatchStage = adminHelper.filterRange({ type: 'month', month: lastMonth });
+                    
+            saleCount = await adminHelper.getCounts(currentMatchStage, pastMatchStage);
+        } else if(range === 'year'){
+            currentMatchStage = adminHelper.filterRange({type:'year',year: new Date().getFullYear()});
+            pastMatchStage = adminHelper.filterRange({type:'year',year:new Date().getFullYear() - 1});
+            saleCount = await adminHelper.getCounts(currentMatchStage,pastMatchStage);
+        }
+
+
+        let chart = { label: [], sales: [], revenue: [] };
+
+        if (saleCount && saleCount.currentProductCount) {
+            chart.label = saleCount.currentProductCount.map(item => item.name);
+            chart.sales = saleCount.currentProductCount.map(item => item.totalQuantitySold);
+            chart.revenue = saleCount.currentProductCount.map(item => item.totalPrice);
+        }
+
+        console.log("saleCount:", saleCount)
+        
 
         if (!req.session.admin) {
             return res.redirect('/admin/login')
@@ -59,9 +93,11 @@ const loadDashboard = async (req, res) => {
             products:products,
             categories:categories,
             orders:orders,
-            saleCountProducts : bestProducts,
-            saleCountCategories : bestCategories
+            saleCountProducts : saleCount.currentProductCount,
+            saleCountCategories : saleCount.currentCategoryCount,
+            chart
         })
+
     } catch (error) {
         console.error(error)
         res.redirect('/pageError')

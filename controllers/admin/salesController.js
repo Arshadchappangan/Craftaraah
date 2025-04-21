@@ -332,55 +332,11 @@ const loadSalesPage = async (req,res) => {
       res.redirect('/pageError');
     }
   };
-  
-  
-  
-  
-  const salesOverviewData = async (req,res) => {
-    try {
-      const range = req.query.range || 'year';
-  
-      let match = {status:{$nin:['Cancelled','Returned']}};
-      let dateFormat = null;
-  
-      if(range === 'week'){
-        match.createdAt = {$gte:moment().startOf('week').toDate()};
-        dateFormat = '%d %B';
-      }else if(range === 'month'){
-        match.createdAt = {$gte:moment().startOf('month').toDate()};
-        dateFormat = '%d %B';
-      }else if(range === 'year'){
-        match.createdAt = { $gte: moment().startOf('year').toDate() };
-        dateFormat = '%B %Y';
-      }
-  
-      const data = await Order.aggregate([
-        {$match:match},
-        {$group:{
-          _id:{$dateToString:{format:dateFormat,date:"$createdAt"}},
-          revenue : {$sum:"$finalAmount"},
-          salesCount : {$sum:1}
-        }},
-        {$sort:{_id:1}}
-      ]);
-  
-      const labels = data.map(d => d._id);
-      const revenues = data.map(d => d.revenue);
-      const salesCount = data.map(d => d.salesCount);
-  
-      res.json({labels,revenues,salesCount})
-  
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({error:"Something went wrong"})
-    }
-  }
 
 
   module.exports = {
     loadSalesPage,
     downloadSalesPdf,
-    downloadSalesExcel,
-    salesOverviewData,
+    downloadSalesExcel
 
   }
