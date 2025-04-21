@@ -1,6 +1,7 @@
 const Order = require('../../models/orderSchema');
 const adminHelper = require('../../helpers/adminHelpers')
-const moment = require('moment')
+const moment = require('moment');
+const ExcelJS = require('exceljs')
 
 const loadSalesPage = async (req,res) => {
     try {
@@ -21,7 +22,7 @@ const loadSalesPage = async (req,res) => {
         let pastMatchStage = null;
         let saleCount = null;
 
-        if(!range) range = 'week'
+        if(!range) range = 'year'
 
         if (startDate && endDate) {
           const start = new Date(startDate);
@@ -83,6 +84,15 @@ const loadSalesPage = async (req,res) => {
         saleCount.revenueGrowthProduct = revenueGrowthProduct;
         saleCount.revenueGrowthCategory = revenueGrowthCategory;
 
+        let chart = {}
+        chart.productNames = saleCount.currentProductCount.map(item => item.name)
+        chart.productSales = saleCount.currentProductCount.map(item => item.totalQuantitySold);
+        chart.productRevenue = saleCount.currentProductCount.map(item => item.totalPrice);
+        chart.categoryNames = saleCount.currentCategoryCount.map(item => item.category);
+        chart.categorySales = saleCount.currentCategoryCount.map(item => item.totalQuantitySold);
+        chart.categoryRevenue = saleCount.currentCategoryCount.map(item => item.totalPrice);
+
+
         let totalProductPages = Math.ceil(saleCount.currentProductCount.length / limit);
         saleCount.currentProductCount = saleCount.currentProductCount.slice(productSkip, pageProduct * limit);
         saleCount.saleGrowthProduct = saleCount.saleGrowthProduct.slice(productSkip, pageProduct * limit);
@@ -92,7 +102,6 @@ const loadSalesPage = async (req,res) => {
         saleCount.currentCategoryCount = saleCount.currentCategoryCount.slice(categorySkip, pageCategory * limit);
         saleCount.saleGrowthCategory = saleCount.saleGrowthCategory.slice(categorySkip, pageCategory * limit);
         saleCount.revenueGrowthCategory = saleCount.revenueGrowthCategory.slice(categorySkip, pageCategory * limit);
-        
 
         
       res.render('salesReport',{
@@ -104,7 +113,8 @@ const loadSalesPage = async (req,res) => {
         totalProductPages,
         totalCategoryPages,
         pageProduct,
-        pageCategory
+        pageCategory,
+        chart
       })
 
     } catch (error) {
@@ -116,7 +126,7 @@ const loadSalesPage = async (req,res) => {
   
   const downloadSalesPdf = async (req, res) => {
     try {
-      const range = req.session.range || 'week';
+      const range = req.session.range || 'year';
       const startDate = req.session.start;
       const endDate = req.session.end;
   
@@ -242,85 +252,88 @@ const loadSalesPage = async (req,res) => {
   
   
   
-  const downloadSalesExcel = async (req,res) => {
+  const downloadSalesExcel = async (req, res) => {
     try {
-      const range = req.session.range;
-      const startDate = req.session.start;
-      const endDate = req.session.end;
+      const { startDate, endDate, range } = req.session;
   
-      let filter = {};
-      filterbydate(filter,range,startDate,endDate);
+      // Prepare match stages for current & past period
+      let currentMatchStage, pastMatchStage;
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = end - start;
+        const pastStart = new Date(start.getTime() - diffTime);
+        const pastEnd = new Date(start);
   
-      const orders = await Order.find(filter).populate('userId').sort({createdAt:-1})
+        currentMatchStage = adminHelper.filterRange({ startDate: start, endDate: end });
+        pastMatchStage = adminHelper.filterRange({ startDate: pastStart, endDate: pastEnd });
+      } else if (range === 'year') {
+        currentMatchStage = adminHelper.filterRange({ type: 'year', year: new Date().getFullYear() });
+        pastMatchStage = adminHelper.filterRange({ type: 'year', year: new Date().getFullYear() - 1 });
+      } else if (range === 'month') {
+        const now = new Date();
+        currentMatchStage = adminHelper.filterRange({ type: 'month', month: now });
+        pastMatchStage = adminHelper.filterRange({ type: 'month', month: new Date(now.getFullYear(), now.getMonth() - 1) });
+      } else {
+        currentMatchStage = adminHelper.filterRange({ type: 'week', week: new Date() });
+        pastMatchStage = adminHelper.filterRange({ type: 'week', week: new Date(new Date().setDate(new Date().getDate() - 6)) });
+      }
   
-      let totalRevenue = 0;
-      let totalDiscount = 0;
-      let couponDeduction = 0
-  
-      orders.forEach(order => {
-        if(order.status !== 'Cancelled' && order.status !== 'Returned'){
-          totalRevenue += order.finalAmount;
-          totalDiscount += order.discount;
-          couponDeduction += order.couponDiscount
-        }
-      });
+      const saleCount = await adminHelper.getCounts(currentMatchStage, pastMatchStage);
   
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Sales Report')
+      const sheet = workbook.addWorksheet('Sales Report');
   
-      worksheet.columns = [
-        {header:"Order ID",key:"orderId",width:30},
-        {header:"Date",key:"date",width:25},
-        {header:"Total price",key:"totalPrice",width:25},
-        {header:"Discount",key:"discount",width:25},
-        {header:"Coupon discount",key:"couponDiscount",width:25},
-        {header:"Final amount",key:"finalAmount",width:25}
-      ]
+      // === HEADER INFO ===
+      sheet.addRow(['Report Range', `: ${range || 'All'}`]);
+      sheet.addRow(['Total Orders', `: ${saleCount.totalOrderCount}`]);
+      sheet.addRow(['Total Revenue', `: ${saleCount.totalRevenue}`]);
+      sheet.addRow(['Total Discount', `: ${saleCount.totalDiscount}`]);
+      sheet.addRow(['Coupon Deduction', `: ${saleCount.totalCouponDeduction}`]);
+      sheet.addRow([]); // empty row for spacing
   
-      orders.forEach((order) => {
-        worksheet.addRow({
-          orderId : order.orderId,
-          date : order.createdAt.toISOString().split('T')[0],
-          totalPrice : order.totalPrice,
-          discount : order.discount,
-          couponDiscount : order.couponDiscount || 0,
-          finalAmount : order.finalAmount
-        })
-      })
-  
-      const totalRow = worksheet.addRow({
-        date: "",
-        orderId: "TOTAL",
-        totalPrice: { formula: `SUM(C2:C${orders.length + 1})` },
-        discount: { formula: `SUM(D2:D${orders.length + 1})` },
-        couponDiscount: { formula: `SUM(E2:E${orders.length + 1})` },
-        finalAmount: { formula: `SUM(F2:F${orders.length + 1})` },
-      });
-    
-      // Style the total row
-      totalRow.font = { bold: true };
-      totalRow.getCell("B").alignment = { horizontal: "right" };
-      totalRow.eachCell((cell) => {
-        cell.border = {
-          top: { style: "thin" },
-          bottom: { style: "double" },
-        };
+      // === PRODUCT SALES SUMMARY ===
+      sheet.addRow(['Product Sales Summary']);
+      sheet.addRow(['Product', 'Current Qty', 'Past Qty', 'Growth']);
+      saleCount.currentProductCount.forEach((item, i) => {
+        const currentQty = item.totalQuantitySold || 0;
+        const pastQty = saleCount.pastProductCount[i]?.totalQuantitySold || 0;
+        sheet.addRow([
+          item.productName,
+          currentQty,
+          pastQty,
+          currentQty - pastQty
+        ]);
       });
   
-      res.setHeader(
-        "Content-Type",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      );
-      res.setHeader("Content-Disposition", "attachment; filename=sales_report.xlsx");
+      sheet.addRow([]); // spacing row
   
+      // === CATEGORY SALES SUMMARY ===
+      sheet.addRow(['Category Sales Summary']);
+      sheet.addRow(['Category', 'Current Qty', 'Past Qty', 'Growth']);
+      saleCount.currentCategoryCount.forEach((item, i) => {
+        const currentQty = item.totalQuantitySold || 0;
+        const pastQty = saleCount.pastCategoryCount[i]?.totalQuantitySold || 0;
+        sheet.addRow([
+          item.categoryName,
+          currentQty,
+          pastQty,
+          currentQty - pastQty
+        ]);
+      });
+  
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=sales_report.xlsx');
       await workbook.xlsx.write(res);
       res.end();
   
-    } catch (error) {
-      console.error(error)
-      res.redirect('/pageError')
+    } catch (err) {
+      console.log(err);
+      res.redirect('/pageError');
     }
-  }
+  };
+  
+  
   
   
   const salesOverviewData = async (req,res) => {

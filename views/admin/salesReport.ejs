@@ -133,128 +133,238 @@
 
     </form>
 
+      <!-- chart -->
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card card-round">
+        <div class="card-header">
+          <div class="card-title">Product-wise Sales & Revenue</div>
+        </div>
+        <div class="card-body">
+          <canvas id="productCombinedChart" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card card-round">
+        <div class="card-header">
+          <div class="card-title">Category-wise Sales & Revenue</div>
+        </div>
+        <div class="card-body">
+          <canvas id="categoryCombinedChart" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Sales Table -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card card-round">
+        <div class="card-header d-flex justify-content-between">
+          <div class="card-title">Sales by Product</div>
+        </div>
+        <div class="card-body table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th scope="col" class="text-center">Sales Quantity</th>
+                <th scope="col" class="text-center">Progress* (Quantity)</th>
+                <th scope="col" class="text-center">Sales Revenue</th>
+                <th scope="col" class="text-center">Progress* (Revenue)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for(let i = 0; i < saleCount.currentProductCount.length; i++) { %>
+                <tr>
+                  <td><%= saleCount.currentProductCount[i].name %></td>
+                  <td class="text-center"><%= saleCount.currentProductCount[i].totalQuantitySold %></td>
+                  <td class="text-center <%= saleCount.saleGrowthProduct[i] > 0 ? 'text-success' : (saleCount.saleGrowthProduct[i] < 0 ? 'text-danger' : '') %>">
+                    <strong><%= saleCount.saleGrowthProduct[i] || 0 %></strong>
+                  </td>
+                  <td class="text-center">₹ <%= saleCount.currentProductCount[i].totalPrice %></td>
+                  <td class="text-center <%= saleCount.revenueGrowthProduct[i] > 0 ? 'text-success' : (saleCount.revenueGrowthProduct[i] < 0 ? 'text-danger' : '') %>">
+                    <strong>₹ <%= saleCount.revenueGrowthProduct[i] %></strong>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+          <div>* All progresses are compared to previous one</div>
+          <nav aria-label="Product Pagination" class="mt-3">
+            <ul class="pagination justify-content-center">
+              <% for(let i = 1; i <= totalProductPages; i++) { %>
+                <li class="page-item <%= i === pageProduct ? 'active' : '' %>">
+                  <a class="page-link" href="?pageProduct=<%= i %>&pageCategory=<%= pageCategory %>"><%= i %></a>
+                </li>
+              <% } %>
+            </ul>
+          </nav>
+          
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card card-round">
+        <div class="card-header d-flex justify-content-between">
+          <div class="card-title">Sales by Category</div>
+        </div>
+        <div class="card-body table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Category Name</th>
+                <th scope="col" class="text-center">Sales Quantity</th>
+                <th scope="col" class="text-center">Progress* (Quantity)</th>
+                <th scope="col" class="text-center">Sales Revenue</th>
+                <th scope="col" class="text-center">Progress* (Revenue)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for(let i = 0; i < saleCount.currentCategoryCount.length; i++) { %>
+                <tr>
+                  <td><%= saleCount.currentCategoryCount[i].category %></td>
+                  <td class="text-center"><%= saleCount.currentCategoryCount[i].totalQuantitySold %></td>
+                  <td class="text-center <%= saleCount.saleGrowthCategory[i] > 0 ? 'text-success' : (saleCount.saleGrowthCategory[i] < 0 ? 'text-danger' : '') %>">
+                    <strong><%= saleCount.saleGrowthCategory[i] || 0 %></strong>
+                  </td>
+                  <td class="text-center">₹ <%= saleCount.currentCategoryCount[i].totalPrice %></td>
+                  <td class="text-center <%= saleCount.revenueGrowthCategory[i] > 0 ? 'text-success' : (saleCount.revenueGrowthCategory[i] < 0 ? 'text-danger' : '') %>">
+                    <strong>₹ <%= saleCount.revenueGrowthCategory[i] %></strong>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+          <div>* All progresses are compared to previous one</div>
+          <nav aria-label="Category Pagination" class="mt-3">
+            <ul class="pagination justify-content-center">
+              <% for(let i = 1; i <= totalCategoryPages; i++) { %>
+                <li class="page-item <%= i === pageCategory ? 'active' : '' %>">
+                  <a class="page-link" href="?pageProduct=<%= pageProduct %>&pageCategory=<%= i %>"><%= i %></a>
+                </li>
+              <% } %>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
 
     
   </div>
 
-    <!-- Sales Table -->
-    <div class="row">
-      <div class="col-md-6">
-        <div class="card card-round">
-          <div class="card-header d-flex justify-content-between">
-            <div class="card-title">Sales by Product</div>
-          </div>
-          <div class="card-body table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Product Name</th>
-                  <th scope="col" class="text-center">Sales Quantity</th>
-                  <th scope="col" class="text-center">Progress* (Quantity)</th>
-                  <th scope="col" class="text-center">Sales Revenue</th>
-                  <th scope="col" class="text-center">Progress* (Revenue)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% for(let i = 0; i < saleCount.currentProductCount.length; i++) { %>
-                  <tr>
-                    <td><%= saleCount.currentProductCount[i].name %></td>
-                    <td class="text-center"><%= saleCount.currentProductCount[i].totalQuantitySold %></td>
-                    <td class="text-center <%= saleCount.saleGrowthProduct[i] > 0 ? 'text-success' : (saleCount.saleGrowthProduct[i] < 0 ? 'text-danger' : '') %>">
-                      <strong><%= saleCount.saleGrowthProduct[i] || 0 %></strong>
-                    </td>
-                    <td class="text-center">₹ <%= saleCount.currentProductCount[i].totalPrice %></td>
-                    <td class="text-center <%= saleCount.revenueGrowthProduct[i] > 0 ? 'text-success' : (saleCount.revenueGrowthProduct[i] < 0 ? 'text-danger' : '') %>">
-                      <strong>₹ <%= saleCount.revenueGrowthProduct[i] %></strong>
-                    </td>
-                  </tr>
-                <% } %>
-              </tbody>
-            </table>
-            <div>* All progresses are compared to previous one</div>
-            <nav aria-label="Product Pagination" class="mt-3">
-              <ul class="pagination justify-content-center">
-                <% for(let i = 1; i <= totalProductPages; i++) { %>
-                  <li class="page-item <%= i === pageProduct ? 'active' : '' %>">
-                    <a class="page-link" href="?pageProduct=<%= i %>&pageCategory=<%= pageCategory %>"><%= i %></a>
-                  </li>
-                <% } %>
-              </ul>
-            </nav>
-            
-          </div>
-        </div>
-      </div>
 
-      <div class="col-md-6">
-        <div class="card card-round">
-          <div class="card-header d-flex justify-content-between">
-            <div class="card-title">Sales by Category</div>
-          </div>
-          <div class="card-body table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Category Name</th>
-                  <th scope="col" class="text-center">Sales Quantity</th>
-                  <th scope="col" class="text-center">Progress* (Quantity)</th>
-                  <th scope="col" class="text-center">Sales Revenue</th>
-                  <th scope="col" class="text-center">Progress* (Revenue)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% for(let i = 0; i < saleCount.currentCategoryCount.length; i++) { %>
-                  <tr>
-                    <td><%= saleCount.currentCategoryCount[i].category %></td>
-                    <td class="text-center"><%= saleCount.currentCategoryCount[i].totalQuantitySold %></td>
-                    <td class="text-center <%= saleCount.saleGrowthCategory[i] > 0 ? 'text-success' : (saleCount.saleGrowthCategory[i] < 0 ? 'text-danger' : '') %>">
-                      <strong><%= saleCount.saleGrowthCategory[i] || 0 %></strong>
-                    </td>
-                    <td class="text-center">₹ <%= saleCount.currentCategoryCount[i].totalPrice %></td>
-                    <td class="text-center <%= saleCount.revenueGrowthCategory[i] > 0 ? 'text-success' : (saleCount.revenueGrowthCategory[i] < 0 ? 'text-danger' : '') %>">
-                      <strong>₹ <%= saleCount.revenueGrowthCategory[i] %></strong>
-                    </td>
-                  </tr>
-                <% } %>
-              </tbody>
-            </table>
-            <div>* All progresses are compared to previous one</div>
-            <nav aria-label="Category Pagination" class="mt-3">
-              <ul class="pagination justify-content-center">
-                <% for(let i = 1; i <= totalCategoryPages; i++) { %>
-                  <li class="page-item <%= i === pageCategory ? 'active' : '' %>">
-                    <a class="page-link" href="?pageProduct=<%= pageProduct %>&pageCategory=<%= i %>"><%= i %></a>
-                  </li>
-                <% } %>
-              </ul>
-            </nav>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Sales Chart -->
-    <div class="row">
-      <div class="col-md-12">
-        <div class="card card-round">
-          <div class="card-header">
-            <div class="card-title">Sales Chart</div>
-          </div>
-          <div class="card-body">
-            <canvas id="salesChart" height="120"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
+    
+   
   </div>
 </div>
 
 <!-- Chart Script -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  const productNames = <%- JSON.stringify(chart.productNames) %>;
+  const productSales = <%- JSON.stringify(chart.productSales) %>;
+  const productRevenue = <%- JSON.stringify(chart.productRevenue) %>;
 
+  const categoryNames = <%- JSON.stringify(chart.categoryNames) %>;
+  const categorySales = <%- JSON.stringify(chart.categorySales) %>;
+  const categoryRevenue = <%- JSON.stringify(chart.categoryRevenue) %>;
 
+  // Combined Product Chart
+  new Chart(document.getElementById('productCombinedChart'), {
+    type: 'bar',
+    data: {
+      labels: productNames,
+      datasets: [
+        {
+          label: 'Sales Quantity',
+          data: productSales,
+          backgroundColor: 'rgba(75, 192, 192, 0.7)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        },
+        {
+          label: 'Revenue (₹)',
+          data: productRevenue,
+          backgroundColor: 'rgba(153, 102, 255, 0.7)',
+          borderColor: 'rgba(153, 102, 255, 1)',
+          borderWidth: 1,
+          yAxisID: 'revenueAxis'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Sales Quantity' }
+        },
+        revenueAxis: {
+          beginAtZero: true,
+          position: 'right',
+          title: { display: true, text: 'Revenue (₹)' },
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
+  });
+
+  // Combined Category Chart
+  new Chart(document.getElementById('categoryCombinedChart'), {
+    type: 'bar',
+    data: {
+      labels: categoryNames,
+      datasets: [
+        {
+          label: 'Sales Quantity',
+          data: categorySales,
+          backgroundColor: 'rgba(255, 159, 64, 0.7)',
+          borderColor: 'rgba(255, 159, 64, 1)',
+          borderWidth: 1
+        },
+        {
+          label: 'Revenue (₹)',
+          data: categoryRevenue,
+          backgroundColor: 'rgba(54, 162, 235, 0.7)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1,
+          yAxisID: 'revenueAxis'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Sales Quantity' }
+        },
+        revenueAxis: {
+          beginAtZero: true,
+          position: 'right',
+          title: { display: true, text: 'Revenue (₹)' },
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
+  });
 </script>
+
 
 
 
