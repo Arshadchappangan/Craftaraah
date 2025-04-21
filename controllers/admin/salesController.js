@@ -114,93 +114,132 @@ const loadSalesPage = async (req,res) => {
   }
   
   
-  const downloadSalesPdf = async(req,res) => {
+  const downloadSalesPdf = async (req, res) => {
     try {
-      const range = req.session.range;
+      const range = req.session.range || 'week';
       const startDate = req.session.start;
       const endDate = req.session.end;
   
-      let filter = {};
-      filterbydate(filter,range,startDate,endDate);
+      let currentMatchStage = null;
+      let pastMatchStage = null;
   
-      const orders = await Order.find(filter).populate('userId').sort({createdAt:-1})
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = end.getTime() - start.getTime();
+        const pastStart = new Date(start.getTime() - diffTime);
+        const pastEnd = new Date(start);
+  
+        currentMatchStage = adminHelper.filterRange({ startDate: start, endDate: end });
+        pastMatchStage = adminHelper.filterRange({ startDate: pastStart, endDate: pastEnd });
+      } else if (range === 'year') {
+        currentMatchStage = adminHelper.filterRange({ type: 'year', year: new Date().getFullYear() });
+        pastMatchStage = adminHelper.filterRange({ type: 'year', year: new Date().getFullYear() - 1 });
+      } else if (range === 'month') {
+        const now = new Date();
+        const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  
+        currentMatchStage = adminHelper.filterRange({ type: 'month', month: currentMonth });
+        pastMatchStage = adminHelper.filterRange({ type: 'month', month: lastMonth });
+      } else if (range === 'week') {
+        currentMatchStage = adminHelper.filterRange({ type: 'week', week: new Date() });
+        pastMatchStage = adminHelper.filterRange({ type: 'week', week: new Date(new Date().setDate(new Date().getDate() - 6)) });
+      }
+  
+      const saleCount = await adminHelper.getCounts(currentMatchStage, pastMatchStage);
+  
+      const filter = {};
+      // filterbydate(filter, range, startDate, endDate);
+  
+      const orders = await Order.find(filter).populate('userId');
   
       let totalRevenue = 0;
       let totalDiscount = 0;
-      let couponDeduction = 0
+      let couponDeduction = 0;
   
       orders.forEach(order => {
-        if(order.status !== 'Cancelled' && order.status !== 'Returned'){
+        if (order.status !== 'Cancelled' && order.status !== 'Returned') {
           totalRevenue += order.finalAmount;
           totalDiscount += order.discount;
-          couponDeduction += order.couponDiscount
+          couponDeduction += order.couponDiscount;
         }
       });
   
-      const doc = new PDFDocument({margin:30,size:'A4'});
-      res.setHeader('Content-type','application/pdf');
-      res.setHeader('Content-Disposition','attachment; filename = sales_report.pdf');
-  
+      const PDFDocument = require('pdfkit-table');
+      const doc = new PDFDocument({ margin: 30, size: 'A4' });
+      res.setHeader('Content-type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
       doc.pipe(res);
   
-      doc.fontSize(18).text("Sales Report",{align:'center'});
+      // Header
+      doc.fontSize(18).text("Sales Report", { align: 'center' }).moveDown();
+  
+      if (startDate && endDate) {
+        doc.fontSize(12).text(`Report Period   : ${new Date(startDate).toISOString().split('T')[0]} to ${new Date(endDate).toISOString().split('T')[0]}`);
+      } else {
+        doc.fontSize(12).text(`Report Range    : ${range.charAt(0).toUpperCase() + range.slice(1)}`);
+      }
+  
+      doc.text(`Total Orders     : ${orders.length}`);
+      doc.text(`Total Revenue    : ₹${totalRevenue}`);
+      doc.text(`Total Discount   : ₹${totalDiscount}`);
+      doc.text(`Coupon Deduction : ₹${couponDeduction}`);
       doc.moveDown();
   
-      if(startDate && endDate){
-        doc
-        .fontSize(12)
-        .text(`Report period  : ${new Date(startDate).toISOString().split('T')[0]} to ${new Date(endDate).toISOString().split('T')[0]}`)
-      }else if(range){
-        doc
-        .fontSize(12)
-        .text(`Report Range   : ${range.charAt(0).toUpperCase() + range.slice(1)}`)
-      }else{
-        doc
-        .fontSize(12)
-        .text(`Report Range   : Overall`)
-      }
+      // Product Sales Table
+      const productTable = {
+        title: "Product Sales Summary",
+        headers: ["Product", "Current Qty", "Past Qty", "Growth"],
+        rows: saleCount.currentProductCount.map((product, index) => {
+          const name = product.name || `Product ${index + 1}`;
+          const currentQty = product.totalQuantitySold || 0;
+          const pastQty = saleCount.pastProductCount[index]?.totalQuantitySold || 0;
+          const growth = currentQty - pastQty;
+          return [name, currentQty, pastQty, growth];
+        })
+      };
   
-      doc
-      .text(`Total Orders     : ${orders.length}`)
-      .text(`Total Revenue    : ${totalRevenue}`)
-      .text(`Total Discount   : ${totalDiscount}`)
-      .text(`Coupon deduction : ${couponDeduction || 0}`)
-      .moveDown();
+      await doc.table(productTable, {
+        prepareHeader: () => doc.font('Helvetica-Bold').fontSize(10),
+        prepareRow: (row, i) => doc.font('Helvetica').fontSize(10),
+        columnSpacing: 5,
+        padding: 5,
+        columnsSize: [150, 100, 100, 100]
+      });
   
-      const table = {
-        headers : [
-          "Order ID",
-          "Date",
-          "Total price",
-          "Discount",
-          "Coupon Discount",
-          "Final Amount"
-        ],
-        rows : orders.map((order) => [
-          order.orderId,
-          order.createdAt.toISOString().split("T")[0],
-          order.totalPrice,
-          order.discount,
-          order.couponDiscount,
-          order.finalAmount
-        ])
-      }
+      doc.moveDown();
   
-      await doc.table(table,{
-        prepareHeader : () => doc.font('Helvetica-Bold').fontSize(10),
-        prepareRow : (row,i) => doc.font('Helvetica').fontSize(10),
-        columnSpacing : 5,
-        padding : 5,
-        columnsSize : [140,80,75,75,75,75]
-      })
+      // Category Sales Table
+      const categoryTable = {
+        title: "Category Sales Summary",
+        headers: ["Category", "Current Qty", "Past Qty", "Growth"],
+        rows: saleCount.currentCategoryCount.map((category, index) => {
+          const name = saleCount.currentCategoryCount[index].category || `Category ${index + 1}`;
+          const currentQty = category.totalQuantitySold || 0;
+          const pastQty = saleCount.pastCategoryCount[index]?.totalQuantitySold || 0;
+          const growth = currentQty - pastQty;
+          return [name, currentQty, pastQty, growth];
+        })
+      };
   
-      doc.end()
+      await doc.table(categoryTable, {
+        prepareHeader: () => doc.font('Helvetica-Bold').fontSize(10),
+        prepareRow: (row, i) => doc.font('Helvetica').fontSize(10),
+        columnSpacing: 5,
+        padding: 5,
+        columnsSize: [150, 100, 100, 100]
+      });
+  
+      doc.end();
   
     } catch (error) {
-      console.error(error)
-      res.redirect('pageError')
+      console.error(error);
+      res.redirect('/pageError');
     }
-  }
+  };
+  
+  
   
   
   const downloadSalesExcel = async (req,res) => {
