@@ -421,6 +421,8 @@ const myOrders = async (req, res) => {
 const loadWallet = async (req, res) => {
     try {
         const user = req.session.user;
+        const page = req.query.page || 1;
+        const limit = 8;
         let wallet = await Wallet.findOne({ userId: user._id });
 
         // Create wallet if not found

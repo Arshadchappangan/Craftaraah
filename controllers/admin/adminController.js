@@ -41,7 +41,7 @@ const login = async (req, res) => {
 const loadDashboard = async (req, res) => {
     try {
         let range = req.query.range;
-        if(!range) range = 'week';
+        if(!range) range = 'year';
 
         const users = await User.find({});
         const products = await Product.find({});
@@ -80,8 +80,6 @@ const loadDashboard = async (req, res) => {
             chart.sales = saleCount.currentProductCount.map(item => item.totalQuantitySold);
             chart.revenue = saleCount.currentProductCount.map(item => item.totalPrice);
         }
-
-        console.log("saleCount:", saleCount)
         
 
         if (!req.session.admin) {

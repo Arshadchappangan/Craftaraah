@@ -119,9 +119,9 @@
                     <div class="card-head-row">
                       <div class="card-title">Sales Overview</div>
                       <div class="card-tools">
-                        <a href="#" class="btn btn-label-info btn-round btn-sm filter-btn" data-filter="week">Week</a>
-                        <a href="#" class="btn btn-label-info btn-round btn-sm filter-btn" data-filter="month">Month</a>
-                        <a href="#" class="btn btn-label-info btn-round btn-sm filter-btn" data-filter="year">Year</a>
+                        <a href="/admin?range=week" class="btn btn-label-info btn-round btn-sm filter-btn" data-filter="week">Week</a>
+                        <a href="/admin?range=month" class="btn btn-label-info btn-round btn-sm filter-btn" data-filter="month">Month</a>
+                        <a href="/admin?range=year" class="btn btn-label-info btn-round btn-sm filter-btn" data-filter="year">Year</a>
                       </div>
                     </div>
                   </div>
@@ -224,7 +224,7 @@
                     <div class="card-head-row card-tools-still-right">
                       <div class="card-title">Best Selling Categories (Top 10)</div>
                     </div>
-                    <% for(let i=0;i<7;i++) { %>
+                    <% for(let i=0;i<8;i++) { %>
                     <div class="card-list py-1">
                       <div class="item-list d-flex justify-content-between">
                         <div class="d-flex">
@@ -307,16 +307,6 @@
           }
         }
       });
-
-
-      document.querySelectorAll('.filter-btn').forEach(button => {
-        button.addEventListener('click', () => {
-          const range = button.getAttribute('data-range');
-          window.location.href = `/admin?range=${range}`;
-        });
-      });
-
-
 
 
     </script>

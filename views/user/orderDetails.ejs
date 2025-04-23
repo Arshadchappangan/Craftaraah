@@ -91,11 +91,15 @@
                   <td class="align-middle text-center">₹<%= item.price %></td>
                   <td class="align-middle text-center">₹<%= item.quantity * item.price %></td>
                     <td class="align-middle text-center">
-                    <% if (order.status === 'Ordered' || order.status === 'Processing') { %>
+                    <% if (order.status === 'Ordered' || order.status === 'Processing' || order.status === 'Partially Cancelled' && item.isCancelled !== true) { %>
                       <a onclick="confirmCancel('<%= order._id %>','<%= item.product._id %>')" class="badge bg-danger rounded-pill text-light">
                         <i class="fa fa-times-circle text-light"></i>  Cancel
                       </a>
-                    <% } %>
+                    <% } else if(order.status === 'Partially Cancelled' && item.isCancelled === true) {%>
+                      <button type="submit" class="badge bg-danger">
+                        Cancelled
+                       </button>
+                       <%}%>
                     </td>
                 </tr>
               <% }) %>
@@ -118,6 +122,10 @@
               </button>
             </a>
           <% } %>
+
+          <!-- <% if (order.orderedItems.isCancelled === true) { %>
+
+          <% } %> -->
 
           <!-- Cancel Order -->
           <% if (order.status === 'Ordered' || order.status === 'Processing' || order.status === 'Partially Cancelled') { %>

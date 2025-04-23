@@ -198,12 +198,11 @@
             <ul class="pagination justify-content-center">
               <% for(let i = 1; i <= totalProductPages; i++) { %>
                 <li class="page-item <%= i === pageProduct ? 'active' : '' %>">
-                  <a class="page-link" href="?pageProduct=<%= i %>&pageCategory=<%= pageCategory %>"><%= i %></a>
+                  <a class="page-link" href="?pageProduct=<%= i %>&pageCategory=<%= pageCategory %>&range=<%= range %>"><%= i %></a>
                 </li>
               <% } %>
             </ul>
           </nav>
-          
         </div>
       </div>
     </div>
@@ -245,7 +244,7 @@
             <ul class="pagination justify-content-center">
               <% for(let i = 1; i <= totalCategoryPages; i++) { %>
                 <li class="page-item <%= i === pageCategory ? 'active' : '' %>">
-                  <a class="page-link" href="?pageProduct=<%= pageProduct %>&pageCategory=<%= i %>"><%= i %></a>
+                  <a class="page-link" href="?pageProduct=<%= pageProduct %>&pageCategory=<%= i %>&range=<%= range %>"><%= i %></a>
                 </li>
               <% } %>
             </ul>

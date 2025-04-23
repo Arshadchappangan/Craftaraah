@@ -589,14 +589,15 @@ const orderDetails = async(req,res) => {
 const cancelOrder = async (req, res) => {
     try {
         const user = req.session.user;
-        const { orderId, productId } = req.query;
+        const orderId = req.query.orderId;
+        const productId = req.query.productId || null;
 
         const order = await Order.findById(orderId).populate('orderedItems.product');
         if (!order) return res.status(404).json({ success: false, message: "Order not found." });
 
         let product = null
         let productIndex = null;
-        if(productId !== 'undefined'){
+        if (productId && productId !== undefined && productId !== 'undefined') {
             product = productId ? await Product.findById(productId).populate('offers') : null;
             if (productId && !product) return res.status(404).json({ success: false, message: "Product not found." });
             productIndex = order.orderedItems.findIndex(item => item.product._id.toString() === productId);
@@ -611,7 +612,7 @@ const cancelOrder = async (req, res) => {
             wallet = new Wallet({ userId: user._id, balance: 0, transactions: [] });
         }
 
-        if (wallet && order.paymentMethod === "Razorpay") {
+        if (wallet && order.paymentMethod === "Razorpay" || order.paymentMethod === 'wallet') {
             const refundAmount = productId
                 ? order.orderedItems[productIndex].price * order.orderedItems[productIndex].quantity
                 : order.finalAmount;
@@ -623,9 +624,10 @@ const cancelOrder = async (req, res) => {
                 amount: refundAmount,
                 date: new Date(),
                 order: orderId,
-                description: product
+                description: productIndex !== null
                     ? `Refund for "${order.orderedItems[productIndex].product.productName}"`
                     : `Refund for order ID: ${order.orderId}`
+
             });
             await wallet.save();
         }
@@ -635,7 +637,7 @@ const cancelOrder = async (req, res) => {
                 await Product.findByIdAndUpdate(productId, {
                     $inc: { stock: order.orderedItems[productIndex].quantity },
                 });
-                order.orderedItems.splice(productIndex, 1);
+                order.orderedItems[productIndex].isCancelled = true
             }
         } else {
             for (const item of order.orderedItems) {
@@ -647,7 +649,8 @@ const cancelOrder = async (req, res) => {
             }
         }
 
-        order.status = order.orderedItems.length === 0 ? "Cancelled" : "Partially Cancelled";
+        const allItemsCancelled = order.orderedItems.every(item => item.isCancelled);
+        order.status = allItemsCancelled ? "Cancelled" : "Partially Cancelled";
         await order.save();
 
         return res.json({ success: true, message: "Cancellation processed successfully!" });
