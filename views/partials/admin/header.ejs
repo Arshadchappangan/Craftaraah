@@ -76,7 +76,7 @@
             <ul class="nav nav-secondary">
               <li class="nav-item active">
                 <a
-                  href="/admin"
+                  href="/admin/"
                   class="collapsed"
                   aria-expanded="false"
                 >
@@ -192,17 +192,17 @@
                 </a>
                 <div class="collapse" id="base">
                   <ul class="nav nav-collapse">
-                    <li>
+                    <li class="nav-item">
                       <a href="/admin/archivedCategories">
                         <span class="sub-item">Categories</span>
                       </a>
                     </li>
-                    <li>
+                    <li class="nav-item">
                       <a href="/admin/archivedProducts">
                         <span class="sub-item">Products</span>
                       </a>
                     </li>
-                    <li>
+                    <li class="nav-item">
                       <a href="/admin/archivedCoupons">
                         <span class="sub-item">Coupons</span>
                       </a>
@@ -225,3 +225,18 @@
    
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            const menuItems = document.querySelectorAll(".nav-item a");
+            const currentPath = window.location.pathname;
+        
+            menuItems.forEach((link) => {
+              if (link.getAttribute("href") === currentPath) {
+                link.closest(".nav-item").classList.add("active");
+              } else {
+                link.closest(".nav-item").classList.remove("active");
+              }
+            });
+          });
+        </script>
+        

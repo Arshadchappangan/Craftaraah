@@ -119,15 +119,15 @@
                     <div class="card-head-row">
                       <div class="card-title">Sales Overview</div>
                       <div class="card-tools">
-                        <a href="" id="filter-week" class="btn btn-label-info btn-round btn-sm">Week</a>
-                        <a href="" id="filter-month" class="btn btn-label-info btn-round btn-sm">Month</a>
-                        <a href="" id="filter-year" class="btn btn-label-info btn-round btn-sm">Year</a>
+                        <a href="/admin?range=week" class="btn btn-label-info btn-round btn-sm filter-btn" data-filter="week">Week</a>
+                        <a href="/admin?range=month" class="btn btn-label-info btn-round btn-sm filter-btn" data-filter="month">Month</a>
+                        <a href="/admin?range=year" class="btn btn-label-info btn-round btn-sm filter-btn" data-filter="year">Year</a>
                       </div>
                     </div>
                   </div>
                   <div class="card-body">
                     <div class="chart-container" style="min-height: 375px">
-                      <canvas id="salesRevenueChart" height="100"></canvas>
+                      <canvas id="productCombinedChart" height="100"></canvas>
                     </div>
                     <div id="myChartLegend"></div>
                   </div>
@@ -224,7 +224,7 @@
                     <div class="card-head-row card-tools-still-right">
                       <div class="card-title">Best Selling Categories (Top 10)</div>
                     </div>
-                    <% for(let i=0;i<7;i++) { %>
+                    <% for(let i=0;i<8;i++) { %>
                     <div class="card-list py-1">
                       <div class="item-list d-flex justify-content-between">
                         <div class="d-flex">
@@ -260,115 +260,55 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-      const ctx = document.getElementById('salesRevenueChart').getContext('2d');
-      let salesRevenueChart;
+      
+      const productNames = <%- JSON.stringify(chart.label) %>;
+      const productSales = <%- JSON.stringify(chart.sales) %>;
+      const productRevenue = <%- JSON.stringify(chart.revenue) %>;
 
-      function createDualChart(labels, revenues, salesCounts) {
-        if (salesRevenueChart) salesRevenueChart.destroy();
-
-        salesRevenueChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [
-              {
-                label: 'Revenue (₹)',
-                data: revenues,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: '#4BC0C0',
-                borderWidth: 2,
-                yAxisID: 'y',
-                tension: 0.2
-              },
-              {
-                label: 'Sales Count',
-                data: salesCounts,
-                backgroundColor: 'rgba(107, 165, 236, 0.87)',
-                borderColor: 'rgba(0, 97, 217, 0.87)',
-                borderWidth: 2,
-                yAxisID: 'y1',
-                tension: 0.2
-              }
-            ]
+      new Chart(document.getElementById('productCombinedChart'), {
+        type: 'bar',
+        data: {
+          labels: productNames,
+          datasets: [
+            {
+              label: 'Sales Quantity',
+              data: productSales,
+              backgroundColor: 'rgba(75, 192, 192, 0.7)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Revenue (₹)',
+              data: productRevenue,
+              backgroundColor: 'rgba(153, 102, 255, 0.7)',
+              borderColor: 'rgba(153, 102, 255, 1)',
+              borderWidth: 1,
+              yAxisID: 'revenueAxis'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          interaction: {
+            mode: 'index',
+            intersect: false
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-              mode: 'index',
-              intersect: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Sales Quantity' }
             },
-            plugins: {
-              legend: {
-                display: true,
-                position: 'top',
-              }
-            },
-            scales: {
-              y: {
-                type: 'linear',
-                position: 'left',
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Revenue (₹)'
-                }
-              },
-              y1: {
-                type: 'linear',
-                position: 'right',
-                beginAtZero: true,
-                grid: {
-                  drawOnChartArea: false
-                },
-                title: {
-                  display: true,
-                  text: 'Sales Count'
-                }
-              }
+            revenueAxis: {
+              beginAtZero: true,
+              position: 'right',
+              title: { display: true, text: 'Revenue (₹)' },
+              grid: { drawOnChartArea: false }
             }
           }
-        });
-      }
-
-      function setActiveButton(id) {
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-          btn.classList.remove('active');
-        });
-        document.getElementById(id).classList.add('active');
-      }
-
-      function fetchChartData(range = 'all') {
-        fetch(`/admin/salesOverviewData?range=${range}`)
-          .then(res => res.json())
-          .then(data => {
-            createDualChart(data.labels, data.revenues, data.salesCount);
-          })
-          .catch(err => console.error(err));
-      }
-
-      // Initial Load
-      fetchChartData('year');
-      setActiveButton('filter-year');
-
-      // Filters
-      document.getElementById('filter-year').addEventListener('click', e => {
-        e.preventDefault();
-        fetchChartData('year');
-        setActiveButton('filter-year');
+        }
       });
 
-      document.getElementById('filter-week').addEventListener('click', e => {
-        e.preventDefault();
-        fetchChartData('week');
-        setActiveButton('filter-week');
-      });
 
-      document.getElementById('filter-month').addEventListener('click', e => {
-        e.preventDefault();
-        fetchChartData('month');
-        setActiveButton('filter-month');
-      });
     </script>
   </body>
 </html>

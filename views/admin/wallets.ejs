@@ -225,6 +225,15 @@
                 
                 
               </tbody>
+              <nav aria-label="Wallet Pagination" class="mt-3">
+                <ul class="pagination justify-content-center">
+                  <% for(let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                      <a class="page-link" href="?page=<%= i %>&limit=<%= limit %>"><%= i %></a>
+                    </li>
+                  <% } %>
+                </ul>
+              </nav>              
             </table>
           </div>
         </div>

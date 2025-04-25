@@ -26,6 +26,10 @@ const orderSchema = new Schema({
         price : {
             type : Number,
             required : true
+        },
+        isCancelled: {
+            type : Boolean,
+            default : false
         }
     }],
     totalPrice : {
