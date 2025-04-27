@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { strike } = require('pdfkit');
 const {Schema} = mongoose;
 
 const categorySchema = new mongoose.Schema({
@@ -10,6 +11,10 @@ const categorySchema = new mongoose.Schema({
     description : {
         type : String,
         required : true,
+    },
+    photo : {
+        type : String,
+        required : true
     },
     isListed : {
         type : Boolean,

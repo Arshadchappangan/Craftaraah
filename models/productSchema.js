@@ -37,9 +37,10 @@ const productSchema = new Schema({
         type : [{type : String}],
         required : true
     },
-    productRating : {
-        type : Number,
-    },
+    review : [{
+        type : Schema.Types.ObjectId,
+        ref : "Review"
+    }],
     isBlocked : {
         type : Boolean,
         required : true,

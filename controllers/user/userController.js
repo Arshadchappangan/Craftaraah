@@ -7,6 +7,7 @@ const { name } = require('ejs');
 const category = require('../../models/categorySchema');
 const Coupon = require('../../models/couponSchema')
 const Cart = require('../../models/cartSchema');
+const Review = require('../../models/reviewSchema')
 const userHelper = require('../../helpers/userHelpers')
 
 const loadHome = async (req, res) => {
@@ -16,6 +17,13 @@ const loadHome = async (req, res) => {
         userHelper.calculateDiscount(product)
         const cartExist = await Cart.find({userId:req.session.user}).populate('items.productId');
         let userData = null;
+        
+        let overallRating = []
+
+        for (const item of product) {
+            const review = await Review.find({ productId: item._id }).populate('userId').sort({ createdAt: -1 });
+             overallRating.push(review.length > 0 ? item.productRating / review.length : 0);
+        }
 
         if (req.session.user) {
             userData = await User.findById(req.session.user);
@@ -26,7 +34,8 @@ const loadHome = async (req, res) => {
         res.render('home', {
             user: userData,
             category: category,
-            product: product
+            product: product,
+            overallRating:overallRating
         });
 
 

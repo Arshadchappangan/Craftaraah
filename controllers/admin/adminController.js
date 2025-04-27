@@ -47,6 +47,14 @@ const loadDashboard = async (req, res) => {
         const products = await Product.find({});
         const categories = await Category.find({isDeleted:false})
         const orders = await Order.find({});
+        let today = {orders:0,cancelled:0,revenue:0}
+        orders.forEach(item => {
+            if (item.createdAt && new Date(item.createdAt).toDateString() === new Date().toDateString()) {
+                today.orders++;
+                if(item.status === 'Cancelled') today.cancelled++;
+                if(item.status === 'Delivered'|| item.status === 'Ordered' || item.status === 'Processing' || item.status === 'Shipped') today.revenue += item.finalAmount
+            }
+        });
 
         let currentMatchStage = null;
         let pastMatchStage = null;
@@ -91,6 +99,7 @@ const loadDashboard = async (req, res) => {
             products:products,
             categories:categories,
             orders:orders,
+            today:today,
             saleCountProducts : saleCount.currentProductCount,
             saleCountCategories : saleCount.currentCategoryCount,
             chart

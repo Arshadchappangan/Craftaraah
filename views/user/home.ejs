@@ -148,7 +148,19 @@
                                     </div>
                                     <div class="latest-product__item__text">
                                         <h6><%=product[i].productName%></h6>
-                                        <span>₹<%=product[i].salePrice%></span>
+                                        <div class="d-flex justify-content-between me-3">
+                                            <span>₹<%=product[i].discountedPrice%></span>
+                                            <span><strike style="color: red;">₹<%=product[i].price%></strike></span>
+                                        </div>
+                                        <div class="product__details__rating" style="color: #FDCC0D;">
+                                            <%for(let j=1;j<= 5;j++){%>
+                                                <%if(j <= overallRating[i]){%>
+                                                <i class="fa fa-star"></i>
+                                                <%}else{%>
+                                                <i class="fa fa-star-o"></i>
+                                            <%}%>
+                                            <%}%>
+                                        </div>
                                     </div>
                                 </a>
                                 <%}%>
@@ -161,7 +173,19 @@
                                         </div>
                                         <div class="latest-product__item__text">
                                             <h6><%=product[i].productName%></h6>
-                                            <span>₹<%=product[i].salePrice%></span>
+                                            <div class="d-flex justify-content-between me-3">
+                                                <span>₹<%=product[i].discountedPrice%></span>
+                                                <span><strike style="color: red;">₹<%=product[i].price%></strike></span>
+                                            </div>
+                                        </div>
+                                        <div class="product__details__rating" style="color: #FDCC0D;">
+                                            <%for(let j=1;j<= 5;j++){%>
+                                                <%if(j <= overallRating[i]){%>
+                                                <i class="fa fa-star"></i>
+                                                <%}else{%>
+                                                <i class="fa fa-star-o"></i>
+                                            <%}%>
+                                            <%}%>
                                         </div>
                                     </a>
                                     <%}%>

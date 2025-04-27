@@ -188,7 +188,7 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Create Category</h5>
-                            <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmission(event)">
+                            <form method="post" action="/admin/addCategory" enctype="multipart/form-data" onsubmit="return handleFormSubmission(event)">
                                 <div class="mb-4">
                                     <label for="product_name" class="form-label"> Name</label>
                                     <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name" />
@@ -199,6 +199,12 @@
                                     <textarea placeholder="Type here" name="description" class="form-control" id="descriptionId"></textarea>
                                     <div id="description-error" class="error-message"></div>
                                 </div>
+                                <div class="mb-4">
+                                  <label for="form-label">Photo</label><br>
+                                  <input type="file" name="photo" id="categoryPhoto" onchange="previewPhoto()">
+                                  <img id="photoPreview" src="#" alt="Photo Preview" style="width: 120px; height: 120px; border-radius: 7.5%; object-fit: cover; margin-top: 10px; display: none;">
+                                  <div id="photo-error" class="error-message"></div>
+                                </div>
                                 <div class="d-grid">
                                     <button class="btn btn-primary" type="submit">Create Category</button>
                                 </div>
@@ -208,13 +214,12 @@
                 </div>
     
             </div> <!-- End Row -->
-            
 
                 </div>
             </div>
         
                 <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+                    <ul class="pagination justify-content-center mb-20">
                         <% for (let i = 1; i <= totalPages; i++) { %> 
                             <li class="page-item <%=(i === currentPage) ? 'active' : '' %>">
                                 <a class="page-link" href="?page=<%= i %><% if (searchQuery) { %>&search=<%= searchQuery %><% } %>">
@@ -230,6 +235,20 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
 
+    function previewPhoto() {
+        const input = document.getElementById('categoryPhoto');
+        const file = input.files[0];
+        const photoPreview = document.getElementById('photoPreview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                photoPreview.src = e.target.result;
+                photoPreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
         function handleFormSubmission(event){
             event.preventDefault();
             if(!validateForm()){
@@ -237,13 +256,31 @@
             }
             const name = document.getElementById("product_name").value.trim();
             const description = document.getElementById("descriptionId").value.trim();
+            const input = document.getElementById('categoryPhoto');
 
-            fetch('/admin/addCategory',{
-                method : "POST",
-                headers : {
-                    "content-type" : "application/json"
-                },
-                body : JSON.stringify({name,description})
+            const file = input.files[0];
+      
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const photoPreview = document.getElementById('photoPreview');
+              if (photoPreview) { 
+                  photoPreview.src = e.target.result;
+                  photoPreview.style.display = 'block'; 
+              }
+            };
+            reader.readAsDataURL(file);
+          }
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('description', description);
+            if (file) {
+              formData.append('photo', file);
+            }
+
+            fetch('/admin/addCategory', {
+              method: 'POST',
+              body: formData
             })
             .then(response => {
                 if(!response.ok){

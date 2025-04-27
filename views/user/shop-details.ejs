@@ -155,6 +155,7 @@
                             <div class="tab-pane" id="tabs-3" role="tabpanel">
                                 <div class="product__details__tab__desc">
                                     <div class="container">
+                                        <% if(review.length > 0 && review.review){ %>
                                         <%for (let i=0;i<review.length;i++){%>
                                         <div v-for="item in list" class="review">
     
@@ -191,6 +192,7 @@
                                             </div>
                                               
                                             </div>
+                                            <%}%>
                                             <%}%>
 
                                     <div id="review-header">Write your review</div>

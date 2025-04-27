@@ -32,7 +32,7 @@ router.get('/unblockCustomer',adminAuth,customerController.unblockCustomer);
 //category management
 
 router.get('/category',adminAuth,categoryController.categoryInfo);
-router.post('/addCategory',adminAuth,categoryController.addCategory);
+router.post('/addCategory',adminAuth,multer.categoryUpload.single('photo'),categoryController.addCategory);
 router.get('/unlistCategory',adminAuth,categoryController.unlistCategory);
 router.get('/listCategory',adminAuth,categoryController.listCategory);
 router.get('/editCategory',adminAuth,categoryController.loadEditCategory);
