@@ -73,7 +73,7 @@ const addCategory = async (req, res) => {
 
         const photoPath = req.file
             ? `/uploads/category-images/${req.file.filename}` 
-            : null; // No photo uploaded
+            : null;
 
 
         const newCategory = new Category({
@@ -111,39 +111,27 @@ const listCategory = async (req,res) => {
     }
 }
 
-const loadEditCategory = async (req,res) => {
+
+const editCategory = async (req, res) => {
     try {
-        const id = req.query.id;
-        const category = await Category.findOne({_id:id});
-        res.render("editCategory",{category:category});
+        const categoryId = req.params.id;
+        const { name, description } = req.body;
+        const photo = req.file ? req.file.path : null;
+
+        const updateData = { name, description };
+        if (photo) {
+            updateData.photo = photo;
+        }
+
+        await Category.findByIdAndUpdate(categoryId, updateData);
+        res.status(200).json({ message: 'Category updated successfully' });
     } catch (error) {
-        res.redirect('/admin/pageError');
+        res.status(400).json({ error: 'Failed to update category' });
     }
 }
 
-const editCategory = async (req,res) => {
-    try {
-        const id = req.params.id;
-        const {name,description} = req.body;
-        const existingCategory = await Category.findOne({name:name,_id: { $ne: id }});
-        if(existingCategory){
-            return res.status(400).json({error:"Category already existing, please try another name"})
-        }
 
-        const updateCategory = await Category.findByIdAndUpdate(id,{
-            name,
-            description
-        })
 
-        if(updateCategory){
-            res.redirect('/admin/category')
-        }else{
-            res.status(404).json({error:"Category not found"})
-        }
-    } catch (error) {
-        res.status(500).json({error:"Internal server error"})
-    }
-}
 
 
 const archiveCategory = async (req,res) =>{
@@ -233,7 +221,6 @@ module.exports = {
     addCategory,
     listCategory,
     unlistCategory,
-    loadEditCategory,
     editCategory,
     archiveCategory,
     archivedCategoryInfo,
