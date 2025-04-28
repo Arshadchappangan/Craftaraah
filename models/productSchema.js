@@ -41,6 +41,10 @@ const productSchema = new Schema({
         type : Schema.Types.ObjectId,
         ref : "Review"
     }],
+    rating : {
+        type : Number,
+        default : 0
+    },
     isBlocked : {
         type : Boolean,
         required : true,

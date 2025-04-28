@@ -115,13 +115,11 @@ const listCategory = async (req,res) => {
 const editCategory = async (req, res) => {
     try {
         const categoryId = req.params.id;
+        const existingCategory = await Category.findById(categoryId)
         const { name, description } = req.body;
-        const photo = req.file ? req.file.path : null;
+        const photo = req.file ? `/uploads/category-images/${req.file.filename}` : existingCategory.photo ;
 
-        const updateData = { name, description };
-        if (photo) {
-            updateData.photo = photo;
-        }
+        const updateData = { name, description, photo };
 
         await Category.findByIdAndUpdate(categoryId, updateData);
         res.status(200).json({ message: 'Category updated successfully' });

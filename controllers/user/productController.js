@@ -52,31 +52,38 @@ const loadProductDetails = async(req,res) => {
         }
 }
 
-const reviewSubmission = async (req,res) => {
+const reviewSubmission = async (req, res) => {
     try {
         const userId = req.session.user;
-        const productId = req.body.productId;
-        const review = req.body.review;
-        const rating = req.body.rating;
+        const { productId, review, rating } = req.body;
 
         const saveReview = new Review({
-            userId : userId,
-            productId : productId,
-            review : review,
-            rating : rating
-        })
-
+            userId,
+            productId,
+            review,
+            rating
+        });
         await saveReview.save();
-        const product = await Product.findOne();
+
+        const product = await Product.findOne({ _id: productId });
+
         product.review.push(saveReview._id);
         await product.save();
-        res.redirect('/shop')
 
+        const allReviews = await Review.find({ productId: productId });
+        const totalRating = allReviews.reduce((acc, curr) => acc + curr.rating, 0);
+        product.rating = totalRating / allReviews.length;
+        await product.save();
+
+        console.log('Average Rating:', product.rating);
+
+        res.redirect('/shop');
     } catch (error) {
         console.error(error);
-        res.redirect('/pageNotFound')
+        res.redirect('/pageNotFound');
     }
 }
+
 
 const loadShoppingCart = async (req,res) => {
     try {

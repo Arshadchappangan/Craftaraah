@@ -5,10 +5,8 @@
       color: red;
       text-align: center;
     }
-
-
-
 </style>
+<link rel="stylesheet" href="https://unpkg.com/cropperjs/dist/cropper.min.css" />
     
 <div class="content">
   <div class="panel-header bg-primary-gradient">
@@ -153,7 +151,7 @@
 
                                         <tr>
                                             <td class="text-start">
-                                              <img style="width: 60px; border-radius: 5%;" src="<%= cat.photo %>" alt="">
+                                              <img style="width: 100%; max-width: 60px; border-radius: 5%;" src="<%= cat.photo %>" alt="">
                                               <%=cat.name%>
                                             </td>
                                             <td class="text-start"><%=cat.description%></td>
@@ -171,7 +169,7 @@
                                               <button class="badge bg-primary rounded-pill" onclick="loadEditCategory('<%=cat._id%>','<%= cat.name %>', '<%= cat.description %>', '<%= cat.photo %>')">
                                                 <i class="fas fa-pencil-alt mx-2"> Edit</i>
                                               </button><br>
-                                                <button class="badge rounded-pill bg-danger"><i class="fas fa-archive mx-2 " onclick="confirmArchive('<%=cat._id%>')"> Archive</i></button><br>
+                                                <button class="badge rounded-pill bg-danger" onclick="confirmArchive('<%=cat._id%>')"><i class="fas fa-archive mx-2 "> Archive</i></button><br>
                                                 <button onclick="manageOffers('<%= cat._id %>')" class="badge rounded-pill bg-success">
                                                     <i class="fa fa-percent mx-2"> Offer</i>
                                                   </button>
@@ -237,6 +235,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/cropperjs/dist/cropper.min.js"></script>
+    
     <script>
 
     function previewPhoto() {
