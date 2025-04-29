@@ -75,15 +75,16 @@
                     <div class="product__details__text">
                         <h3><%=product.productName%></h3>
                         <h5 class="my-2"><%=product.category.name%></h5>
-                        <div class="product__details__rating">
-                            <%for(let i=1;i<= 5;i++){%>
-                                <%if(i <= overallRating){%>
-                                <i class="fa fa-star"></i>
-                                <%}else{%>
-                                <i class="fa fa-star-o"></i>
-                            <%}%>
-                            <%}%>
-                            <span>(<%=review.length%> reviews)</span>
+                        <div class="product__details__rating" style="color: #FDCC0D;">
+                            <% let rating = product.rating || 0; %>
+                            <% for(let j = 1; j <= 5; j++) { %>
+                                <% if (j <= Math.ceil(rating)) { %>
+                                    <i class="fa fa-star"></i>
+                                <% } else { %>
+                                    <i class="fa fa-star-o"></i>
+                                <% } %>
+                            <% } %>
+                            <span class="text-dark">(<%= product.review.length %>)</span>
                         </div>
                         <div class="product__details__price" style="display: inline-block;">₹<%=product.discountedPrice%></div>
                         <span><strike>₹<%=product.price%></strike></span>
@@ -93,15 +94,7 @@
                         <% } %>
 
                         <p><%=product.category.description%></p>
-                        <div class="product__details__quantity">
-                            <div class="quantity">
-                                <div class="pro-qty">
-                                    <span class="dec qtybtn" id="minus">-</span>
-                                    <input type="text" value="1" id="numberDisplayInput" disabled>
-                                    <span class="dec qtybtn" id="plus">+</span>
-                                </div>
-                            </div>
-                        </div>
+
                         <%if(product.stock){%>
                         <a onclick="addToCart('<%=product._id%>')" class="primary-btn">ADD TO CART</a>
                         <%}else{%>
@@ -114,7 +107,7 @@
                             <%}else{%>
                             <li><b>Availability</b> <span>Out of stocks</span></li>
                             <%}%>
-                            <li><b>Shipping</b> <span>01 day shipping. <samp>Free pickup today</samp></span></li>
+                            <li><b>Shipping</b> <span>05 days shipping. <samp>Free pickup tomorrow</samp></span></li>
                         </ul>
                     </div>
                 </div>
@@ -155,8 +148,9 @@
                             <div class="tab-pane" id="tabs-3" role="tabpanel">
                                 <div class="product__details__tab__desc">
                                     <div class="container">
-                                        <% if(review.length > 0 && review.review){ %>
+                                        <% if(review.length>0){ %>
                                         <%for (let i=0;i<review.length;i++){%>
+                                            <% if (review[i].review && review[i].review.trim() !== "") { %>
                                         <div v-for="item in list" class="review">
     
                                             <div class="review-photo">
@@ -178,7 +172,7 @@
                                                             <%}else{%>
                                                     <i class="fa fa-star-o" aria-hidden="true"></i>
                                                     <%}%>
-
+                                                    <%}%>
                                                 <%}%>
                                               </div>
                                               <div class="review-comment">
@@ -198,18 +192,21 @@
                                     <div id="review-header">Write your review</div>
                                     <form action="/review" method="post">
                                         <label class="review-label">Rate this product:</label>
+                                        <% let userReview = review.find(r => r.userId && r.userId._id.toString() === userId._id.toString()); %>
                                         <div class="star-rating">
-                                            <span class="star" data-value="5">&#9733;</span>
-                                            <span class="star" data-value="4">&#9733;</span>
-                                            <span class="star" data-value="3">&#9733;</span>
-                                            <span class="star" data-value="2">&#9733;</span>
-                                            <span class="star" data-value="1">&#9733;</span>
-                                          </div>
-                                          <input type="hidden" name="productId" value="<%=product._id%>">
-                                          <input type="hidden" id="rating-value" name="rating" />
-<br>
+                                            <% for (let j = 5; j >= 1; j--) { %>
+                                                <% if (userReview && j <= userReview.rating) { %>
+                                                    <span class="star" data-value="<%= j %>" style="color: #FFD700;">&#9733;</span>
+                                                <% } else { %>
+                                                    <span class="star" data-value="<%= j %>" style="color: grey;">&#9733;</span>
+                                                <% } %>
+                                            <% } %>
+                                        </div>
+                                        <input type="hidden" name="productId" value="<%=product._id%>">
+                                        <input type="hidden" id="rating-value" name="rating" value="<%= userReview ? userReview.rating : '' %>"/>
                                         <label class="review-label">Insert your Review:</label>
-                                        <textarea id="review-input" name="review" v-model="content"></textarea>
+                                        <textarea id="review-input" name="review" v-model="content"><%= userReview ? userReview.review : '' %></textarea>
+<br>
                                         <button type="submit" style="float: right;" class="btn btn-success">Submit</button>
                                     </form>
 
@@ -268,22 +265,7 @@
             const mainImage = document.getElementById('mainImage');
             mainImage.src = imageSrc;
         }
-        
-        const minus = document.getElementById('minus');
-        const plus = document.getElementById('plus');
-        const input = document.getElementById('numberDisplayInput');
-
-        minus.addEventListener('click', () => {
-        let currentValue = Number(input.value);
-        if (currentValue > 1) {
-        input.value = currentValue - 1;
-        }
-        });
-
-        plus.addEventListener('click', () => {
-        let currentValue = Number(input.value);
-        input.value = currentValue + 1;
-        });
+    
 
 
         const img = document.getElementById("mainImage");
@@ -305,18 +287,20 @@
         const ratingInput = document.getElementById('rating-value');
 
         stars.forEach(star => {
-            star.addEventListener('click', () => {
-            const value = star.getAttribute('data-value');
-            ratingInput.value = value;
+            star.addEventListener('click', function () {
+                const value = this.getAttribute('data-value');
+                ratingInput.value = value;
 
-            stars.forEach(s => {
-            s.classList.remove('selected');
-            if (s.getAttribute('data-value') <= value) {
-            s.classList.add('selected');
-        }
+
+                stars.forEach(s => {
+                    if (s.getAttribute('data-value') <= value) {
+                        s.style.color = '#FFD700'; 
+                    } else {
+                        s.style.color = 'grey'; 
+                    }
+                });
+            });
         });
-    });
-    });
 
 
     function addToCart(productId) {

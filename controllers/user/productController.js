@@ -23,9 +23,10 @@ const loadProductDetails = async(req,res) => {
 
         const userId = req.session.user;
         const userData = await User.findById(userId);
-        const productId = req.query.id;
+        const productId = req.query.id || req.session.product;
         const product = await Product.findById(productId).populate('category').populate('offers');
         const findCategory = product.category;
+        req.session.product = null;
         const related = await Product.find({
             category : findCategory,
             _id : {$ne:productId}
@@ -37,7 +38,7 @@ const loadProductDetails = async(req,res) => {
         userHelper.calculateDiscount(product)
 
         res.render('shop-details',{
-            user : userData,
+            userId : userData,
             product : product,
             category : findCategory,
             related : related,
@@ -55,29 +56,36 @@ const loadProductDetails = async(req,res) => {
 const reviewSubmission = async (req, res) => {
     try {
         const userId = req.session.user;
+        console.log("user Id : ",userId)
         const { productId, review, rating } = req.body;
-
-        const saveReview = new Review({
-            userId,
-            productId,
-            review,
-            rating
-        });
-        await saveReview.save();
+        req.session.product = productId;
 
         const product = await Product.findOne({ _id: productId });
 
-        product.review.push(saveReview._id);
-        await product.save();
+        const existingReview = await Review.findOne({userId:userId,productId:productId})
+        if(existingReview){
+            existingReview.review = review,
+            existingReview.rating = rating
+            await existingReview.save()
+        }else{
+            const saveReview = new Review({
+                userId: userId,
+                productId,
+                review,
+                rating
+            });
+            await saveReview.save();
+
+            product.review.push(saveReview._id);
+            await product.save();
+        }
 
         const allReviews = await Review.find({ productId: productId });
         const totalRating = allReviews.reduce((acc, curr) => acc + curr.rating, 0);
         product.rating = totalRating / allReviews.length;
         await product.save();
 
-        console.log('Average Rating:', product.rating);
-
-        res.redirect('/shop');
+        res.redirect('/productDetails');
     } catch (error) {
         console.error(error);
         res.redirect('/pageNotFound');
