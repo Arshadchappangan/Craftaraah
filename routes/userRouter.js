@@ -72,7 +72,7 @@ router.get('/shoppingCart',userAuth,productController.loadShoppingCart);
 router.get('/coupon',userAuth,productController.loadCouponPage);
 router.get('/addToCart',userAuth,productController.addToCart);
 router.get('/removeFromCart',userAuth,productController.removeFromCart);
-router.get('/updateCart',userAuth,productController.updateCart);
+router.post('/updateCart',userAuth,productController.updateCart);
 router.post('/applyCoupon',userAuth,productController.applyCoupon);
 
 

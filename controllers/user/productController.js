@@ -25,12 +25,13 @@ const loadProductDetails = async(req,res) => {
         const userData = await User.findById(userId);
         const productId = req.query.id || req.session.product;
         const product = await Product.findById(productId).populate('category').populate('offers');
-        const findCategory = product.category;
+        const findCategory = product.category._id;
         req.session.product = null;
-        const related = await Product.find({
+        let related = await Product.find({
             category : findCategory,
             _id : {$ne:productId}
-        }).limit(4)
+        }).populate('offers').limit(4)
+        userHelper.calculateDiscount(related)
 
         const review = await Review.find({productId:productId}).populate('userId').sort({createdAt:-1});
         const overallRating = review.length > 0 ? Math.ceil(product.productRating / review.length) : 0
@@ -56,7 +57,6 @@ const loadProductDetails = async(req,res) => {
 const reviewSubmission = async (req, res) => {
     try {
         const userId = req.session.user;
-        console.log("user Id : ",userId)
         const { productId, review, rating } = req.body;
         req.session.product = productId;
 
@@ -115,7 +115,7 @@ const loadShoppingCart = async (req,res) => {
                 shippingCharge : 0,
                 tax : 0,
                 total : 0,
-                // coupons : null,
+                coupons : null,
                 coupon : null,
                 couponDiscount : 0
             });
@@ -245,35 +245,43 @@ const removeFromCart = async(req,res) => {
 const updateCart = async (req, res) => {
     try {
         const user = req.session.user;
-        const productId = req.query.productId;
-        const quantity = parseInt(req.query.quantity); 
+        const productId = req.body.productId;
+        const quantity = parseInt(req.body.quantity); 
 
-        const cartExist = await Cart.findOne({ userId: user._id });
+        const cartExist = await Cart.findOne({ userId: user._id }).populate('items.productId');
         if (!cartExist) {
-            return res.status(404).send("Cart not found");
+            return res.json({success:false,message:'Cart not found'})
         }
 
         const findProduct = cartExist.items.findIndex(
-            (item) => item.productId.toString() === productId
+            (item) => item.productId._id.toString() === productId.toString()
         );
 
         if (findProduct === -1) {
-            return res.status(400).send("Product not found in cart");
+            return res.json({success:false,message:'Product not found in cart'})
         }
 
         const item = cartExist.items[findProduct];
 
-        if (quantity === 1 && item.quantity < 5) {
+        if ((item.quantity + quantity) > (item.productId?.stock || 0)) {
+            return res.json({success:false,message:`Only ${item.productId.stock} items left in inventory`})
+        }
+
+        if((item.quantity + quantity) > 5){
+            return res.json({ success: false, message: "Maximum quantity reached (5)" });
+        }
+
+        if (quantity === 1 && item.quantity < 5 ) {
             item.quantity += 1;
         } else if (quantity === -1 && item.quantity > 1) {
             item.quantity -= 1;
         }
 
         await cartExist.save();
-        res.redirect('/shoppingCart');
+        res.json({success:true});
     } catch (error) {
         console.error(error);
-        res.redirect('/pageNotFound');
+        res.status(500).json({ success: false, message: 'Server error' })
     }
 };
 
@@ -323,25 +331,30 @@ const addToWishlist = async (req, res) => {
   const loadWishlist = async (req, res) => {
     try {
         const user = req.session.user;
-        let wishlist = await Wishlist.findOne({userId:user._id}).populate('products.productId');
-        if(!wishlist){
-            wishlist = {products:[]}
-            res.render('wishlist',{
-                user : user,
-                wishlist : wishlist
-            })
-        }else{
-            res.render('wishlist',{
-                user : user,
-                wishlist : wishlist
-            })
+
+        let wishlist = await Wishlist.findOne({ userId: user._id }).populate('products.productId');
+        let wishlistProducts = []
+
+        if (!wishlist) {
+            wishlist = { products: [] };
+        } else {
+            const productIds = wishlist.products.map(item => item.productId);
+            wishlistProducts = await Product.find({ _id: { $in: productIds } }).populate('offers');
+            userHelper.calculateDiscount(wishlistProducts);
         }
+
+        res.render('wishlist', {
+            user: user,
+            wishlist: wishlistProducts
+        });
+
     } catch (error) {
-      console.error("Error in loadWishlist:", error);
-      res.redirect("/pageNotFound");
-        
+        console.error("Error in loadWishlist:", error);
+        res.redirect("/pageNotFound");
     }
-  }
+}
+
+
   
 
   const removeFromWishlist = async (req, res) => {
@@ -365,7 +378,7 @@ const addToWishlist = async (req, res) => {
             const cart = await Cart.findOne({ userId: user._id });
 
             if (!cart || cart.items.length === 0) {
-                return res.status(200).json({ success: false, message: "Cart is empty" });
+                return res.json({ success: false, message: "Cart is empty" });
             }
 
             res.status(200).json({ success: true });

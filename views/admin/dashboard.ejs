@@ -316,7 +316,6 @@
 
           // Draw the needle
           ctx.beginPath();
-          ctx.strokeStyle = 'white';
           if(todayRevenue*100/revenueTarget < 30){
             ctx.fillStyle = '#E03C32';
           }else if(todayRevenue*100/revenueTarget < 80){
@@ -329,7 +328,6 @@
           ctx.moveTo(-10, 0);
           ctx.lineTo(0, 0 - innerRadius - widthSlice);
           ctx.lineTo(10, 0);
-          ctx.stroke();
           ctx.fill();
 
           // Center circle

@@ -97,7 +97,7 @@
                                         <h5><%=cart.items[i].productId.productName%></h5>
                                     </td>
                                     <td class="shoping__cart__price">
-                                        ₹<%=cart.items[i].price%>
+                                        ₹<%=cart.items[i].productId.price%>
                                     </td>
                                     <td class="shoping__cart__price">
                                         ₹<%=cart.items[i].productId.discountedPrice%>
@@ -105,15 +105,15 @@
                                     <td class="shoping__cart__quantity">
                                         <div class="quantity">
                                             <div class="pro-qty">
-                                                <a href="/updateCart?productId=<%=cart.items[i].productId._id%>&quantity=-1">
-                                                    <span class="dec qtybtn" id="minus">-</span>
-                                                </a>
-                                                <input type="text" value="<%=cart.items[i].quantity%>" id="numberDisplayInput" disabled>
-                                                <a href="/updateCart?productId=<%=cart.items[i].productId._id%>&quantity=1">
-                                                    <span class="dec qtybtn" id="plus">+</span>
-                                                </a>
+                                              <a class="minus-btn" data-product-id="<%= cart.items[i].productId._id %>">
+                                                <span class="dec qtybtn">-</span>
+                                              </a>
+                                              <input type="text" class="quantity-input" value="<%= cart.items[i].quantity %>" disabled>
+                                              <a class="plus-btn" data-product-id="<%= cart.items[i].productId._id %>">
+                                                <span class="inc qtybtn">+</span>
+                                              </a>
                                             </div>
-                                        </div>
+                                          </div>                                          
                                     </td>
                                     <%  let totalPrice = 0;
                                         cart.items[i].totalPrice = cart.items[i].productId.discountedPrice * cart.items[i].quantity 
@@ -184,21 +184,54 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        const minus = document.getElementById('minus');
-        const plus = document.getElementById('plus');
-        const input = document.getElementById('numberDisplayInput');
+        const minusButtons = document.querySelectorAll('.minus-btn');
+        const plusButtons = document.querySelectorAll('.plus-btn');
 
-        minus.addEventListener('click', () => {
-        let currentValue = Number(input.value);
-        if (currentValue > 1) {
-        input.value = currentValue - 1;
+        minusButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const productId = button.getAttribute('data-product-id');
+            updateCart(productId, -1);
+        });
+        });
+
+        plusButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const productId = button.getAttribute('data-product-id');
+            updateCart(productId, 1);
+        });
+        });
+
+
+        function updateCart(productId, change) {
+            fetch('/updateCart', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId, quantity : change })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                window.location.reload();
+                } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: data.message || 'Failed to update cart.',
+                });
+                }
+            })
+            .catch(error => {
+                console.error('Error updating cart:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Something went wrong while updating the cart.',
+                });
+            });
         }
-        });
 
-        plus.addEventListener('click', () => {
-        let currentValue = Number(input.value);
-        input.value = currentValue + 1;
-        });
 
         function checkout() {
             fetch(`/checkCart`)

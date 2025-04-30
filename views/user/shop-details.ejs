@@ -87,7 +87,7 @@
                             <span class="text-dark">(<%= product.review.length %>)</span>
                         </div>
                         <div class="product__details__price" style="display: inline-block;">₹<%=product.discountedPrice%></div>
-                        <span><strike>₹<%=product.price%></strike></span>
+                        <span><strike>₹<%=product.price.toLocaleString('en-IN')%></strike></span>
 
                         <% if(product.maxDiscount > 0) { %>
                             <span class="ml-2 text-success"><b>(<%= product.maxDiscount %>% OFF)</b></span>
@@ -232,22 +232,49 @@
                 </div>
             </div>
             <div class="row">
-               <%for(let i=0;i<related.length;i++){%>
-                <div class="col-lg-3 col-md-6 col-sm-6 product-item" data-createdAt="<%= related[i].createdAt %>" data-price="<%= related[i].salePrice %>" data-name="<%= related[i].productName %>">
-                    <div class="product__item">
-                        <div class="product__item__pic set-bg" data-setbg="<%=related[i].productImage[0]%>">
-                            <ul class="product__item__pic__hover">
-                                <li><a href="#"><i class="fa fa-heart"></i></a></li>
-                                <li><a href="#"><i class="fa fa-shopping-cart"></i></a></li>
-                            </ul>
-                        </div>
-                        <div class="product__item__text">
-                            <h6><a href="/productDetails?id=<%=related[i]._id%>"><%=related[i].productName%></a></h6>
-                            <p class="d-flex justify-content-between"><span style="color: black;"><b>₹<%=related[i].salePrice%></b></span><span class="text-muted"><strike>₹<%=related[i].regularPrice%></strike></span></p>
+                <% if (related && related.length > 0) { %>
+                <% for(let i = 0; i < related.length; i++) { %>
+                    <div class="col-lg-3 col-md-6 col-sm-6 product-item" 
+                         data-createdAt="<%= related[i].createdAt %>" 
+                         data-price="<%= related[i].discountedPrice %>" 
+                         data-name="<%= related[i].productName %>">
+                         
+                        <div class="product__item position-relative">
+                            
+                            <% if (related[i].maxDiscount > 0) { %>
+                            <div style="position: absolute; top: 10px; left: 10px; background-color: red; color: white; font-size: 13px; padding: 2px 6px; border-radius: 5px; z-index: 10;">
+                                <%= related[i].maxDiscount %>% OFF
+                            </div>
+                            <% } %>
+                    
+                            <div class="product__item__pic set-bg" data-setbg="<%=related[i].productImage[0]%>">
+                                <ul class="product__item__pic__hover">
+                                    <li onclick="addToWishlist('<%=related[i]._id%>')"><a><i class="fa fa-heart"></i></a></li>
+                                    <li onclick="addToCart('<%=related[i]._id%>')"><a><i class="fa fa-shopping-cart"></i></a></li>
+                                </ul>
+                            </div>
+                            <div class="product__item__text">
+                                <h6><a href="/productDetails?id=<%=related[i]._id%>"><%=related[i].productName%></a></h6>
+                                <div class="product__details__rating" style="color: #FDCC0D;">
+                                    <% let rating = related[i].rating || 0; %>
+                                    <% for(let j = 1; j <= 5; j++) { %>
+                                        <% if (j <= Math.ceil(rating)) { %>
+                                            <i class="fa fa-star"></i>
+                                        <% } else { %>
+                                            <i class="fa fa-star-o"></i>
+                                        <% } %>
+                                    <% } %>
+                                    <span class="text-dark">(<%= related[i].review.length %>)</span>
+                                </div>
+                                <p class="d-flex justify-content-between">
+                                    <span style="color: black;"><b>₹<%= related[i].discountedPrice %></b></span>
+                                    <span class="text-muted"><strike class="text-danger">₹<%=related[i].price.toLocaleString('en-IN')%></strike></span>
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <%}%>
+                    <% } %>  
+                <% } %>     
             </div>
         </div>
     </section>
