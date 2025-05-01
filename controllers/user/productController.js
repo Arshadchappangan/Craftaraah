@@ -641,7 +641,6 @@ const cancelOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Order ID is required." });
         }
 
-        // Fetch order with populated product details
         const order = await Order.findById(orderId).populate('orderedItems.product');
         if (!order) {
             return res.status(404).json({ success: false, message: "Order not found." });
@@ -660,27 +659,29 @@ const cancelOrder = async (req, res) => {
             selectedItem = order.orderedItems[productIndex];
         }
 
-        // Fetch or create user's wallet
         let wallet = await Wallet.findOne({ userId: user._id });
         if (!wallet) {
             wallet = new Wallet({ userId: user._id, balance: 0, transactions: [] });
         }
 
-        // Handle refund to wallet if applicable
         if (["Razorpay", "wallet"].includes(order.paymentMethod)) {
             let refundAmount = 0;
             let description = '';
 
             if (selectedItem) {
-                if (!selectedItem.product) {
-                    return res.status(404).json({ success: false, message: "Product details missing for refund." });
-                }
-                refundAmount = selectedItem.product.price * selectedItem.quantity;
-                description = `Refund for "${selectedItem.product.productName}"`;
+                refundAmount = selectedItem.price * selectedItem.quantity;
+                description = `Refund for "${selectedItem.product.productName}" from the order with order ID ${order.orderId}`;
             } else {
-                refundAmount = order.finalAmount;
+                const cancelledItemsTotal = order.orderedItems
+                    .filter(item => item.isCancelled === true)
+                    .reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
+                refundAmount = order.finalAmount - cancelledItemsTotal;
                 description = `Refund for order ID: ${order.orderId}`;
             }
+
+            order.refundAmount = (order.refundAmount || 0) + refundAmount;
+            await order.save();
+
 
             wallet.balance += refundAmount;
             wallet.transactions.push({

@@ -107,6 +107,13 @@
           </table>
         </div>
 
+        <!-- Refunded Amount -->
+        <% if (order.refundAmount) { %>
+          <div class="alert alert-success mt-3 text-center" role="alert">
+            <strong>₹<%= order.refundAmount %></strong> has been refunded to your wallet for the cancelled items.
+          </div>
+        <% } %>
+
         <!-- Action Buttons -->
         <div class="text-center mt-4 d-flex justify-content-center gap-3 flex-wrap">
           <!-- Download Invoice -->

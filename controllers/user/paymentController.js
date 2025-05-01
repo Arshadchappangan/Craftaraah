@@ -7,8 +7,6 @@ const adminHelper = require('../../helpers/adminHelpers')
 const createRazorpayOrder = async (req,res) => {
     try {
 
-        console.log('inside the razorpay order create function')
-
         const amount = req.body.amount * 100;
         
         const options = {
@@ -19,7 +17,6 @@ const createRazorpayOrder = async (req,res) => {
     
         const order = await razorpay.orders.create(options)
     
-        console.log('order created')
         res.json({orderId:order.id,key:process.env.RAZORPAY_KEY_ID,amount});
 
     } catch (error) {
@@ -32,8 +29,6 @@ const createRazorpayOrder = async (req,res) => {
 const verifyPayment = (req,res) => {
     try {
 
-        console.log('verify payment function')
-
     const { razorOrderId, paymentId, signature } = req.body;
 
         const secret = process.env.RAZORPAY_KEY_SECRET;
@@ -44,7 +39,6 @@ const verifyPayment = (req,res) => {
         if (hash === signature) {
             return res.status(200).json({status: true});
         }else {
-            console.log('Payment verification failed');
             return res.redirect('/orderFailure');
         }
 
