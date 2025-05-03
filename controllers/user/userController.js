@@ -7,15 +7,53 @@ const { name } = require('ejs');
 const category = require('../../models/categorySchema');
 const Coupon = require('../../models/couponSchema')
 const Cart = require('../../models/cartSchema');
+const Review = require('../../models/reviewSchema')
 const userHelper = require('../../helpers/userHelpers')
+const adminHelper = require('../../helpers/adminHelpers');
+const Order = require('../../models/orderSchema');
 
 const loadHome = async (req, res) => {
     try {
         const category = await Category.find({isDeleted:false});
         const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('offers');
         userHelper.calculateDiscount(product)
+        const rated = [...product].sort((a,b) => b.rating - a.rating)
+
         const cartExist = await Cart.find({userId:req.session.user}).populate('items.productId');
         let userData = null;
+
+        const orders = await Order.aggregate([
+            {$unwind:"$orderedItems"},
+            {
+                $group: {
+                    _id: "$orderedItems.product",
+                    totalQuantitySold: { $sum: "$orderedItems.quantity" }
+                }
+            },
+            { $sort: { totalQuantitySold: -1 } },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'productDetails'
+                }
+            },
+            { $unwind: "$productDetails" },
+            {
+                $project: {
+                    _id: "$productDetails._id",
+                    totalQuantitySold: 1,
+                }
+            }
+        ])
+
+        product.forEach(prod => {
+            const order = orders.find(order => order._id.toString() === prod._id.toString());
+            prod.totalSold = order ? order.totalQuantitySold : 0;
+        });
+
+        const bestSeller = product.sort((a,b) => b.totalSold-a.totalSold)
 
         if (req.session.user) {
             userData = await User.findById(req.session.user);
@@ -26,7 +64,9 @@ const loadHome = async (req, res) => {
         res.render('home', {
             user: userData,
             category: category,
-            product: product
+            product: product,
+            rated:rated,
+            bestSeller:bestSeller
         });
 
 
@@ -80,10 +120,8 @@ const signup = async (req, res) => {
         req.session.userData = { name, email, phone, password };
         req.session.referrer = referrer
 
-
         console.log("OTP sent", otp)
         res.render('signupOtp')
-
 
     } catch (error) {
         console.error("Signup error", error);
@@ -146,7 +184,8 @@ const verifyOtp = async (req, res) => {
                     owner: referrerData._id,
                     minPurchaseAmount: 1000,
                     maxDiscountAmount: 2000,
-                    expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                    expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                    autoDeleteAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)
                 });
 
                 await referralCoupon.save();

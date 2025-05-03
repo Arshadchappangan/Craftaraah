@@ -31,7 +31,7 @@ function generateOrderId() {
         }
 
         product.maxDiscount = maxDiscount;
-        product.discountedPrice = Math.max(discountedPrice, 0).toFixed(2);
+        product.discountedPrice = Math.max(discountedPrice, 0);
     };
 
     if (Array.isArray(productData)) {

@@ -1,5 +1,11 @@
 <%-include("../../views/partials/user/header")%>
 
+<style>
+    .sidebar__item a{
+        color: black;
+    }
+</style>
+
    <!-- Hero Section Begin -->
     <section class="hero hero-normal">
         <div class="container">
@@ -51,7 +57,7 @@
                 <div class="col-lg-3 col-md-5">
                     <div class="sidebar">
                         <div class="sidebar__item">
-                            <h4>Categories</h4>
+                            <h4><i class="fa fa-filter" aria-hidden="true"></i>  Categories </h4>
                             <ul>
                                 <%for(let i=0;i<category.length;i++){%>
                                 <li>
@@ -63,7 +69,7 @@
                             </ul>
                         </div>
                         <div class="sidebar__item">
-                            <h4>Price</h4>
+                            <h4><i class="fa fa-filter" aria-hidden="true"></i>  Price</h4>
                             <div class="sidebar__item__size">
                                 <a href="/shop?<%= new URLSearchParams({ 
                                     ...query, minPrice: 0, maxPrice: 2000 
@@ -147,9 +153,20 @@
                                 </div>
                                 <div class="product__item__text">
                                     <h6><a href="/productDetails?id=<%=products[i]._id%>"><%=products[i].productName%></a></h6>
+                                    <div class="product__details__rating" style="color: #FDCC0D;">
+                                        <% let rating = products[i].rating || 0; %>
+                                        <% for(let j = 1; j <= 5; j++) { %>
+                                            <% if (j <= Math.ceil(rating)) { %>
+                                                <i class="fa fa-star"></i>
+                                            <% } else { %>
+                                                <i class="fa fa-star-o"></i>
+                                            <% } %>
+                                        <% } %>
+                                        <span class="text-dark">(<%= products[i].review.length %>)</span>
+                                    </div>
                                     <p class="d-flex justify-content-between">
                                         <span style="color: black;"><b>₹<%=products[i].discountedPrice%></b></span>
-                                        <span class="text-muted"><strike>₹<%=products[i].price%></strike></span>
+                                        <span class="text-muted"><strike class="text-danger">₹<%=products[i].price.toLocaleString('en-IN')%></strike></span>
                                     </p>
                                 </div>
                             </div>

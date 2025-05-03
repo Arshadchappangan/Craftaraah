@@ -11,12 +11,12 @@
 
         <div class="row">
             <div class="col-md-1"></div>
-            <div class="col-md-10">
-                <div class="card card-round">
+            <div class="col-md-10 card card-round">
                     <div class="card-header d-flex justify-content-between">
                         <h4 class="card-title">#<%= order.orderId %></h4>
-                        <div>
-                            <select id="orderStatus" class="form-select" <%= ["Returned", "Cancelled"].includes(order.status) ? "disabled" : "" %>>
+                        <div class="d-flex align-items-center">
+                            <label for="orderStatus" class="me-3 fw-bold">Order Status:</label>
+                            <select id="orderStatus" class="form-select w-auto" <%= ["Returned", "Cancelled"].includes(order.status) ? "disabled" : "" %>>
                                 <option hidden disabled value="Ordered" <%= order.status === "Ordered" ? "selected" : "" %>>Ordered</option>
                                 <option value="Processing" <%= order.status === "Processing" ? "selected" : "" %>>Processing</option>
                                 <option value="Shipped" <%= order.status === "Shipped" ? "selected" : "" %>>Shipped</option>
@@ -27,21 +27,31 @@
                             </select>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <h5>Customer</h5>
-                        <p><strong>Full name:</strong> <%= order.userId.name %></p>
-                        <p><strong>Email:</strong> <%= order.userId.email %></p>
-                        <p><strong>Phone Number:</strong> <%= order.userId.phone %></p>
-                        <p><strong>Shipping Address:</strong></p> <p><%= order.address.landMark %> <br> <%= order.address.city %> <br> <%= order.address.state %> <br> <%= order.address.pincode %> </p>
+                    <div>
+                        <div class="customer-info bg-light p-3 rounded my-3">
+                            <h5 class="text-secondary">Customer Information</h5>
+                            <div class="d-flex flex-column"></div>
+                                <p><strong>Full Name:</strong> <%= order.userId.name %></p>
+                                <p><strong>Email:</strong> <%= order.userId.email %></p>
+                                <p><strong>Phone Number:</strong> <span class="text-primary"><%= order.userId.phone %></span></p>
+                            </div>
+                        </div>
+                        <div class="shipping-info bg-light p-3 rounded mb-3">
+                            <h5 class="text-secondary">Shipping Address</h5>
+                            <div class="d-flex flex-column">
+                                <p><strong>Landmark:</strong> <%= order.address.landMark %></p>
+                                <p><strong>City:</strong> <%= order.address.city %></p>
+                                <p><strong>State:</strong> <%= order.address.state %></p>
+                                <p><strong>Pincode:</strong> <%= order.address.pincode %></p>
+                            </div>
+                        </div>
                     </div>
-                </div>
             </div>
             <div class="col-md-1"></div>
         </div>
-
         
 
-        <div class="row mt-4">
+        <div class="row">
             <div class="col-md-1"></div>
             <div class="col-md-10">
                 <div class="card card-round">
@@ -57,6 +67,7 @@
                                     <th scope="col" class="text-center">Unit Price</th>
                                     <th scope="col" class="text-center">Quantity</th>
                                     <th scope="col" class="text-center">Total Price</th>
+                                    <Th scope="col" class="text-center"></Th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -64,10 +75,14 @@
                                     <tr>
                                         <td class="text-start"><img style="height: 80px;" src="<%= item.product.productImage[0]%>" alt=""></td>
                                         <td class="text-start"><%= item.product.productName %></td>
-                                        <td class="text-center">₹ <%= item.product.price%></td>
+                                        <td class="text-center">₹ <%= item.price%></td>
                                         <td class="text-center"><%= item.quantity %></td>
-                                        
                                         <td class="text-center">₹ <%= item.price * item.quantity %></td>
+                                        <td class="text-center">
+                                            <% if (item.isCancelled) { %>
+                                                <span class="badge bg-danger ms-2">Cancelled</span>
+                                            <% } %>
+                                        </td>
                                     </tr>
                                 <% }); %>
                             </tbody>

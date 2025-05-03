@@ -137,50 +137,16 @@
                 <div class="card card-primary card-round">
                   <div class="card-header">
                     <div class="card-head-row">
-                      <div class="card-title">Daily Sales</div>
-                      <div class="card-tools">
-                        <div class="dropdown">
-                          <button
-                            class="btn btn-sm btn-label-light dropdown-toggle"
-                            type="button"
-                            id="dropdownMenuButton"
-                            data-bs-toggle="dropdown"
-                            aria-haspopup="true"
-                            aria-expanded="false"
-                          >
-                            Export
-                          </button>
-                          <div
-                            class="dropdown-menu"
-                            aria-labelledby="dropdownMenuButton"
-                          >
-                            <a class="dropdown-item" href="#">Action</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <a class="dropdown-item" href="#"
-                              >Something else here</a
-                            >
-                          </div>
-                        </div>
-                      </div>
+                      <div class="card-title">Todays Sales</div>
                     </div>
-                    <div class="card-category">March 25 - April 02</div>
+                    <div class="card-category"><%= new Date().toDateString() %></div>
                   </div>
                   <div class="card-body pb-0">
                     <div class="mb-4 mt-2">
-                      <h1>$4,578.58</h1>
+                      <h1>₹ <%= today.revenue %></h1>
                     </div>
                     <div class="pull-in">
-                      <canvas id="dailySalesChart"></canvas>
-                    </div>
-                  </div>
-                </div>
-                <div class="card card-round">
-                  <div class="card-body pb-0">
-                    <div class="h1 fw-bold float-end text-primary">+5%</div>
-                    <h2 class="mb-2">17</h2>
-                    <p class="text-muted">Users online</p>
-                    <div class="pull-in sparkline-fix">
-                      <div id="lineChart"></div>
+                      <canvas id="dailySalesChart" width="300" height="150" class="mx-3"></canvas>
                     </div>
                   </div>
                 </div>
@@ -194,7 +160,7 @@
                     <div class="card-head-row card-tools-still-right">
                       <div class="card-title">Best Selling Products (Top 10)</div>
                     </div>
-                    <% for(let i=0;i<10;i++) { %>
+                    <% for(let i=0; i<Math.min(10, saleCountProducts.length);i++) { %>
                     <div class="card-list py-1">
                       <div class="item-list d-flex justify-content-between">
                         <div class="d-flex">
@@ -224,26 +190,27 @@
                     <div class="card-head-row card-tools-still-right">
                       <div class="card-title">Best Selling Categories (Top 10)</div>
                     </div>
-                    <% for(let i=0;i<8;i++) { %>
-                    <div class="card-list py-1">
-                      <div class="item-list d-flex justify-content-between">
-                        <div class="d-flex">
-                          <div class="avatar">
-                            <img
-                              src="/uploads/product-images/resized-1744394504898.jpg"
-                              alt="..."
-                              class="avatar-img rounded-circle"
-                            />
+                    <% for(let i = 0; i < Math.min(10, saleCountCategories.length); i++) { %>
+                      <div class="card-list py-1">
+                        <div class="item-list d-flex justify-content-between">
+                          <div class="d-flex">
+                            <div class="avatar">
+                              <img
+                                src="/uploads/product-images/resized-1744394504898.jpg"
+                                alt="..."
+                                class="avatar-img rounded-circle"
+                              />
+                            </div>
+                            <div class="info-user ms-3">
+                              <div class="username"><%= saleCountCategories[i].category %></div>
+                              <div style="max-width: 300px;" class="status"><%= saleCountCategories[i].description %></div>
+                            </div>
                           </div>
-                          <div class="info-user ms-3">
-                            <div class="username"><%= saleCountCategories[i].category %></div>
-                            <div style="max-width: 300px;" class="status"><%= saleCountCategories[i].description %></div>
-                          </div>
+                          <div>Sold <strong><%= saleCountCategories[i].totalQuantitySold %></strong> items</div>
                         </div>
-                        <div>Sold <strong><%= saleCountCategories[i].totalQuantitySold %></strong> items</div>
                       </div>
-                    </div>
-                    <% }%>
+                    <% } %>
+                    
                   </div>
                 </div>
               </div>
@@ -258,6 +225,11 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-gauge@0.3.0/dist/chartjs-gauge.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-gauge@3.0.0/dist/chartjs-chart-gauge.min.js"></script>
+
+
 
     <script>
       
@@ -307,6 +279,126 @@
           }
         }
       });
+
+
+      // today chart
+      const todayRevenue = <%= today.revenue %>;
+      const revenueTarget = 10000; 
+
+      const gaugeData = [
+        todayRevenue,                 // Reached (green)
+        Math.max(revenueTarget - todayRevenue, 0)  // Remaining (gray)
+      ];
+
+      const gaugeNeedle = {
+        id: 'gaugeNeedle',
+        afterDatasetDraw(chart, args, plugins) {
+          const { ctx } = chart;
+          const meta = chart.getDatasetMeta(0);
+          const xMid = meta.data[0].x;
+          const yMid = meta.data[0].y;
+          const outerRadius = meta.data[0].outerRadius;
+          const innerRadius = meta.data[0].innerRadius;
+          const widthSlice = (outerRadius - innerRadius) / 3;
+          const radius = 12;
+
+          // Get live animated value
+          const dataset = chart.data.datasets[0];
+          const currentValue = dataset.data[0];
+          const totalValue = dataset.data[0] + dataset.data[1];
+
+          // Calculate angle (180 degrees max)
+          const needleAngle = (currentValue / totalValue) * 180;
+
+          ctx.save();
+          ctx.translate(xMid, yMid);
+          ctx.rotate((needleAngle - 90) * Math.PI / 180); // Start from bottom
+
+          // Draw the needle
+          ctx.beginPath();
+          if(todayRevenue*100/revenueTarget < 30){
+            ctx.fillStyle = '#E03C32';
+          }else if(todayRevenue*100/revenueTarget < 80){
+            ctx.fillStyle = '#FFD301';
+          }else{
+            ctx.fillStyle = '#7BB662';
+          }
+          
+          ctx.lineWidth = 3;
+          ctx.moveTo(-10, 0);
+          ctx.lineTo(0, 0 - innerRadius - widthSlice);
+          ctx.lineTo(10, 0);
+          ctx.fill();
+
+          // Center circle
+          ctx.beginPath();
+          ctx.arc(0, 0, radius, 0, Math.PI * 2, false);
+          ctx.fill();
+          ctx.restore();
+        }
+      };
+
+
+
+      const ctx = document.getElementById('dailySalesChart').getContext('2d');
+      const gaugeChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [
+              0, // Start from 0 revenue
+              revenueTarget
+            ],
+            backgroundColor: ['#00C49F', '#e0e0e0'],
+            borderWidth: 2,
+            circumference: 180,
+            rotation: 270
+          }]
+        },
+        options: {
+          aspectRatio: 1.75,
+          animation: {
+            duration: 0,  // no built-in animation, we do custom
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              enabled: false
+            }
+          }
+        },
+        plugins: [gaugeNeedle]
+      });
+
+
+
+      function animateNeedleToTarget(targetRevenue, duration = 2000) { // 2 seconds
+        const startRevenue = 0;
+        const startTime = performance.now();
+
+        function animate(time) {
+          const elapsed = time - startTime;
+          const progress = Math.min(elapsed / duration, 1); // 0 to 1
+
+          const currentRevenue = startRevenue + (targetRevenue - startRevenue) * progress;
+
+          // Update chart data
+          gaugeChart.data.datasets[0].data[0] = currentRevenue;
+          gaugeChart.data.datasets[0].data[1] = Math.max(revenueTarget - currentRevenue, 0);
+
+          gaugeChart.update();
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animateNeedleToTarget(todayRevenue);
 
 
     </script>

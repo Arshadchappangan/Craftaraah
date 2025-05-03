@@ -138,8 +138,9 @@
                 const daysSinceCreated = (new Date() - new Date(referralCoupon.createdAt)) / (1000 * 3600 * 24);
                 const isNew = daysSinceCreated <= 3;
                 const isExpired = new Date(referralCoupon.expiryDate).getTime() < Date.now();
-                const usedByEntry = referralCoupon.usedBy;
+                const usedByEntry = referralCoupon.usedBy?.find(entry => entry.userId.toString() === user._id.toString());
                 const isUsed = usedByEntry && usedByEntry.usedCount >= referralCoupon.usageLimit;
+
             %>
 
             <div class="col-md-6">

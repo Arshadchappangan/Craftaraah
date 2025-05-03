@@ -68,20 +68,41 @@
                         </div>
                     </div>
                     <div class="row" id="productsContainer">
-                        <% if (wishlist && wishlist.products && wishlist.products.length > 0) { %>
-                        <%for(let i=0;i<wishlist.products.length;i++){%>
+                        <% if (wishlist && wishlist.length > 0) { %>
+                        <%for(let i=0;i<wishlist.length;i++){%>
                         
                         <div class="col-lg-3 col-md-6 col-sm-6 product-item" >
                             <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="<%=wishlist.products[i].productId.productImage[0]%>">
+                                <div class="product__item__pic set-bg" data-setbg="<%=wishlist[i].productImage[0]%>">
                                     <ul class="product__item__pic__hover">
-                                        <li onclick="removeFromWishlist('<%=wishlist.products[i].productId._id%>')"><a><i class="fa fa-trash"></i></a></li>
-                                        <li onclick="addToCart('<%=wishlist.products[i].productId._id%>')"><a><i class="fa fa-shopping-cart"></i></a></li>
+                                        <li onclick="removeFromWishlist('<%=wishlist[i]._id%>')"><a><i class="fa fa-trash"></i></a></li>
+                                        <li onclick="addToCart('<%=wishlist[i]._id%>')"><a><i class="fa fa-shopping-cart"></i></a></li>
                                     </ul>
                                 </div>
                                 <div class="product__item__text">
-                                    <h6><a href="/productDetails?id=<%=wishlist.products[i].productId._id%>"><%=wishlist.products[i].productId.productName%></a></h6>
-                                    <p class="d-flex justify-content-between"><span style="color: black;"><b>₹<%=wishlist.products[i].productId.salePrice%></b></span><span class="text-muted"><strike>₹<%=wishlist.products[i].productId.regularPrice%></strike></span></p>
+                                    <h6><a href="/productDetails?id=<%=wishlist[i]._id%>"><%=wishlist[i].productName%></a></h6>
+                                    <div class="product__details__rating" style="color: #FDCC0D;">
+                                        <% let rating = wishlist[i].rating || 0; %>
+                                        <% for(let j = 1; j <= 5; j++) { %>
+                                            <% if (j <= Math.ceil(rating)) { %>
+                                                <i class="fa fa-star"></i>
+                                            <% } else { %>
+                                                <i class="fa fa-star-o"></i>
+                                            <% } %>
+                                        <% } %>
+                                        <span class="text-dark">(<%= wishlist[i].review.length %>)</span>
+                                    </div>
+                                    <p class="d-flex justify-content-between">
+                                        <span style="color: black;">
+                                          <b>₹<%= wishlist[i].discountedPrice || wishlist[i].price.toLocaleString('en-IN') %></b>
+                                        </span>
+                                        <span class="text-muted">
+                                          <strike class="text-danger">
+                                            ₹<%= wishlist[i].price.toLocaleString('en-IN') %>
+                                          </strike>
+                                        </span>
+                                      </p>
+                                      
                                 </div>
                             </div>
                         </div>

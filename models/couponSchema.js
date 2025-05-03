@@ -48,6 +48,10 @@ const couponSchema = new mongoose.Schema({
                     ref: 'User'},
         usedCount: {type : Number, default: 0}
     }],
+    autoDeleteAt: {
+        type: Date,
+        index: { expires: 0 }
+    }
 },{
     timestamps: true
 });

@@ -110,6 +110,10 @@ const orderSchema = new Schema({
             default : Date.now()
         }
 
+    },
+    refundAmount : {
+        type : Number,
+        default:0
     }
 },{timestamps:true});
 
