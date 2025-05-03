@@ -469,10 +469,6 @@ const placeOrder = async (req, res) => {
             await wallet.save();
         }
 
-        if(paymentMethod === 'COD' && total > 1000){
-            return res.json({success:false,message:"Cash on delivery option only available for orders less than ₹1000"})
-        }
-
         if(paymentMethod === 'wallet' && wallet.balance < total){
             return res.json({success:false,message:'Insufficient wallet balance. Please choose another payment method or top up your wallet.'})
         }
@@ -680,8 +676,6 @@ const cancelOrder = async (req, res) => {
             }
 
             order.refundAmount = (order.refundAmount || 0) + refundAmount;
-            await order.save();
-
 
             wallet.balance += refundAmount;
             wallet.transactions.push({
@@ -935,9 +929,6 @@ const loadCouponPage = async (req, res) => {
             couponCode: { $regex: /^REF/ },  
             owner: new mongoose.Types.ObjectId(user._id)   
         });
-        
-
-        console.log('referral coupon : ',referralCoupon)
         
         res.render('couponDetails',{user,coupons,referralCoupon});
     } catch (error) {

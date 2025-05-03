@@ -120,10 +120,8 @@ const signup = async (req, res) => {
         req.session.userData = { name, email, phone, password };
         req.session.referrer = referrer
 
-
         console.log("OTP sent", otp)
         res.render('signupOtp')
-
 
     } catch (error) {
         console.error("Signup error", error);
@@ -186,7 +184,8 @@ const verifyOtp = async (req, res) => {
                     owner: referrerData._id,
                     minPurchaseAmount: 1000,
                     maxDiscountAmount: 2000,
-                    expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                    expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                    autoDeleteAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)
                 });
 
                 await referralCoupon.save();

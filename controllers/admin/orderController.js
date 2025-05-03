@@ -251,6 +251,7 @@ const refund = async (req, res) => {
 
         order.returnRequest.status = "Completed";
         order.status = "Returned";
+        order.refundAmount = refundAmount;
         await order.save();
         
         res.status(200).json({success:true, message: "Refund processed successfully"});
