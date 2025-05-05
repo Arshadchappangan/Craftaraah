@@ -1,7 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const app = express(); 
 const path = require('path');
-require('dotenv').config();
 const db = require('./config/db');
 const userRouter = require('./routes/userRouter');
 const adminRouter = require('./routes/adminRouter');
