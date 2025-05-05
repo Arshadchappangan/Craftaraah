@@ -135,56 +135,58 @@
                         <h4>Latest Products</h4>
                         <div class="latest-product__slider owl-carousel">
                             <div class="latest-prdouct__slider__item">
-                                <%for(let i=0;i<3;i++){%>
-                                <a href="/productDetails?id=<%=product[i]._id%>" class="latest-product__item">
-                                    <div class="latest-product__item__pic">
-                                        <img src="<%=product[i].productImage[0]%>" alt="">
-                                    </div>
-                                    <div class="latest-product__item__text">
-                                        <h6><%=product[i].productName%></h6>
-                                        <div class="d-flex justify-content-between me-3">
-                                            <span>₹<%=product[i].discountedPrice%></span>
-                                            <span><strike class="text-danger">₹<%=product[i].price.toLocaleString('en-IN')%></strike></span>
-                                        </div>
-                                        <div class="product__details__rating" style="color: #FDCC0D;">
-                                            <% let rating = product[i].rating || 0; %>
-                                            <% for(let j = 1; j <= 5; j++) { %>
-                                                <% if (j <= Math.ceil(rating)) { %>
-                                                    <i class="fa fa-star"></i>
-                                                <% } else { %>
-                                                    <i class="fa fa-star-o"></i>
-                                                <% } %>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                </a>
-                                <%}%>
+                                <% for(let i=0; i<3; i++){ 
+                                    if(product[i]) { %>
+                                       <a href="/productDetails?id=<%=product[i]._id%>" class="latest-product__item">
+                                           <div class="latest-product__item__pic">
+                                               <img src="<%=product[i].productImage[0]%>" alt="">
+                                           </div>
+                                           <div class="latest-product__item__text">
+                                               <h6><%=product[i].productName%></h6>
+                                               <div class="d-flex justify-content-between me-3">
+                                                   <span>₹<%=product[i].discountedPrice%></span>
+                                                   <span><strike class="text-danger">₹<%=product[i].price.toLocaleString('en-IN')%></strike></span>
+                                               </div>
+                                               <div class="product__details__rating" style="color: #FDCC0D;">
+                                                   <% let rating = product[i].rating || 0; %>
+                                                   <% for(let j = 1; j <= 5; j++) { %>
+                                                       <% if (j <= Math.ceil(rating)) { %>
+                                                           <i class="fa fa-star"></i>
+                                                       <% } else { %>
+                                                           <i class="fa fa-star-o"></i>
+                                                       <% } %>
+                                                   <% } %>
+                                               </div>
+                                           </div>
+                                       </a>
+                               <% } } %>                               
                             </div>
                             <div class="latest-prdouct__slider__item">
-                                <%for(let i=3;i<6;i++){%>
-                                    <a href="/productDetails?id=<%=product[i]._id%>" class="latest-product__item">
-                                        <div class="latest-product__item__pic">
-                                            <img src="<%=product[i].productImage[0]%>" alt="">
-                                        </div>
-                                        <div class="latest-product__item__text">
-                                            <h6><%=product[i].productName%></h6>
-                                            <div class="d-flex justify-content-between me-3">
-                                                <span>₹<%=product[i].discountedPrice%></span>
-                                                <span><strike class="text-danger">₹<%=product[i].price.toLocaleString('en-IN')%></strike></span>
-                                            </div>
-                                        </div>
-                                        <div class="product__details__rating" style="color: #FDCC0D;">
-                                            <% let rating = product[i].rating || 0; %>
-                                            <% for(let j = 1; j <= 5; j++) { %>
-                                                <% if (j <= Math.ceil(rating)) { %>
-                                                    <i class="fa fa-star"></i>
-                                                <% } else { %>
-                                                    <i class="fa fa-star-o"></i>
-                                                <% } %>
-                                            <% } %>
-                                        </div>
-                                    </a>
-                                    <%}%>
+                                <% for(let i=3; i<6; i++){ 
+                                    if(product[i]) { %>
+                                       <a href="/productDetails?id=<%=product[i]._id%>" class="latest-product__item">
+                                           <div class="latest-product__item__pic">
+                                               <img src="<%=product[i].productImage[0]%>" alt="">
+                                           </div>
+                                           <div class="latest-product__item__text">
+                                               <h6><%=product[i].productName%></h6>
+                                               <div class="d-flex justify-content-between me-3">
+                                                   <span>₹<%=product[i].discountedPrice%></span>
+                                                   <span><strike class="text-danger">₹<%=product[i].price.toLocaleString('en-IN')%></strike></span>
+                                               </div>
+                                               <div class="product__details__rating" style="color: #FDCC0D;">
+                                                   <% let rating = product[i].rating || 0; %>
+                                                   <% for(let j = 1; j <= 5; j++) { %>
+                                                       <% if (j <= Math.ceil(rating)) { %>
+                                                           <i class="fa fa-star"></i>
+                                                       <% } else { %>
+                                                           <i class="fa fa-star-o"></i>
+                                                       <% } %>
+                                                   <% } %>
+                                               </div>
+                                           </div>
+                                       </a>
+                               <% } } %>            
                             </div>
                         </div>
                     </div>
@@ -194,7 +196,8 @@
                         <h4>Top Rated Products</h4>
                         <div class="latest-product__slider owl-carousel">
                             <div class="latest-prdouct__slider__item">
-                                <%for(let i=0;i<3;i++){%>
+                                <% for(let i=0; i<3; i++){ 
+                                if(rated[i]) { %>
                                 <a href="/productDetails?id=<%=rated[i]._id%>" class="latest-product__item">
                                     <div class="latest-product__item__pic">
                                         <img src="<%=rated[i].productImage[0]%>" alt="">
@@ -217,10 +220,11 @@
                                         </div>
                                     </div>
                                 </a>
-                                <%}%>
+                                <% } } %>
                             </div>
                             <div class="latest-prdouct__slider__item">
-                                <%for(let i=3;i<6;i++){%>
+                                <% for(let i=3; i<6; i++){ 
+                                    if(rated[i]) { %>
                                     <a href="/productDetails?id=<%=rated[i]._id%>" class="latest-product__item">
                                         <div class="latest-product__item__pic">
                                             <img src="<%=rated[i].productImage[0]%>" alt="">
@@ -243,7 +247,7 @@
                                             <% } %>
                                         </div>
                                     </a>
-                                    <%}%>
+                                    <%}}%>
                             </div>
                         </div>
                     </div>
@@ -253,7 +257,8 @@
                         <h4>Best Selling Products</h4>
                         <div class="latest-product__slider owl-carousel">
                             <div class="latest-prdouct__slider__item">
-                                <%for(let i=0;i<3;i++){%>
+                                <% for(let i=0; i<3; i++){ 
+                                    if(bestSeller[i]) { %>
                                 <a href="/productDetails?id=<%=bestSeller[i]._id%>" class="latest-product__item">
                                     <div class="latest-product__item__pic">
                                         <img src="<%=bestSeller[i].productImage[0]%>" alt="">
@@ -276,10 +281,11 @@
                                         </div>
                                     </div>
                                 </a>
-                                <%}%>
+                                <%}}%>
                             </div>
                             <div class="latest-prdouct__slider__item">
-                                <%for(let i=3;i<6;i++){%>
+                                <% for(let i=3; i<6; i++){ 
+                                    if(bestSeller[i]) { %>
                                     <a href="/productDetails?id=<%=bestSeller[i]._id%>" class="latest-product__item">
                                         <div class="latest-product__item__pic">
                                             <img src="<%=bestSeller[i].productImage[0]%>" alt="">
@@ -302,7 +308,7 @@
                                             <% } %>
                                         </div>
                                     </a>
-                                    <%}%>
+                                    <%}}%>
                             </div>
                         </div>
                     </div>
