@@ -233,7 +233,7 @@ const resendOtp = async (req, res) => {
 const signin = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const findUser = await User.findOne({ email: email });
+        const findUser = await User.findOne({ email: email ,isAdmin:false});
         if (!findUser) {
             return res.render('login', { message: "User Not Found" })
         }
