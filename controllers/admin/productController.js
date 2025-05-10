@@ -81,8 +81,6 @@ const productInfo = async (req, res) => {
         });
 
         calculateDiscount(productData)
-
-        console.log('product data ; ',productData)
         
         if (category) {
             res.render('products', {
