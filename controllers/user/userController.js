@@ -53,7 +53,7 @@ const loadHome = async (req, res) => {
             prod.totalSold = order ? order.totalQuantitySold : 0;
         });
 
-        const bestSeller = product.sort((a,b) => b.totalSold-a.totalSold)
+        const bestSeller = [...product].sort((a,b) => b.totalSold-a.totalSold)
 
         if (req.session.user) {
             userData = await User.findById(req.session.user);

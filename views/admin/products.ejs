@@ -162,7 +162,10 @@
                           
                           <% for (let i = data.length - 1; i >= 0; i--) { %>
                             <tr>
-                                <td class="text-start"><%=data[i].productName%></td>
+                                <td class="text-start">
+                                  <img style="width: 100%; max-width: 60px; border-radius: 5%;" src="<%= data[i].productImage[0] %>" alt="">
+                                  <%=data[i].productName%>
+                                </td>
                                 <td class="text-start"><%= data[i].category ? data[i].category.name : "No Category" %></td>
                                 <td class="text-center">₹ <%= data[i].price %></td>
                                 <td class="text-center"><%= data[i].maxDiscount %> %</td>

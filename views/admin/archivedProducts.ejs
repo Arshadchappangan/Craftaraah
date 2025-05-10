@@ -51,17 +51,22 @@
                                     <tbody>
                                         <%for(let i=data.length-1;i>=0;i--){%>
                                         <tr>
-                                            <td class="text-start"><%=data[i].productName%></td>
+                                            <td class="text-start">
+                                                <img style="width: 100%; max-width: 60px; border-radius: 5%;" src="<%= data[i].productImage[0] %>" alt="">
+                                                <%=data[i].productName%>
+                                              </td>
                                             <td class="text-start"><%= data[i].category ? data[i].category.name : "No Category" %></td>
                                             <td class="text-end"><%=data[i].regularPrice%></td>
                                             <td class="text-end"><%=data[i].salePrice%></td>
                                             <td class="text-end"><%=data[i].quantity%></td>
-                                            <td class="text-end">
-                                                  <i class="fas fa-undo mx-2" onclick="confirmRestore('<%=data[i]._id%>')"></i>
-                                                  <i class="fas fa-trash-alt mx-2" onclick="confirmDelete('<%=data[i]._id%>')"></i>
-                                              </td>
-                            
-                                        </tr>
+                                            <td class="text-start">
+                                                <button class="badge rounded-pill bg-success text-light"  onclick="confirmRestore('<%=data[i]._id%>')">
+                                                    <i class="fas fa-undo mx-2 text-white">  Restore</i> 
+                                                </button><br>
+                                                <button class="badge rounded-pill bg-danger text-light" onclick="confirmDelete('<%=data[i]._id%>')">
+                                                    <i class="fas fa-trash-alt mx-2">  Delete</i>
+                                                </button>
+                                            </td>
 
                                         <%}%>
                                     </tbody>
