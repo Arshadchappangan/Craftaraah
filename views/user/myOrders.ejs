@@ -100,14 +100,24 @@
                             <!-- Product Listing -->
                             <div class="list-group">
                                 <% order.orderedItems.forEach(item => { %>
-                                    <div class="list-group-item d-flex align-items-center mb-3 rounded shadow-sm">
-                                        <img src="<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>" class="img-thumbnail me-4" style="width: 100px;">
-                                        <div class="mx-3">
-                                            <h5 class="mb-1"><%= item.product.productName %></h5>
-                                            <p class="mb-1">Qty: <%= item.quantity %></p>
-                                            <p class="mb-0">Subtotal: ₹<%= item.quantity * item.price %></p>
+                                    <% if (item.product) { %>
+                                        <div class="list-group-item d-flex align-items-center mb-3 rounded shadow-sm">
+                                            <img src="<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>" class="img-thumbnail me-4" style="width: 100px;">
+                                            <div class="mx-3">
+                                                <h5 class="mb-1"><%= item.product.productName %></h5>
+                                                <p class="mb-1">Qty: <%= item.quantity %></p>
+                                                <p class="mb-0">Subtotal: ₹<%= item.quantity * item.price %></p>
+                                            </div>
                                         </div>
-                                    </div>
+                                    <% } else { %>
+                                        <div class="list-group-item d-flex align-items-center mb-3 rounded shadow-sm bg-light">
+                                            <div class="mx-3">
+                                                <h5 class="mb-1 text-muted">[Product Deleted]</h5>
+                                                <p class="mb-1">Qty: <%= item.quantity %></p>
+                                                <p class="mb-0">Subtotal: ₹<%= item.quantity * item.price %></p>
+                                            </div>
+                                        </div>
+                                    <% } %>
                                 <% }); %>
                             </div>
                         </div>

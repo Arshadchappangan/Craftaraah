@@ -11,23 +11,87 @@ const categoryInfo = async (req,res) => {
 
         const search = req.query.search || "";
 
+        const results = await Category.aggregate([
+            {
+                $facet:{
+                    data : [
+                        {
+                            $match:{
+                                isDeleted:false,
+                                name:{$regex:'.*'+search+'.*',$options:'i'}
+                            }
+                        },
+                        {
+                            $sort:{createdAt:-1}
+                        },
+                        {
+                            $skip:skip
+                        },
+                        {
+                            $limit:limit
+                        }
+                    ],
+                    totalCount : [
+                        {
+                            $count:'count'
+                        }
+                    ],
+                    listedCount : [
+                        {
+                            $match:{isListed:true}
+                        },
+                        {
+                            $count:'count'
+                        }
+                    ],
+                    unlistedCount : [
+                        {
+                            $match:{isListed:false}
+                        },
+                        {
+                            $count:'count'
+                        }
+                    ],
+                    archivedCount : [
+                        {
+                            $match:{isDeleted:true}
+                        },
+                        {
+                            $count:'count'
+                        }
+                    ],
+                    searchedCount : [
+                        {
+                            $match:{
+                                isDeleted:false,
+                                name:{$regex:'.*'+search+'.*',$options:'i'}
+                            }
+                        },
+                        {
+                            $count:'count'
+                        }
+                    ]
 
-        const categoryData = await Category.find({
-            isDeleted : false,
-            name:{$regex:'.*'+search+'.*',$options:'i'}
-        })
-        .sort({createdAt:-1})
-        .skip(skip)
-        .limit(limit)
+                }
+            }
+        ])
 
-        const totalCategories = await Category.countDocuments({
-            isDeleted : false,
-            name:{$regex:'.*'+search+'.*',$options:'i'}
-        })
+        // const categoryData = await Category.find({
+        //     isDeleted : false,
+        //     name:{$regex:'.*'+search+'.*',$options:'i'}
+        // })
+        // .sort({createdAt:-1})
+        // .skip(skip)
+        // .limit(limit)
+
+        // const totalCategories = await Category.countDocuments({
+        //     isDeleted : false,
+        //     name:{$regex:'.*'+search+'.*',$options:'i'}
+        // })
 
         const categoryOffers = await Offer.find({isActive:true,applicableTo:"Category"});
 
-        const categoryIds = categoryData.map(category => category._id);
+        const categoryIds = results[0].data.map(category => category._id);
         
         const offersPerCategory = await Offer.find({
                 applicableTo: 'Category',
@@ -43,12 +107,11 @@ const categoryInfo = async (req,res) => {
                 });
             });
 
-        const totalPages = Math.ceil(totalCategories/limit);
+        const totalPages = Math.ceil(results[0].searchedCount[0]?.count/limit);
         res.render('category',{
-            category : categoryData,
+            category : results,
             currentPage : page,
             totalPages : totalPages,
-            totalCategories : totalCategories,
             categoryOffers : categoryOffers,
             activeOfferMap : activeOfferMap,
             searchQuery : search

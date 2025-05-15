@@ -45,6 +45,31 @@ const productInfo = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
 
+        const banner = await Product.aggregate([
+            {
+                $facet: {
+                totalProducts: [
+                    { $count: "count" }
+                ],
+                newArrivals: [
+                { 
+                    $match: {
+                        createdAt: {
+                            $gte: new Date(new Date().setDate(new Date().getDate() - 7))
+                        }
+                    }
+                },
+                    { $count: "count" }
+                ],
+                archivedProducts: [
+                    { $match: { isDeleted: true } },
+                    { $count: "count" }
+                ]
+                }
+            }
+        ]);
+
+
         const productData = await Product.find({
             isDeleted : false,
             $or: [
@@ -84,6 +109,7 @@ const productInfo = async (req, res) => {
         
         if (category) {
             res.render('products', {
+                banner : banner[0],
                 data: productData,
                 currentPage: page,
                 totalPages: Math.ceil(count / limit),

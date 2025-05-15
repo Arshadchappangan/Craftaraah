@@ -3,13 +3,66 @@ const User = require('../../models/userSchema');
 
 const loadCoupons = async (req, res) => {
     try {
-        const coupons = await Coupon.find({isDeleted:false}).sort({ createdAt: -1 });
-        res.render('coupons', { coupons });
+        let searchQuery = req.query.search || '';
+        let page = parseInt(req.query.page) || 1; 
+        const limit = 10;
+        const skip = (page - 1) * limit;
+
+        const result = await Coupon.aggregate([
+            {
+                $facet : {
+                    data : [
+                        { $match : {
+                            isDeleted: false,
+                            couponCode: { $regex: searchQuery, $options: 'i' }
+                        }},
+                        { $sort : { createdAt: -1 } },
+                        { $skip : skip },
+                        { $limit : limit }
+                    ],
+                    totalCount : [
+                        { $match : { isDeleted: false } },
+                        { $count : 'count' }
+                    ],
+                    activeCount : [
+                        { $match : { isDeleted: false, isActive: true } },
+                        { $count : 'count' }
+                    ],
+                    expiredCount : [
+                        { $match : { isDeleted: false, expiryDate: { $lt: new Date() } } },
+                        { $count : 'count' }
+                    ],
+                    archivedCount : [
+                        { $match : { isDeleted: true } },
+                        { $count : 'count' }
+                    ],
+                    searchedCount : [
+                        { $match : {
+                            isDeleted: false,
+                            couponCode: { $regex: searchQuery, $options: 'i' }
+                        }},
+                        { $count : 'count' }
+                    ]
+                }
+            }
+        ]);
+
+        const coupons = result[0];
+        const totalCount = result[0].searchedCount[0]?.count || 0;
+        const totalPages = Math.ceil(totalCount / limit);
+
+        res.render('coupons', {
+            coupons,
+            currentPage: page,
+            totalPages,
+            searchQuery
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 }
+
 
 const addCoupon = async (req, res) => {
     try {

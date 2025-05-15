@@ -50,7 +50,7 @@
             <div class="col col-stats ms-3 ms-sm-0">
               <div class="numbers">
                 <p class="card-category">Total Coupons</p>
-                <h4 class="card-title">30</h4>
+                <h4 class="card-title"><%= coupons.totalCount[0]?.count || 0 %></h4>
               </div>
             </div>
           </div>
@@ -71,7 +71,7 @@
             <div class="col col-stats ms-3 ms-sm-0">
               <div class="numbers">
                 <p class="card-category">Active Coupons</p>
-                <h4 class="card-title">30</h4>
+                <h4 class="card-title"><%= coupons.activeCount[0]?.count || 0 %></h4>
               </div>
             </div>
           </div>
@@ -92,7 +92,7 @@
             <div class="col col-stats ms-3 ms-sm-0">
               <div class="numbers">
                 <p class="card-category">Expired Coupons</p>
-                <h4 class="card-title">20</h4>
+                <h4 class="card-title"><%= coupons.expiredCount[0]?.count || 0 %></h4>
               </div>
             </div>
           </div>
@@ -113,7 +113,7 @@
             <div class="col col-stats ms-3 ms-sm-0">
               <div class="numbers">
                 <p class="card-category">Redeemed Coupons</p>
-                <h4 class="card-title">20</h4>
+                <h4 class="card-title"><%= coupons.archivedCount[0]?.count || 0 %></h4>
               </div>
             </div>
           </div>
@@ -143,12 +143,12 @@
                     <th class="text-start">Code</th>
                     <th class="text-start">Discount</th>
                     <th class="text-start">Expiry Date</th>
-                    <th class="text-end">Status</th>
-                    <th class="text-end">Actions</th>
+                    <th class="text-start">Status</th>
+                    <th class="text-start">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <% coupons.forEach((coupon, ind) => { %>
+                  <% coupons.data.forEach((coupon, ind) => { %>
                   <tr>
                     <td class="text-start"><%= coupon.couponCode %></td>
                     <%if(coupon.couponType === 'percentage'){ %>
@@ -157,7 +157,7 @@
                       <td class="text-start">₹ <%= coupon.discountAmount %></td>
                       <%}%>
                     <td class="text-start"><%= new Date(coupon.expiryDate).toLocaleDateString()%></td>
-                    <td class="text-end">
+                    <td class="text-start">
                       <% if (coupon.isActive) { %>
                       <button class="badge badge-success">Active</button>
                       <i class="fas fa-sync ms-2 text-dark" onclick="confirmDeactivate('<%= coupon._id %>')"></i>
@@ -166,9 +166,13 @@
                       <i class="fas fa-sync ms-2 text-dark" onclick="confirmActivate('<%= coupon._id %>')"></i>
                       <% } %>
                     </td>
-                    <td class="text-end">
-                      <i class="fas fa-pencil-alt mx-2 text-dark" onclick='loadCouponToForm(<%- JSON.stringify(coupon) %>)'></i>
-                      <i class="fas fa-archive mx-2" onclick="confirmArchive('<%= coupon._id %>')"></i>
+                    <td class="text-start">
+                      <button class="badge bg-primary rounded-pill" onclick='loadCouponToForm(<%- JSON.stringify(coupon) %>)'>
+                        <i class="fas fa-pencil-alt mx-2 text-light" >  Edit</i>
+                      </button><br>
+                      <button class="badge bg-danger rounded-pill" onclick="confirmArchive('<%= coupon._id %>')">
+                        <i class="fas fa-archive mx-2" >  Archive</i>
+                      </button>
                     </td>
                   </tr>
                   <% }); %>
@@ -234,6 +238,19 @@
     </div>
 
     <!-- pagination here -->
+      <div class="container mt-3">
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+          <% for (let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%=(i === currentPage) ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= i %><% if (searchQuery) { %>&search=<%= searchQuery %><% } %>">
+              <%= i %>
+            </a>
+          </li>
+          <% } %>
+        </ul>
+      </nav>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

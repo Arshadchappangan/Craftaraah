@@ -183,7 +183,8 @@ const loadSalesPage = async (req,res) => {
       doc.pipe(res);
   
       // Header
-      doc.fontSize(18).text("Sales Report", { align: 'center' }).moveDown();
+      doc.font('Helvetica-Bold').fontSize(20).text("Craftaraah", { align: 'center' });
+      doc.fontSize(16).text("Sales Report", { align: 'center' }).moveDown();
   
       if (startDate && endDate) {
         doc.fontSize(12).text(`Report Period   : ${new Date(startDate).toISOString().split('T')[0]} to ${new Date(endDate).toISOString().split('T')[0]}`);
