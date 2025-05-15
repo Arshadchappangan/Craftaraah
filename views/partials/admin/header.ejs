@@ -131,7 +131,7 @@
                   aria-expanded="false"
                 >
                   <i class="fas fa-reply"></i>
-                  <p>Return Requests</p>
+                  <p>Return Requests  <% if(returnRequests) {%><span class="badge bg-danger"><%= returnRequests || 0 %></span><%}%></p>
                 </a>
               </li>
               <li class="nav-item">

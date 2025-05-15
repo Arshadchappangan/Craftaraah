@@ -102,6 +102,18 @@ const viewOrders = async (req, res) => {
         {
           $facet: {
             metadata: [{ $count: 'total' }],
+            pending : [{$match:{
+              status: { $in: ['Ordered', 'Processing', 'Shipped'] }
+            }},
+          { $count: 'total' }],
+            cancelled : [{$match:{
+              status: 'Cancelled'
+            }},
+          { $count: 'total' }],
+            delivered : [{$match:{
+              status : 'Delivered'
+            }},
+          { $count: 'total' }],
             data: [{ $skip: skip }, { $limit: limit }]
           }
         }
@@ -110,11 +122,18 @@ const viewOrders = async (req, res) => {
       const result = await Order.aggregate(pipeline);
   
       const orders = result[0].data;
+      const banner = {
+        total : result[0].metadata[0]?.total || 0,
+        pending : result[0].pending[0]?.total || 0,
+        cancelled : result[0].cancelled[0]?.total || 0,
+        delivered : result[0].delivered[0]?.total || 0
+      }
       const totalOrders = result[0].metadata[0]?.total || 0;
       const totalPages = Math.ceil(totalOrders / limit);
   
       res.render('orders', {
         orders,
+        banner,
         currentPage: page,
         totalPages,
         searchKeyword: search || '',

@@ -42,7 +42,7 @@
               <div class="col col-stats ms-3 ms-sm-0">
                 <div class="numbers">
                   <p class="card-category">Total Offers Created</p>
-                  <h4 class="card-title">120</h4>
+                  <h4 class="card-title"><%= offers.totalCount[0]?.count || 0 %></h4>
                 </div>
               </div>
             </div>
@@ -61,8 +61,8 @@
               </div>
               <div class="col col-stats ms-3 ms-sm-0">
                 <div class="numbers">
-                  <p class="card-category">Total Offers Redeemed</p>
-                  <h4 class="card-title">70</h4>
+                  <p class="card-category">Active Offers</p>
+                  <h4 class="card-title"><%= offers.activeCount[0]?.count || 0 %></h4>
                 </div>
               </div>
             </div>
@@ -81,8 +81,8 @@
               </div>
               <div class="col col-stats ms-3 ms-sm-0">
                 <div class="numbers">
-                  <p class="card-category">Avg. Engagement/Offer</p>
-                  <h4 class="card-title">3.8%</h4>
+                  <p class="card-category">Expired Offers</p>
+                  <h4 class="card-title"><%= offers.expiredCount[0]?.count || 0 %></h4>
                 </div>
               </div>
             </div>
@@ -112,17 +112,12 @@
     </div>
 
     <div class="row mt-4">
-      <div class="col-md-12">
+      <div class="col-md-9">
         <div class="card card-round">
           <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="card-title">Offer Performance Overview</div>
-            <div>
-              <button onclick="createOffer()" class="btn btn-primary btn-sm">Create Offer</button>
-              <a href="#" class="btn btn-outline-secondary btn-sm">Export</a>
-            </div>
+            <div class="card-title">Offer Details</div>
           </div>
           <div class="card-body table-responsive">
-            <input type="text" class="form-control mb-3" placeholder="Search offers by title, status, or tier..." />
             <table class="table">
               <thead>
                 <tr>
@@ -135,273 +130,213 @@
                 </tr>
               </thead>
               <tbody>
-                <% offers.forEach(offer => { %>
+                <% offers.data.forEach(offer => { %>
                   <tr>
                     <td><%= offer.title %></td>
                     <td>
                       <% if (offer.isActive) { %>
                         <span class="badge badge-success">Active</span>
+                        <i class="fas fa-sync ms-2 text-dark" onclick="confirmUnlist('<%=offer._id%>')"></i>
                       <% } else { %>
                         <span class="badge badge-danger">Inactive</span>
+                        <i class="fas fa-sync ms-2 text-dark" onclick="confirmList('<%=offer._id%>')"></i>
                       <% } %>
+
                     </td>
                     <td><%= offer.applicableTo %></td>
                     <td><%= offer.formattedStartDate %></td>
                     <td><%= offer.formattedEndDate %></td>
                     <td>
-                      <a onclick='editOffer(<%- JSON.stringify(offer) %>)' class="btn btn-sm btn-primary">
-                        <i class="fas fa-edit"></i>
-                      </a>
-                      <a onclick="confirmDelete('<%= offer._id %>')" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></a>
+                      <button onclick='loadOfferData(<%- JSON.stringify(offer) %>)' class="badge bg-primary rounded-pill">
+                        <i class="fas fa-pencil-alt mx-2 text-light" >  Edit</i>
+                      </button><br>
+                      <button onclick="confirmDelete('<%= offer._id %>')" class="badge bg-danger rounded-pill">
+                        <i class="fas fa-trash">  Delete</i>
+                      </button>
                     </td>
                   </tr>
                 <% }) %>
               </tbody>
             </table>
-           <!-- pagination -->
           </div>
         </div>
       </div>
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-body">
+            <h5 id="form-card" class="card-title">Create Offer</h5>
+            <form id="offer-form" method="post" action="/admin/createOffer">
+              <div class="mb-4">
+                <label class="form-label">Offer Title</label>
+                <input type="text" name="title" class="form-control" id="offer_title" placeholder="Type here" />
+                <div id="title-error" class="error-message"></div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Offer Type</label>
+                <select type="" name="type" class="form-control" id="offer_type">
+                    <option value="" disabled selected>Choose One</option>
+                    <option value="Product">Product Offer</option>
+                    <option value="Category">Category Offer</option>
+                </select>
+                <div id="offer_type-error" class="error-message"></div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Discount</label>
+                <input type="number" name="discount" class="form-control" id="discount_value" placeholder="Type here" />
+                <div id="discount-error" class="error-message"></div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Starting Date</label>
+                <input type="date" name="startingDate" class="form-control" id="starting_date" placeholder="Type here" />
+                <div id="starting_date-error" class="error-message"></div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Ending Date</label>
+                <input type="date" name="endingDate" class="form-control" id="ending_date" placeholder="Type here" />
+                <div id="ending_date-error" class="error-message"></div>
+              </div>
+              <div class="d-grid">
+                <button id="btn-submit" class="btn btn-primary" type="submit">Create Coupon</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+        <!-- pagination here -->
+      <div class="container mt-3">
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+          <% for (let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%=(i === currentPage) ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= i %><% if (searchQuery) { %>&search=<%= searchQuery %><% } %>">
+              <%= i %>
+            </a>
+          </li>
+          <% } %>
+        </ul>
+      </nav>
     </div>
   </div>
 </div>
 
 
+
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-  function createOffer() {
-    Swal.fire({
-      title: 'Create New Offer',
-      html: `
-        <style>
-          .swal2-popup .swal2-input, 
-          .swal2-popup .swal2-select {
-            width: 100% !important;
-            padding: 10px;
-            margin: 8px 0;
-            font-size: 1rem;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-          }
-            #offer-expiry {
-            width: 30% !important;
-            padding: 10px;
-            }
 
-            #date-row {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              gap: 10px;
-              margin: 8px 0;
-            }
+document.getElementById('offer-form').addEventListener('submit', handleFormSubmission);
 
-              #date-row input[type="date"] {
-                flex: 1;
-                padding: 10px;
-                border-radius: 8px;
-                border: 1px solid #ccc;
-                font-size: 1rem;
-              }
+function handleFormSubmission(event) {
+    event.preventDefault(); 
 
-              #date-row span {
-                white-space: nowrap;
-                padding: 0 5px;
-                font-weight: 500;
-              }
-        </style>
+    const title = document.getElementById('offer_title').value.trim();
+    const type = document.getElementById('offer_type').value.trim();
+    const discount = document.getElementById('discount_value').value.trim();
+    const start = document.getElementById('starting_date').value.trim();
+    const end = document.getElementById('ending_date').value.trim();
+    const formAction = document.getElementById('offer-form').action;
+    const method = formAction.includes("editOffer") ? "PUT" : "POST";
 
-        <input id="offer-title" class="swal2-input" placeholder="Offer Title">
-        <input id="offer-discount" class="swal2-input" placeholder="Discount %" type="number" min="1" max="100">
-        
-        <select id="offer-type" class="swal2-select">
-          <option value="" disabled selected>Select Offer Type</option>
-          <option value="Product">Product Offer</option>
-          <option value="Category">Category Offer</option>
-          <option value="Referral">Referral Offer</option>
-        </select>
-        
-        <div id="date-row"><input id="offer-start" class="swal2-input" type="date"><span style="margin : 0px 10px">to</span><input id="offer-end" class="swal2-input" type="date"></div>
-      `,
-      confirmButtonText: 'Create Offer',
-      focusConfirm: false,
-      preConfirm: () => {
-        const title = document.getElementById('offer-title').value;
-        const discount = document.getElementById('offer-discount').value;
-        const type = document.getElementById('offer-type').value;
-        const start = document.getElementById('offer-start').value;
-        const end = document.getElementById('offer-end').value;
+  if (!validateForm()) return;
 
-        if (!title || !discount || !type || !start || !end) {
-          Swal.showValidationMessage('Please fill all fields');
-          return false;
-        }
+  let body = { title, discount, type, start, end };
 
-        if (title.length < 3 || title.length > 50) {
-          Swal.showValidationMessage('Title must be between 3 and 50 characters long');
-          return false;
-        }
-
-        if (discount < 1 || discount > 100) {
-          Swal.showValidationMessage('Discount must be between 1 and 100%');
-          return false;
-        }
-
-        if( new Date(start) >= new Date(end)) {
-          Swal.showValidationMessage('Start date must be before end date');
-          return false;
-        }
-
-        if (new Date(end) < new Date()) {
-          Swal.showValidationMessage('Expiry date must be in the future');
-          return false;
-        }
-
-        return { title, discount, type, start, end };
-      }
-      }).then((result) => {
-      if (result.isConfirmed) {
-        fetch('/admin/createOffer', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(result.value)
-        })
-        .then(response => {
-          if (response.ok) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Offer Created!',
-              text: 'Your offer has been created successfully.',
-              confirmButtonText: 'OK'
-            }).then(() => {
-              location.reload(); // Reload the page to see the new offer
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error!',
-              text: 'There was an error creating the offer. Please try again.',
-            });
-          }
+    fetch(formAction, {
+      method : method,
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body)
+    })
+    .then(response => {
+      if(!response.ok){
+        return response.json().then(err => {
+          throw new Error(err.error);
         })
       }
+      return response.json();
+    })
+    .then(data => {
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: data.message || "Operation completed successfully!" 
+      }).then(() => {
+        setTimeout(() => {
+          location.reload();
+        }, 1500);
+
       });
+    })
+    .catch(error => {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: error.message || "Something went wrong!"
+      });
+    });
+}
 
+function validateForm() {
+
+  const title = document.getElementById('offer_title').value.trim();
+  const type = document.getElementById('offer_type').value.trim();
+  const discount = document.getElementById('discount_value').value.trim();
+  const start = document.getElementById('starting_date').value.trim();
+  const end = document.getElementById('ending_date').value.trim();
+
+  let isValid = true;
+
+  if (title === "") {
+    displayErrorMessage("title-error", "Please enter offer title");
+    isValid = false;
   }
 
-  function editOffer(offer) {
-  Swal.fire({
-    title: 'Edit Offer',
-    html: `
-      <style>
-        .swal2-popup .swal2-input, 
-        .swal2-popup .swal2-select {
-          width: 100% !important;
-          padding: 10px;
-          margin: 8px 0;
-          font-size: 1rem;
-          border-radius: 8px;
-          border: 1px solid #ccc;
-        }
-        #date-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 10px;
-          margin: 8px 0;
-        }
-        #date-row input[type="date"] {
-          flex: 1;
-          padding: 10px;
-          border-radius: 8px;
-          border: 1px solid #ccc;
-          font-size: 1rem;
-        }
-        #date-row span {
-          white-space: nowrap;
-          padding: 0 5px;
-          font-weight: 500;
-        }
-      </style>
+  if (type === "") {
+    displayErrorMessage("offer_type-error", "Please select offer type");
+    isValid = false;
+  }
 
-      <input id="offer-title" class="swal2-input" placeholder="Offer Title" value="${offer.title}">
-      <input id="offer-discount" class="swal2-input" placeholder="Discount %" type="number" min="1" max="100" value="${offer.discountPercentage}">
-      
-      <select id="offer-type" class="swal2-select">
-        <option value="" disabled>Select Offer Type</option>
-        <option value="Product" ${offer.applicableTo === 'Product' ? 'selected' : ''}>Product Offer</option>
-        <option value="Category" ${offer.applicableTo === 'Category' ? 'selected' : ''}>Category Offer</option>
-        <option value="Referral" ${offer.applicableTo === 'Referral' ? 'selected' : ''}>Referral Offer</option>
-      </select>
-      
-      <div id="date-row">
-        <input id="offer-start" class="swal2-input" type="date" value="${offer.startDate?.split('T')[0]}">
-        <span>to</span>
-        <input id="offer-end" class="swal2-input" type="date" value="${offer.endDate?.split('T')[0]}">
-      </div>
-    `,
-    confirmButtonText: 'Update Offer',
-    focusConfirm: false,
-    preConfirm: () => {
-      const title = document.getElementById('offer-title').value;
-      const discount = document.getElementById('offer-discount').value;
-      const type = document.getElementById('offer-type').value;
-      const start = document.getElementById('offer-start').value;
-      const end = document.getElementById('offer-end').value;
+  if (discount === "") {
+    displayErrorMessage("discount-error", "Please enter discount value");
+    isValid = false;
+  } else if (isNaN(discount) || discount <= 0 || discount > 100) {
+    displayErrorMessage("discount-error", "Discount must be a positive number between 1 and 100");
+    isValid = false;
+  }
 
-      if (!title || !discount || !type || !start || !end) {
-        Swal.showValidationMessage('Please fill all fields');
-        return false;
-      }
+  if (start === "") {
+    displayErrorMessage("starting_date-error", "Please select starting date");
+    isValid = false;
+  }
 
-      if (title.length < 3 || title.length > 50) {
-        Swal.showValidationMessage('Title must be between 3 and 50 characters');
-        return false;
-      }
+  if (end === "") {
+    displayErrorMessage("ending_date-error", "Please select ending date");
+    isValid = false;
+  } else if (new Date(start) >= new Date(end)) {
+    displayErrorMessage("ending_date-error", "Ending date must be after starting date");
+    isValid = false;
+  }
 
-      if (discount < 1 || discount > 100) {
-        Swal.showValidationMessage('Discount must be between 1 and 100');
-        return false;
-      }
+  if (isValid) {
+    clearErrorMessages();
+  }
+  return isValid;
+}
 
-      if (new Date(start) >= new Date(end)) {
-        Swal.showValidationMessage('Start date must be before end date');
-        return false;
-      }
-
-      return { title, discount, type, start, end };
-    }
-  }).then((result) => {
-    if (result.isConfirmed) {
-      fetch(`/admin/editOffer/${offer._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(result.value)
-      })
-      .then(response => {
-        if (response.ok) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Offer Updated!',
-            text: 'The offer has been updated successfully.',
-            confirmButtonText: 'OK'
-          }).then(() => {
-            location.reload(); 
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: 'Failed to update offer. Try again.',
-          });
-        }
-      });
-    }
+function displayErrorMessage(id, message) {
+  const el = document.getElementById(id);
+  el.innerText = message;
+  el.style.display = "block";
+  el.style.color = "red";
+}
+  
+function clearErrorMessages() {
+  document.querySelectorAll(".error-message").forEach(el => {
+    el.innerHTML = "";
+    el.style.display = "none";
   });
 }
 
@@ -439,5 +374,91 @@ function confirmDelete(offerId) {
     }
   });
 }
+
+function loadOfferData(offer) {
+
+  document.getElementById('offer-form').action = `/admin/editOffer/${offer._id}`;
+  document.getElementById('offer-form').onsubmit = handleFormSubmission;
+  document.getElementById('form-card').innerText = "Update Offer : " + offer.title;
+
+  document.getElementById('offer_title').value = offer.title;
+  document.getElementById('offer_type').value = offer.applicableTo;
+  document.getElementById('discount_value').value = offer.discountPercentage;
+  document.getElementById('starting_date').value = offer.startDate.slice(0, 10);
+  document.getElementById('ending_date').value = offer.endDate.slice(0, 10);
+
+  document.getElementById('btn-submit').innerText = "Update Offer";
+}
+
+
+function confirmUnlist(offerId) {
+          Swal.fire({
+            title: "Are you sure?",
+            text: "This offer will be Unlisted!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Unlist"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin/unlistOffer?id=${offerId}`, {
+                    method: 'GET'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        Swal.fire(
+                            'Unlisted!',
+                            'The offer has been unlisted.',
+                            'success'
+                        ).then(() => {
+                            location.reload(); 
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'Failed to unlist the offer. Try again.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+        }
+
+        function confirmList(offerId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This offer will be Listed!",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "List"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin/listOffer?id=${offerId}`, {
+                    method: 'GET'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        Swal.fire(
+                            'Listed!',
+                            'The offer has been listed.',
+                            'success'
+                        ).then(() => {
+                            location.reload(); 
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'Failed to list the offer. Try again.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    }
 
 </script>

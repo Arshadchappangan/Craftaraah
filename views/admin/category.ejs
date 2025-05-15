@@ -51,7 +51,7 @@
                     <div class="col col-stats ms-3 ms-sm-0">
                       <div class="numbers">
                         <p class="card-category">Total Categories</p>
-                        <h4 class="card-title">30</h4>
+                        <h4 class="card-title"><%= category[0].totalCount[0]?.count || 0 %></h4>
                       </div>
                     </div>
                   </div>
@@ -72,7 +72,7 @@
                     <div class="col col-stats ms-3 ms-sm-0">
                       <div class="numbers">
                         <p class="card-category">Listed Categories</p>
-                        <h4 class="card-title">30</h4>
+                        <h4 class="card-title"><%= category[0].listedCount[0]?.count || 0 %></h4>
                       </div>
                     </div>
                   </div>
@@ -93,7 +93,7 @@
                     <div class="col col-stats ms-3 ms-sm-0">
                       <div class="numbers">
                         <p class="card-category">Unlisted Categories</p>
-                        <h4 class="card-title">20</h4>
+                        <h4 class="card-title"><%= category[0].unlistedCount[0]?.count || 0 %></h4>
                       </div>
                     </div>
                   </div>
@@ -113,7 +113,7 @@
                     </div>
                     <div class="col col-stats ms-3 ms-sm-0">
                       <div class="numbers">Archived Categories</p>
-                        <h4 class="card-title">100</h4>
+                        <h4 class="card-title"><%= category[0].archivedCount[0]?.count || 0 %></h4>
                       </div>
                     </div>
                   </div>
@@ -147,7 +147,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <%category.forEach((cat,ind) => {%>
+                                        <%category[0].data.forEach((cat,ind) => {%>
 
                                         <tr>
                                             <td class="text-start">

@@ -50,7 +50,7 @@
             <div class="col col-stats ms-3 ms-sm-0">
               <div class="numbers">
                 <p class="card-category">Total Products</p>
-                <h4 class="card-title">30</h4>
+                <h4 class="card-title"><%= banner.totalProducts[0]?.count || 0 %></h4>
               </div>
             </div>
           </div>
@@ -92,7 +92,7 @@
             <div class="col col-stats ms-3 ms-sm-0">
               <div class="numbers">
                 <p class="card-category">New Arrivals</p>
-                <h4 class="card-title">20</h4>
+                <h4 class="card-title"><%= banner.newArrivals[0]?.count || 0 %></h4>
               </div>
             </div>
           </div>
@@ -112,7 +112,7 @@
             </div>
             <div class="col col-stats ms-3 ms-sm-0">
               <div class="numbers">Archived Products</p>
-                <h4 class="card-title">100</h4>
+                <h4 class="card-title"><%= banner.archivedProducts[0]?.count || 0 %></h4>
               </div>
             </div>
           </div>

@@ -152,10 +152,21 @@ async function getCounts(current,past){
 }
 
 
+function formatAmount(amount) {
+    return amount.toLocaleString('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+
 module.exports = {
     generateTransactionId,
     filterRange,
     saleCountProducts,
     saleCountCategories,
-    getCounts
+    getCounts,
+    formatAmount
 }

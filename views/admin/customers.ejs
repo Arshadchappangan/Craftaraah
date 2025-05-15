@@ -42,7 +42,7 @@
             <div class="col col-stats ms-3 ms-sm-0">
               <div class="numbers">
                 <p class="card-category">Total Customers</p>
-                <h4 class="card-title">30</h4>
+                <h4 class="card-title"><%= data[0].totalCount[0]?.count || 0 %></h4>
               </div>
             </div>
           </div>
@@ -50,7 +50,6 @@
       </div>
     </div>
 
-    <!-- Low Stock -->
     <div class="col-sm-6 col-md-3">
       <div class="card card-stats card-round">
         <div class="card-body">
@@ -63,7 +62,7 @@
             <div class="col col-stats ms-3 ms-sm-0">
               <div class="numbers">
                 <p class="card-category">Blocked Customers</p>
-                <h4 class="card-title">30</h4>
+                <h4 class="card-title"><%= data[0].blockedCount[0]?.count || 0 %></h4>
               </div>
             </div>
           </div>
@@ -71,7 +70,6 @@
       </div>
     </div>
 
-    <!-- Out of Stock -->
     <div class="col-sm-6 col-md-3">
       <div class="card card-stats card-round">
         <div class="card-body">
@@ -84,7 +82,7 @@
             <div class="col col-stats ms-3 ms-sm-0">
               <div class="numbers">
                 <p class="card-category">Active Customers</p>
-                <h4 class="card-title">20</h4>
+                <h4 class="card-title"><%= data[0].activeCustomersCount[0]?.count || 0 %></h4>
               </div>
             </div>
           </div>
@@ -92,7 +90,6 @@
       </div>
     </div>
 
-    <!-- Total Products -->
     <div class="col-sm-6 col-md-3">
       <div class="card card-stats card-round">
         <div class="card-body">
@@ -104,7 +101,7 @@
             </div>
             <div class="col col-stats ms-3 ms-sm-0">
               <div class="numbers">New Customers</p>
-                <h4 class="card-title">100</h4>
+                <h4 class="card-title"><%= data[0].newCustomersCount[0]?.count || 0 %></h4>
               </div>
             </div>
           </div>
@@ -143,24 +140,24 @@
                       </tr>
                     </thead>
                     <tbody>
-                        <%for(let i=0;i<data.length;i++){%>
+                        <% data[0].data.forEach(user => { %>
                       <tr>
-                        <td class="text-start"><img style="width: 40px; border-radius: 50%;" src="<%= data[i].photo %>" alt=""><%=data[i].name%></td>
-                        <td class="text-start"><%=data[i].email%></td>
-                        <td class="text-start"><%=data[i].phone%></td>
+                        <td class="text-start"><img style="width: 40px; border-radius: 50%;" src="<%= user.photo %>" alt=""><%= user.name %></td>
+                        <td class="text-start"><%= user.email %></td>
+                        <td class="text-start"><%= user.phone %></td>
                         <td class="text-end">
-                            <%if(data[i].isBlocked === false){%>
-                          <button class="badge badge-danger" onclick="confirmBlock('<%= data[i]._id %>')">
+                            <%if(user.isBlocked === false){%>
+                          <button class="badge badge-danger" onclick="confirmBlock('<%= user._id %>')">
                             Block
                         </button>
                           <%}else{%>
-                          <button class="badge badge-success" onclick="confirmUnblock('<%= data[i]._id %>')">
+                          <button class="badge badge-success" onclick="confirmUnblock('<%= user._id %>')">
                             Unblock
                             </button>
                           <%}%>
                         </td>
                       </tr>
-                      <%}%>
+                      <%})%>
                     </tbody>
                   </table>
                 </div>
