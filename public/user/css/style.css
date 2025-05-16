@@ -291,6 +291,7 @@ ol {
 }
 
 .header__top__right {
+	display: flex;
 	text-align: right;
 	padding: 10px 0 13px;
 }
@@ -393,19 +394,52 @@ ol {
 	padding: 5px 10px;
 }
 
-.header__top__right__auth {
+.header__top__right__auth .humberger__menu__widget{
 	display: inline-block;
 }
 
-.header__top__right__auth a {
+.header__top__right__auth a,.humberger__menu__widget a {
 	display: block;
 	font-size: 14px;
 	color: #1c1c1c;
 }
 
-.header__top__right__auth a i {
+.header__top__right__auth a i,.humberger__menu__widget a i {
 	margin-right: 6px;
 }
+
+
+.header__top__right__auth .dropdown,.humberger__menu__widget .dropdown{ 
+	position: relative;
+	display: inline-block;	
+}
+
+.header__top__right__auth .dropdown-content,.humberger__menu__widget .dropdown-content {
+	display: none;
+	position: absolute;
+	background-color: white;
+	min-width: 160px;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 500;
+	right: 5px;
+}
+
+.header__top__right__auth .dropdown-content a ,.humberger__menu__widget .dropdown-content a {
+	color: black;
+	padding: 12px 16px;
+	text-decoration: none;
+	display: block;
+	width: 100%;
+}
+
+.header__top__right__auth .dropdown-content a:hover,.humberger__menu__widget .dropdown-content a:hover {
+	background-color: rgb(224, 216, 216);
+}
+
+.header__top__right__auth .dropdown:hover .dropdown-content, .humberger__menu__widget .dropdown:hover .dropdown-content {
+	display: block;
+}
+
 
 .header__logo {
 	padding: 15px 0;
@@ -3060,36 +3094,6 @@ input[type="radio"]:checked + .selectable-card {
 	letter-spacing: 2px;
 }
 
-.header__top__right__auth .dropdown{
-	position: relative;
-	display: inline-block;	
-}
-
-.header__top__right__auth .dropdown-content{
-	display: none;
-	position: absolute;
-	background-color: white;
-	min-width: 160px;
-	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-	z-index: 500;
-	right: 5px;
-}
-
-.header__top__right__auth .dropdown-content a{
-	color: black;
-	padding: 12px 16px;
-	text-decoration: none;
-	display: block;
-	width: 100%;
-}
-
-.header__top__right__auth .dropdown-content a:hover{
-	background-color: rgb(224, 216, 216);
-}
-
-.header__top__right__auth .dropdown:hover .dropdown-content{
-	display: block;
-}
 
 .header {
 	position: relative;

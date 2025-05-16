@@ -36,12 +36,19 @@
             <li><a href="/wishlist"><i class="fa fa-heart"></i><span>1</span></a></li>
             <li><a href="/shoppingCart"><i class="fa fa-shopping-bag"></i><span>3</span></a></li>
         </ul>
-        <div class="header__cart__price">item: <span>$150.00</span></div>
     </div>
     <div class="humberger__menu__widget">
         <div class="header__top__right__auth">
             <% if (locals.user) { %>
-                <a href="/userProfile"><i class="fa fa-user"></i> <%=locals.user.name%></a>
+                <div class="dropdown">
+                    <a href=""><i class="fa fa-user"></i>
+                        <%=locals.user.name%>
+                    </a>
+                    <div class="dropdown-content">
+                        <a href="/userProfile">Profile</a>
+                        <a href="/logout">Logout</a>
+                    </div>
+                </div>
             <% } else { %>
                 <a href="/login"><i class="fa fa-user"></i> Login</a>
             <% } %>
@@ -114,27 +121,3 @@
         </div>
     </header>
     <!-- Header Section End -->
-
-    <script src="/user/js/jquery-3.3.1.min.js"></script>
-    <script src="/user/js/jquery.slicknav.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('.slicknav_nav').slicknav({
-                prependTo: '.humberger__menu__wrapper',
-                allowParentLinks: true
-            });
-        });
-
-        document.querySelector('.humberger__open').addEventListener('click', () => {
-            document.querySelector('.humberger__menu__wrapper').classList.add('show__humberger__menu__wrapper');
-            document.querySelector('.humberger__menu__overlay').classList.add('active');
-            document.body.classList.add('over_hid');
-        });
-    
-        document.querySelector('.humberger__menu__overlay').addEventListener('click', () => {
-            document.querySelector('.humberger__menu__wrapper').classList.remove('show__humberger__menu__wrapper');
-            document.querySelector('.humberger__menu__overlay').classList.remove('active');
-            document.body.classList.remove('over_hid');
-        });
-    </script>
-    

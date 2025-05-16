@@ -7,9 +7,9 @@
                 <div class="col-lg-12">
                     <div class="hero__search d-flex justify-content-center">
                         <div class="hero__search__form">
-                            <form action="#">
-                                <input type="text" placeholder="What do yo u need?">
-                                <button type="submit" class="site-btn">SEARCH</button>
+                            <form id="searchForm" >
+                                <input type="text" placeholder="What do yo u need?" name="search" id="searchInput" />
+                                <button id="searchButton" type="submit" class="site-btn">SEARCH</button>
                             </form>
                         </div>
                     </div>
@@ -319,3 +319,16 @@
     <!-- Latest Product Section End -->
 
  <%-include("../../views/partials/user/footer")%>
+
+ <script>
+    document.getElementById('searchButton').addEventListener('click',() => searchSubmit(document.getElementById('searchInput').value));
+
+    function searchSubmit(search) {  
+        event.preventDefault();
+        if (search.trim() === '') {
+            return;
+        }
+        window.location.href = `/shop?search=${search}`;
+    }
+
+ </script>

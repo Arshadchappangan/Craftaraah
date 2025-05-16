@@ -422,12 +422,12 @@ const loadWallet = async (req, res) => {
     try {
         const user = req.session.user;
         const page = req.query.page || 1;
-        const limit = 8;
+        const limit = 15;
+        const skip = (page - 1) * limit;
         let wallet = await Wallet.findOne({ userId: user._id });
 
         // Create wallet if not found
         if (!wallet) {
-            let walletId = '';
             const p1 = Math.floor(1000 + Math.random() * 9000);
             const p2 = Math.floor(1000 + Math.random() * 9000);
             const p3 = Math.floor(1000 + Math.random() * 9000);
@@ -447,10 +447,17 @@ const loadWallet = async (req, res) => {
             wallet.transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
         }
 
+        const totalTransactions = wallet.transactions.length;
+        const totalPages = Math.ceil(totalTransactions / limit);
+        const paginatedTransactions = wallet.transactions.slice(skip, skip + limit);
+
 
         res.render('wallet', {
             user: user,
-            wallet: wallet
+            wallet: wallet,
+            transactions: paginatedTransactions,
+            currentPage: parseInt(page),    
+            totalPages: totalPages
         });
 
     } catch (error) {
