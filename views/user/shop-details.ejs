@@ -105,12 +105,13 @@
                             <div class="tab-pane" id="tabs-2" role="tabpanel">
                                 <div class="product__details__tab__desc">
                                     <h6>Product Specifications : </h6>
-                                    <ul>
-                                        <%for(let i=0;i<product.specifications.length;i++){%>
-                                            <li class="my-2"><%=product.specifications[i]%></li>
+                                    <p>
+                                        <ul>
+                                            <%for(let i=0;i<product.specifications.length;i++){%>
+                                            <li class="my-2 mx-4"><%=product.specifications[i]%></li>
                                             <%}%>
-                                    </ul>
-                                    <p></p>
+                                        </ul>
+                                    </p>
                                 </div>
                             </div>
                             <div class="tab-pane" id="tabs-3" role="tabpanel">
@@ -119,13 +120,13 @@
                                         <% if(review.length>0){ %>
                                         <%for (let i=0;i<review.length;i++){%>
                                             <% if (review[i].review && review[i].review.trim() !== "") { %>
-                                        <div v-for="item in list" class="review">
+                                        <div v-for="item in list" class="review row">
     
                                             <div class="review-photo">
                                               <img style="border-radius: 50%; width: 50px;" src="<%= review[i].userId.photo %>">
                                             </div>
                                             
-                                            <div class="review-box">
+                                            <div class="review-box col-12 col-sm-9">
                                               
                                               <div class="review-author">
                                                 <% if (review[i].userId) { %>
@@ -159,16 +160,18 @@
 
                                     <div id="review-header">Write your review</div>
                                     <form action="/review" method="post">
-                                        <label class="review-label">Rate this product:</label>
-                                        <% let userReview = review.find(r => r.userId && r.userId._id.toString() === userId._id.toString()); %>
-                                        <div class="star-rating">
-                                            <% for (let j = 5; j >= 1; j--) { %>
-                                                <% if (userReview && j <= userReview.rating) { %>
-                                                    <span class="star" data-value="<%= j %>" style="color: #FFD700;">&#9733;</span>
-                                                <% } else { %>
-                                                    <span class="star" data-value="<%= j %>" style="color: grey;">&#9733;</span>
+                                        <div class="d-flex align-items-center">
+                                            <label class="review-label">Rate this product:</label>
+                                            <% let userReview = review.find(r => r.userId && r.userId._id.toString() === userId._id.toString()); %>
+                                            <div class="star-rating d-flex align-items-center">
+                                                <% for (let j = 5; j >= 1; j--) { %>
+                                                    <% if (userReview && j <= userReview.rating) { %>
+                                                        <span class="star" data-value="<%= j %>" style="color: #FFD700;">&#9733;</span>
+                                                    <% } else { %>
+                                                        <span class="star" data-value="<%= j %>" style="color: grey;">&#9733;</span>
+                                                    <% } %>
                                                 <% } %>
-                                            <% } %>
+                                            </div>
                                         </div>
                                         <input type="hidden" name="productId" value="<%=product._id%>">
                                         <input type="hidden" id="rating-value" name="rating" value="<%= userReview ? userReview.rating : '' %>"/>

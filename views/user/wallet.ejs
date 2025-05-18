@@ -57,10 +57,10 @@
             </div>
 
             <!-- Wallet Activity -->
-            <div class="card shadow-sm p-4 mt-4">
+            <div id="wallet" class="card shadow-sm p-4 mt-4">
                 <h4>Wallet Activity</h4>
                 <p class="text-muted">Your recent transactions</p>
-                <ul class="list-group mt-3">
+                <ul  class="list-group mt-3">
                     <% if (transactions.length === 0) { %>
                         <p class="text-muted text-center">No transactions yet.</p>
                     <% } else { %>

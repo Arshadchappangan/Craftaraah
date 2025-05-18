@@ -39,3 +39,83 @@
         margin-bottom: 20px;
         padding: 20px 40px;
     }
+
+    #photoForm img{
+        width: 100%; 
+        max-width: 100px;
+        border-radius: 50%; 
+        object-fit: cover;
+    }
+
+    #photoForm label{
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        padding: 5%;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    #profile a {
+        margin: 10px;
+    }
+
+
+@media only screen and (max-width: 767px) {
+        .main .card {
+        margin-bottom: 10px;
+        padding: 10px;
+    }
+
+    #profile {
+        padding: 0.5rem;
+    }
+
+    #profile h2 {
+        font-size: 1.5rem;
+    }
+
+    #profile td {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+
+    .breadcrumb__text h2 {
+        font-size: 1.5rem;
+    }
+
+    .card.d-flex.flex-row {
+        flex-direction: column !important;
+        align-items: center;
+    }
+
+    .card .col-3, .card .col-9 {
+        width: 100% !important;
+        max-width: 100%;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .referral-container {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .referral-container input {
+        width: 100% !important;
+    }
+
+    .referral-container i {
+        margin-top: 10px;
+        font-size: 1.2rem;
+    }
+
+    .d-flex.justify-content-between {
+        align-items: center;
+    }
+
+    #wallet {
+        padding: 0.5rem; !important
+    }
+}

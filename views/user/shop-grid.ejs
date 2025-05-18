@@ -56,52 +56,49 @@
             <div class="row">
                 <div class="col-lg-3 col-md-5">
                     <div class="sidebar">
-                        <div class="sidebar__item">
-                            <h4><i class="fa fa-filter" aria-hidden="true"></i>  Categories </h4>
-                            <ul>
-                                <%for(let i=0;i<category.length;i++){%>
-                                <li>
-                                    <a href="/shop?<%= new URLSearchParams({ 
-                                        ...query, category: category[i]._id 
-                                    }).toString() %>"><%= category[i].name %></a>
-                                </li>
-                                <%}%>
-                            </ul>
-                        </div>
-                        <div class="sidebar__item">
-                            <h4><i class="fa fa-filter" aria-hidden="true"></i>  Price</h4>
-                            <div class="sidebar__item__size">
-                                <a href="/shop?<%= new URLSearchParams({ 
-                                    ...query, minPrice: 0, maxPrice: 2000 
-                                }).toString() %>">Under 2000</a>
-                            </div>
-                            <div class="sidebar__item__size">
-                                <a href="/shop?<%= new URLSearchParams({ 
-                                    ...query, minPrice: 2000, maxPrice: 4000 
-                                }).toString() %>">2000 - 4000</a>
-                            </div>
-                            <div class="sidebar__item__size">
-                                <a href="/shop?<%= new URLSearchParams({ 
-                                    ...query, minPrice: 4000, maxPrice: 6000 
-                                }).toString() %>">4000 - 6000</a>
-                            </div>
-                            <div class="sidebar__item__size">
-                                <a href="/shop?<%= new URLSearchParams({ 
-                                    ...query, minPrice: 6000, maxPrice: 8000 
-                                }).toString() %>">6000 - 8000</a>
-                            </div>
-                            <div class="sidebar__item__size">
-                                <a href="/shop?<%= new URLSearchParams({ 
-                                    ...query, minPrice: 8000, maxPrice: 10000 
-                                }).toString() %>">8000 - 10000</a>
-                            </div>
-                            <div class="sidebar__item__size">
-                                <a href="/shop?<%= new URLSearchParams({ 
-                                    ...query, minPrice: 10000, maxPrice: 100000 
-                                }).toString() %>">Above 10000</a>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Categories Filter -->
+    <div class="sidebar__item position-relative">
+        <h4 class="filter-toggle" data-toggle="category-filter">
+            <i class="fa fa-filter" aria-hidden="true"></i> Categories
+            <i class="fa fa-chevron-down toggle-icon float-end"></i>
+        </h4>
+        <ul class="filter-content category-filter shadow-sm p-2 bg-white border rounded">
+            <%for(let i=0;i<category.length;i++){%>
+            <li>
+                <a href="/shop?<%= new URLSearchParams({ 
+                    ...query, category: category[i]._id 
+                }).toString() %>"><%= category[i].name %></a>
+            </li>
+            <%}%>
+        </ul>
+    </div>
+
+    <!-- Price Filter -->
+    <div class="sidebar__item position-relative">
+        <h4 class="filter-toggle" data-toggle="price-filter">
+            <i class="fa fa-filter" aria-hidden="true"></i> Price
+            <i class="fa fa-chevron-down toggle-icon float-end"></i>
+        </h4>
+        <div class="filter-content price-filter shadow-sm p-2 bg-white border rounded">
+            <% const priceRanges = [
+                { min: 0, max: 2000, label: 'Under 2000' },
+                { min: 2000, max: 4000, label: '2000 - 4000' },
+                { min: 4000, max: 6000, label: '4000 - 6000' },
+                { min: 6000, max: 8000, label: '6000 - 8000' },
+                { min: 8000, max: 10000, label: '8000 - 10000' },
+                { min: 10000, max: 100000, label: 'Above 10000' },
+            ]; %>
+            <% priceRanges.forEach(range => { %>
+            <div class="sidebar__item__size">
+                <a href="/shop?<%= new URLSearchParams({ 
+                    ...query, minPrice: range.min, maxPrice: range.max 
+                }).toString() %>"><%= range.label %></a>
+            </div>
+            <% }); %>
+        </div>
+    </div>
+</div>
+
                 </div>
                 <div class="col-lg-9 col-md-7">
                     <div class="filter__item">
@@ -308,6 +305,27 @@
                 });
             });
     }
+
+
+
+    document.querySelectorAll('.filter-toggle').forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            const targetClass = toggle.getAttribute('data-toggle');
+            const content = document.querySelector(`.${targetClass}`);
+
+            // Close others
+            document.querySelectorAll('.filter-content').forEach(el => {
+                if (el !== content) el.classList.remove('active');
+            });
+            document.querySelectorAll('.filter-toggle').forEach(el => {
+                if (el !== toggle) el.classList.remove('open');
+            });
+
+            // Toggle selected
+            toggle.classList.toggle('open');
+            content.classList.toggle('active');
+        });
+    });
 
 
     </script>
