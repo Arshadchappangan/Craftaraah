@@ -53,70 +53,55 @@
             </div>
             <div class="col-lg-9">
                 <div class="main">
-                    <div class="card d-flex flex-row">
-                        <div class="col-lg-3">
+                    <div class="card d-flex flex-lg-row flex-column align-items-start align-items-lg-stretch">
+                        <div class="col-lg-3 col-12 text-center mb-3 mb-lg-0">
                             <form action="/uploadProfilePhoto" method="POST" enctype="multipart/form-data" id="photoForm">
-                                <div style="position: relative; width: fit-content;">
-                                    <img src="<%= user.photo %>" alt="Profile Photo" id="profileImagePreview"
-                                        style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;">
-
-                                    <!-- Edit Icon -->
-                                    <label for="profilePhotoInput" style="
-                                    position: absolute;
-                                    bottom: 0;
-                                    right: 0;
-                                    /* background-color: rgba(0,0,0,0.6); */
-                                    padding: 5px;
-                                    border-radius: 50%;
-                                    cursor: pointer;
-                                    ">
-                                    <i class="fa fa-pencil text-dark"></i>
+                                <div style="position: relative; width: fit-content; margin: auto;">
+                                    <img src="<%= user.photo %>" alt="Profile Photo" id="profileImagePreview" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
+                                    <label for="profilePhotoInput" style="position: absolute; bottom: 5px; right: 5px; cursor: pointer;">
+                                        <i class="fa fa-pencil text-dark"></i>
                                     </label>
-
-                                    <!-- Hidden File Input -->
                                     <input type="file" id="profilePhotoInput" name="profilePhoto" accept="image/*" style="display: none;" onchange="submitPhotoForm()">
                                 </div>
                             </form>
-                            
                         </div>
-                        <div class="col-lg-9">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <h2><%= user.name %></h2>
-                                    <i class="fa fa-pencil text-dark" style="cursor: pointer; font-size: medium;" onclick="editProfileInfo('<%= user.name %>', '<%= user.phone %>')"></i>
+                        <div class="col-lg-9 col-12">
+                            <div id="profile" class="card-body">
+                                <div class="d-flex justify-content-between flex-wrap">
+                                    <h2 id="profile_name"><%= user.name %></h2>
+                                    <i class="fa fa-pencil text-dark" style="cursor: pointer;" onclick="editProfileInfo('<%= user.name %>', '<%= user.phone %>')"></i>
                                 </div>
-                                
-                                <table>
+                                <table class="table table-borderless mt-2">
                                     <tbody>
                                         <tr>
                                             <td>Email</td>
                                             <td>:</td>
-                                            <td><%=user.email%></td>
+                                            <td style="word-break: break-all;"><%= user.email %></td>
                                         </tr>
                                         <tr>
                                             <td>Phone</td>
                                             <td>:</td>
-                                            <td><%=user.phone%></td>
+                                            <td><%= user.phone %></td>
                                         </tr>
                                     </tbody>
                                 </table>
-                            </div>
-                            <div class="d-flex">
-                                <a onclick="confirmEmailChange()" style="margin-right: 20px;" class="btn btn-primary text-light"><i class="fa fa-envelope"></i> Change Email</a>
-                                <a onclick="confirmChangePassword()" class="btn btn-primary text-light"><i class="fa fa-lock"></i> Change Password</a>
+                                <div class="d-flex flex-wrap gap-2 justify-content-between">
+                                    <a onclick="confirmEmailChange()" class="btn btn-primary text-light"><i class="fa fa-envelope"></i> Change Email</a>
+                                    <a onclick="confirmChangePassword()" class="btn btn-primary text-light"><i class="fa fa-lock"></i> Change Password</a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card">
-                        <label for="" class="form-label">Copy and share your referral link</label>
-                        <div class="referral-container mt-3">
-                            <input type="text" id="referralLink" class="form-control referral-input" value="<%= user.referral.link %>" readonly>
-                            <i class="fa fa-clone" onclick="copyReferralLink()"></i>
-                          </div>
-                    </div>
-                       
-                </div>    
 
+                    <div class="card mt-4 p-3">
+                        <label class="form-label mb-2">Copy and share your referral link</label>
+                        <div class="referral-container d-flex align-items-center" style="gap: 10px;">
+                            <input type="text" id="referralLink" class="form-control referral-input" value="<%= user.referral.link %>" readonly style="flex: 1;">
+                            <i class="fa fa-clone" onclick="copyReferralLink()" style="cursor: pointer;"></i>
+                        </div>
+                    </div>
+       
+                </div>    
             </div>
         </div>
     </div>
