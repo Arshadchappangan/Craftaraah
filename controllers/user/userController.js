@@ -177,8 +177,12 @@ const verifyOtp = async (req, res) => {
             const referrerData = await User.findOne({ "referral.link": `${domain}?ref=${referrer}` });
 
             if (referrerData) {
+
+                let couponCode = `REF-${namePart}${Math.floor(1000 + Math.random() * 9000)}`;
+
+
                 const referralCoupon = new Coupon({
-                    couponCode: `REF-${referrer}`,
+                    couponCode: couponCode,
                     couponType: "percentage",
                     discountAmount: 15,
                     owner: referrerData._id,

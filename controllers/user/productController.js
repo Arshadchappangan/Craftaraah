@@ -925,7 +925,7 @@ const loadCouponPage = async (req, res) => {
             couponCode: { $not: /^REF/ }
         }).sort({ isActive: -1, expiryDate: 1 });
 
-        const referralCoupon = await Coupon.findOne({
+        const referralCoupon = await Coupon.find({
             couponCode: { $regex: /^REF/ },  
             owner: new mongoose.Types.ObjectId(user._id)   
         });

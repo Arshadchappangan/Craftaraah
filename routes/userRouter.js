@@ -23,6 +23,16 @@ router.post('/verifyOtp',userController.verifyOtp)
 router.post('/resendOtp',userController.resendOtp)
 router.get('/auth/google',passport.authenticate('google',{scope : ['profile','email']}));
 router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/login'}),(req,res) => {
+    if (!req.user) {
+      return res.redirect('/login');
+    }
+
+    req.session.user = {
+      _id: req.user._id,
+      name: req.user.name,
+      email: req.user.email
+    };
+    
     res.redirect('/')
 });
 
