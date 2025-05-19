@@ -386,10 +386,16 @@ const myOrders = async (req, res) => {
     try {
         const user = req.session.user;
         let searchQuery = req.query.search?.trim().toLowerCase() || "";
+        let page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+
         const query = { userId: user._id };
 
         let orders = await Order.find(query)
-            .sort({ createdAt: -1 }) 
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit) 
             .populate('orderedItems.product');
 
         if (searchQuery.length > 0) {
@@ -405,10 +411,15 @@ const myOrders = async (req, res) => {
             orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         }
 
+        const totalOrders = await Order.countDocuments(query);
+        const totalPages = Math.ceil(totalOrders / limit);
+
         res.render('myOrders', {
             user,
             orders : orders,
-            searchQuery
+            searchQuery,
+            currentPage: page,
+            totalPages: totalPages
         });
     } catch (err) {
         console.error(err);

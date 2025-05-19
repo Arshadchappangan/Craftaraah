@@ -114,8 +114,5 @@
     .d-flex.justify-content-between {
         align-items: center;
     }
-
-    #wallet {
-        padding: 0.5rem; !important
-    }
+    
 }
