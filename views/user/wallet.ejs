@@ -104,7 +104,15 @@
                                     </span>
                                     <div>
                                         <strong><%= transactionType %></strong>
-                                        <p class="text-muted mb-0"><%= transaction.date.toLocaleString() %></p>
+                                        <p class="text-muted mb-0"><%= transaction.date.toLocaleString('en-US', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                            }) %>
+                                        </p>
                                     </div>
                                 </div>
                                 <div>

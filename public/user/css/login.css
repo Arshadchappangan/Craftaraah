@@ -1,16 +1,17 @@
 body{
 	margin: 0;
-	padding: 0;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	min-height: 100vh;
+	height: 100vh;
+	position: relative;
 	font-family: 'Jost', sans-serif;
 	background-color: #fff;
 }
 .main{
 	width: 350px;
 	height: 700px;
+	position: absolute;
+	top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 	overflow: hidden;
 	border-radius: 10px;
 	box-shadow: 5px 20px 50px #7fad39;
@@ -115,4 +116,13 @@ button:hover{
 .forgot-password-link:hover{
 	color: rgb(13, 145, 253);
 	text-decoration: underline;
+}
+
+
+@media only screen and (max-width: 767px) {
+	#login_main{
+		width: 100vw;
+		height: 100vh;
+		top: 0;
+	}
 }

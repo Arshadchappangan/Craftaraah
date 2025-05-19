@@ -121,8 +121,18 @@
                                 <% }); %>
                             </div>
                         </div>
-                    </div>
-                <% }); %>
+                    </div>    
+                <% }); %>                                             
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation example" class="my-4">
+                        <ul class="pagination justify-content-center">
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                    <a class="page-link" href="/myOrders?page=<%= i %>"><%= i %></a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    </nav>
             <% } %>
         </div>
     </div>
