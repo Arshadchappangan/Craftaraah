@@ -820,13 +820,12 @@ const downloadInvoice = async (req, res) => {
                 doc.fillColor("#F0F0F0").rect(50, y - 5, 500, 20).fill().fillColor(primaryColor);
             }
 
-            const regularPrice = item.product.price;
             const offerPrice = item.price;
             const total = offerPrice * item.quantity;
 
             doc.text(item.product.productName, 55, y);
             doc.text(item.quantity.toString(), 200, y);
-            doc.text(`${item.product.regularPrice.toFixed(2)}`, 250, y);
+            doc.text(`${item.product.price.toFixed(2)}`, 250, y);
             doc.text(`${item.price.toFixed(2)}`, 320, y);
             doc.text(`${total.toFixed(2)}`, 420, y);
 
