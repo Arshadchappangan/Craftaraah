@@ -439,13 +439,9 @@ const loadWallet = async (req, res) => {
 
         // Create wallet if not found
         if (!wallet) {
-            const p1 = Math.floor(1000 + Math.random() * 9000);
-            const p2 = Math.floor(1000 + Math.random() * 9000);
-            const p3 = Math.floor(1000 + Math.random() * 9000);
-            const p4 = Math.floor(1000 + Math.random() * 9000);
 
             wallet = new Wallet({ 
-                walletId: `${p1} ${p2} ${p3} ${p4}`,
+                walletId: userHelper.generateWalletId(),
                 userId: user._id, 
                 balance: 0, 
                 transactions: [] 

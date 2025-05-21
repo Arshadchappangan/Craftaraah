@@ -141,6 +141,16 @@ const securePassword = async (password) => {
     }
 }
 
+//function to generate wallet ID 
+const generateWalletId = () => {
+    const p1 = Math.floor(1000 + Math.random() * 9000);
+    const p2 = Math.floor(1000 + Math.random() * 9000);
+    const p3 = Math.floor(1000 + Math.random() * 9000);
+    const p4 = Math.floor(1000 + Math.random() * 9000);
+
+    return `${p1} ${p2} ${p3} ${p4}`
+}
+
 
 
 
@@ -151,5 +161,6 @@ const securePassword = async (password) => {
     couponDiscountApply,
     generateOtp,
     verificationMail,
-    securePassword
+    securePassword,
+    generateWalletId
   }
