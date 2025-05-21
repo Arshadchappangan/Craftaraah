@@ -463,6 +463,7 @@ const placeOrder = async (req, res) => {
         if(!wallet){
             wallet = new Wallet({
                 userId : user._id,
+                walletId : userHelper.generateWalletId(),
                 balance : 0,
                 transactions : []
             })
@@ -657,7 +658,12 @@ const cancelOrder = async (req, res) => {
 
         let wallet = await Wallet.findOne({ userId: user._id });
         if (!wallet) {
-            wallet = new Wallet({ userId: user._id, balance: 0, transactions: [] });
+            wallet = new Wallet({ 
+                userId: user._id, 
+                walletId: userHelper.generateWalletId(),
+                balance: 0, 
+                transactions: [] 
+            });
         }
 
         if (["Razorpay", "wallet"].includes(order.paymentMethod)) {
