@@ -287,8 +287,8 @@ const loadShopPage = async (req,res) => {
             category,
             minPrice,
             maxPrice,
-            sortBy,
-            sortOrder,
+            sortBy = 'createdAt',
+            sortOrder = 'desc',
             page,
             limit = 9
         } = req.query

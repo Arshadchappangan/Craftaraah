@@ -158,6 +158,13 @@
 
 
 		document.addEventListener('DOMContentLoaded', () => {
+
+			name.addEventListener('focusout', nameValidate);
+			email.addEventListener('focusout', emailValidate);
+			phone.addEventListener('focusout', phoneValidate);
+			password1.addEventListener('focusout', passwordValidate);
+			password2.addEventListener('focusout', passwordValidate);
+
 			signupForm.addEventListener('submit', (event) => {
 				nameValidate();
 				emailValidate();
@@ -168,6 +175,7 @@
 					event.preventDefault();
 				}
 			})
+
 		})
 
 	</script>

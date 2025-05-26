@@ -107,11 +107,11 @@
                                 <div class="filter__sort">
                                     <span>Sort By</span>
                                     <select id="sortOptions" onchange="sortProducts()">
-                                            <option value="createdAt" sortOrder="desc">Latest (Default)</option>
-                                            <option value="price" sortOrder="asc">Price : Low - High</option>
-                                            <option value="price" sortOrder="desc">Price : High - Low</option>
-                                            <option value="productName" sortOrder="asc">Product Name : A - Z</option>
-                                            <option value="productName" sortOrder="desc">Product Name : Z - A</option>
+                                        <option value="createdAt-desc" <%= query.sortBy === 'createdAt' && query.sortOrder === 'desc' ? 'selected' : '' %>>Latest (Default)</option>
+                                        <option value="price-asc" <%= query.sortBy === 'price' && query.sortOrder === 'asc' ? 'selected' : '' %>>Price : Low - High</option>
+                                        <option value="price-desc" <%= query.sortBy === 'price' && query.sortOrder === 'desc' ? 'selected' : '' %>>Price : High - Low</option>
+                                        <option value="productName-asc" <%= query.sortBy === 'productName' && query.sortOrder === 'asc' ? 'selected' : '' %>>Product Name : A - Z</option>
+                                        <option value="productName-desc" <%= query.sortBy === 'productName' && query.sortOrder === 'desc' ? 'selected' : '' %>>Product Name : Z - A</option>
                                     </select>
                                 </div>
                             </div>
@@ -201,17 +201,17 @@
 
     <script>
 
-    function sortProducts() {
-        const select = document.getElementById('sortOptions');
-        const selectedOption = select.options[select.selectedIndex];
-        const sortBy = selectedOption.value;
-        const sortOrder = selectedOption.getAttribute('sortOrder');
+        function sortProducts() {
+        const selectedValue = document.getElementById('sortOptions').value; 
+        const [sortBy, sortOrder] = selectedValue.split('-');
 
         const urlParams = new URLSearchParams(window.location.search);
-        urlParams.set('sortBy',sortBy);
-        urlParams.set('sortOrder',sortOrder);
+        urlParams.set('sortBy', sortBy);
+        urlParams.set('sortOrder', sortOrder);
+
         window.location.href = `/shop?${urlParams.toString()}`;
     }
+
 
 
     document.getElementById('searchButton').addEventListener('click',() => searchSubmit(document.getElementById('searchInput').value));
