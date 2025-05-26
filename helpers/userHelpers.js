@@ -1,6 +1,7 @@
 const Coupon = require('../models/couponSchema');
 const nodeMailer = require('nodemailer');
 const env = require('dotenv').config();
+const bcrypt = require('bcrypt');
 
 
 //fuction to generate orderId in a readable format
@@ -137,9 +138,11 @@ const securePassword = async (password) => {
         const passwordHashed = await bcrypt.hash(password, 10);
         return passwordHashed;
     } catch (error) {
-
+        console.error("Error in securePassword:", error);
+        return null; // 👈 return something meaningful on error
     }
-}
+};
+
 
 //function to generate wallet ID 
 const generateWalletId = () => {
