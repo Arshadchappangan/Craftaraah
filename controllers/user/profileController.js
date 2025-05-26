@@ -51,6 +51,7 @@ const verifyForgotOtp = async (req, res) => {
     try {
         const otp = req.body.otp;
         if (otp === req.session.userOTP) {
+            req.session.user = await User.findOne({ email: req.session.email });
             res.json({ success: true, redirectUrl: '/resetPassword' })
         } else {
             res.json({ success: false, message: 'OTP not matching' })
@@ -99,7 +100,7 @@ const resetPassword = async (req, res) => {
         const { password } = req.body;
         const userId = req.session.user._id;
         const passwordHashed = await userHelper.securePassword(password);
-        await User.findByIdAndUpdate(userId, { $set: { password: passwordHashed } })
+        await User.findByIdAndUpdate(userId,{ password: passwordHashed })
         req.session.user = null;
         res.redirect('/login')
     } catch (error) {

@@ -249,7 +249,7 @@ const signin = async (req, res) => {
         if (!passwordMatch) {
             return res.render('login', { message: "Incorrect Password" })
         }
-
+        
         req.session.user = {
             _id: findUser._id,
             name: findUser.name,
