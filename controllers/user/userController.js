@@ -88,8 +88,8 @@ const loadLogin = async (req, res) => {
     try {
         
         if (!req.session.user) {
-            let referrer = req.query.ref || null
-            res.render('login',{referrer})
+            req.session.referrer = req.query.ref || null
+            res.render('login')
         } else {
             res.redirect('/')
         }
@@ -101,7 +101,7 @@ const loadLogin = async (req, res) => {
 
 const signup = async (req, res) => {
     try {
-        const { name, email, phone, password , referrer} = req.body;
+        const { name, email, phone, password} = req.body;
         const existingUser = await User.findOne({ email })
         if (existingUser) {
             return res.render('login', { messageExists: "User already exists... Please Signin..." })
@@ -118,7 +118,6 @@ const signup = async (req, res) => {
         req.session.email = email;
         req.session.userOTP = otp;
         req.session.userData = { name, email, phone, password };
-        req.session.referrer = referrer
 
         console.log("OTP sent", otp)
         res.render('signupOtp')

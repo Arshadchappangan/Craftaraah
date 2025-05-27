@@ -55,7 +55,7 @@
                                 <%}%>
                                 <% if(order.status === 'Partially Cancelled'){ %>
                                     <p><strong>Amount to Pay:</strong> ₹<%= order.finalAmount-order.refundAmount %></p>
-                                <% }%>
+                                <% } %>
                                 <p><strong>Order Date:</strong> <%= order.createdAt.toLocaleDateString() %></p>
                             </div>
 
