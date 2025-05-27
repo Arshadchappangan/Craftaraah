@@ -103,7 +103,7 @@ const viewOrders = async (req, res) => {
           $facet: {
             metadata: [{ $count: 'total' }],
             pending : [{$match:{
-              status: { $in: ['Ordered', 'Processing', 'Shipped'] }
+              status: { $in: ['Ordered', 'Processing', 'Shipped','Partially Cancelled'] }
             }},
           { $count: 'total' }],
             cancelled : [{$match:{

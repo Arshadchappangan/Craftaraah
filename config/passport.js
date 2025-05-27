@@ -12,7 +12,8 @@ passport.use(new googleStrategy({
 
     async (req,accessToken, refrechToken, profile, done) => {
         try {
-            console.log('client Id : ',process.env.GOOGLE_CLIENT_ID)
+
+
             let user = await User.findOne({ googleId: profile.id })
             if (user) {
                 return done(null, user)
@@ -28,11 +29,18 @@ passport.use(new googleStrategy({
                 return done(null, user);
             }
 
+            const namePart = user.name.slice(0, 3).toUpperCase();
+            const numberPart = Math.floor(1000 + Math.random() * 9000);
+            const domain = process.env.BASE_URL;
+            const referralLink = `${domain}?ref=${namePart}${numberPart}`;
 
                 user = new User({
                     name : profile.displayName,
                     email : profile.emails[0].value,
-                    googleId : profile.id
+                    googleId : profile.id,
+                    referral: {
+                        link: referralLink
+                    }
                 })
 
                 await user.save();
