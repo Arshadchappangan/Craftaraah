@@ -491,6 +491,7 @@ const updateProfileInfo = async (req,res) => {
         const user = req.session.user;
         const {name,phone} = req.body
         await User.updateOne({_id:user._id},{$set:{name:name,phone:phone}});
+        req.session.user.name = name; 
         res.json({success:true})
     } catch (error) {
         console.error(error)

@@ -436,7 +436,7 @@ const placeOrder = async (req, res) => {
     try {
         const user = req.session.user;
         const couponCode = req.session.couponCode || null;
-        const { razorOrderId, paymentId, signature, paymentMethod,selectedAddress } = req.body;
+        let { razorOrderId, paymentId, signature, paymentMethod,selectedAddress } = req.body;
 
         let cart = await Cart.findOne({userId:user._id}).populate({
             path: 'items.productId',
@@ -479,6 +479,7 @@ const placeOrder = async (req, res) => {
             quantity: item.quantity,
             price: item.productId.discountedPrice
           }));
+
 
         const placeOrder = new Order({
             orderId : orderId,

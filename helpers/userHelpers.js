@@ -2,6 +2,7 @@ const Coupon = require('../models/couponSchema');
 const nodeMailer = require('nodemailer');
 const env = require('dotenv').config();
 const bcrypt = require('bcrypt');
+const Razorpay = require('../config/razorpay');
 
 
 //fuction to generate orderId in a readable format
@@ -154,6 +155,19 @@ const generateWalletId = () => {
     return `${p1} ${p2} ${p3} ${p4}`
 }
 
+//function to get payment details from Razorpay
+const getPaymentDetails = async (paymentId) => {
+    try {
+        const payment = await Razorpay.payments.fetch(paymentId);
+        return payment;
+    }
+    catch (error) {
+        console.error("Error fetching payment details:", error);
+        throw error;
+    }
+}
+
+
 
 
 
@@ -165,5 +179,6 @@ const generateWalletId = () => {
     generateOtp,
     verificationMail,
     securePassword,
-    generateWalletId
+    generateWalletId,
+    getPaymentDetails
   }
