@@ -29,7 +29,7 @@ passport.use(new googleStrategy({
                 return done(null, user);
             }
 
-            const namePart = user.name.slice(0, 3).toUpperCase();
+            const namePart = profile.displayName.slice(0, 3).toUpperCase();
             const numberPart = Math.floor(1000 + Math.random() * 9000);
             const domain = process.env.BASE_URL;
             const referralLink = `${domain}?ref=${namePart}${numberPart}`;
