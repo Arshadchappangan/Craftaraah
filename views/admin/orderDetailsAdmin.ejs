@@ -45,6 +45,20 @@
                                 <p><strong>Pincode:</strong> <%= order.address.pincode %></p>
                             </div>
                         </div>
+                        <div class="payment-info bg-light p-3 rounded mb-3">
+                            <h5 class="text-secondary">Payment Information</h5>
+                            <div class="d-flex flex-column">
+                                <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                                <p><strong>Total Amount:</strong> ₹<%= order.finalAmount %></p>
+                                <% if(order.refundAmount){ %>
+                                    <p><strong>Refund Amount:</strong> ₹<%= order.refundAmount %></p>
+                                <%}%>
+                                <% if(order.status === 'Partially Cancelled'){ %>
+                                    <p><strong>Amount to Pay:</strong> ₹<%= order.finalAmount-order.refundAmount %></p>
+                                <% }%>
+                                <p><strong>Order Date:</strong> <%= order.createdAt.toLocaleDateString() %></p>
+                            </div>
+
                     </div>
             </div>
             <div class="col-md-1"></div>
